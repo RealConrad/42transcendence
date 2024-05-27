@@ -6,18 +6,23 @@
     cd 42transcendence
     ```
 
-2. Create and activate the virtual environment:
+2. Create the virtual environment
     ```bash
-    python -m venv backend/venv
-    source venv/bin/activate
+    python3 -m venv backend/venv
     ```
 
-3. Install dependencies:
+3. Run the virtual environment
+	```
+    source backend/venv/bin/activate
+	```
+
+4. Install dependencies:
+> NOTE: This will install all dependencies for the project. Make sure you have postgres installed on your host system before running this else you will get an error.
     ```bash
     pip install -r requirements.txt
     ```
 
-4. Run the development server:
+5. Run the development server:
     ```bash
     python backend/manage.py runserver
     ```
