@@ -17,7 +17,8 @@
 	```
 
 4. Install dependencies:
-> NOTE: This will install all dependencies for the project. Make sure you have postgres installed on your host system before running this else you will get an error.
+> NOTE: This will install all dependencies for the project. Make sure you have postgres installed on your host system before running this else you will get an error
+
     ```bash
     pip install -r requirements.txt
     ```
