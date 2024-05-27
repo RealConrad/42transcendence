@@ -19,10 +19,15 @@ source backend/venv/bin/activate
 4. Install dependencies:
 > NOTE: Ensure you have postgres install before running this, else you will get an error. You can install it via: `brew install postgresql` 
 ```bash
- pip install -r requirements.txt
+pip install -r requirements.txt
 ```
 
-5. Run the development server:
+5. Sync settings with db
+```bash
+python backend/manage.py migrate
+```
+
+6. Run the development server:
 ```bash
 python backend/manage.py runserver
 ```
