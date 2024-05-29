@@ -1,8 +1,9 @@
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenRefreshView
 from django.contrib.auth.models import User
+from rest_framework.views import APIView
 from .serializers import RegisterSerializer, LoginSerializer
 
 """
@@ -37,7 +38,6 @@ class RegisterView(generics.CreateAPIView):
 		}, status=status.HTTP_201_CREATED)
 
 class LoginView(generics.GenericAPIView):
-	# These variables are used by the parent class 'generics.CreateAPIView'
 	permission_classes = (permissions.AllowAny,)
 	serializer_class = LoginSerializer
 
@@ -57,3 +57,13 @@ class LoginView(generics.GenericAPIView):
 
 class CustomTokenRefreshView(TokenRefreshView):
     permission_classes = (permissions.AllowAny,)
+
+class DeleteUserView(APIView):
+	permission_classes = [permissions.IsAuthenticated]
+
+	def delete(self, request, format=None):
+		user = request.user
+		user.delete()
+		return Response({
+			'message': "User has been deleted"
+		}, status=status.HTTP_200_OK)
