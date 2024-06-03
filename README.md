@@ -1,1 +1,1 @@
-# 42transcendence
+## Django Setup Instructions
