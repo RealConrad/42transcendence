@@ -31,3 +31,6 @@ services:
 
 volumes:
   postgres_data:
+
+# docker exec -it auth_service python manage.py migrate
+# docker exec -it postgreSQL psql -U admin -d transcendence 

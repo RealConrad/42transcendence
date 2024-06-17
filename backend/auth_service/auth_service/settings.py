@@ -74,7 +74,7 @@ OAUTH_SETTINGS = {
 	'CLIENT_SECRET': env('42_CLIENT_SECRET'),
 	'AUTHORIZATION_URL': 'https://api.intra.42.fr/oauth/authorize',
 	'TOKEN_URL': 'https://api.intra.42.fr/oauth/token',
-	'REDIRECT_URI': 'http://localhost:8000/api/auth/oauth-callback/',
+	'REDIRECT_URI': 'http://127.0.0.1:8000/api/auth/oauth-callback/',
 	'SCOPE': 'public'
 }
 

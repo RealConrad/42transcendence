@@ -28,7 +28,11 @@ def oauthCallback(request):
 	if not code or not state:
 		return HttpResponseBadRequest("No code or state provided for oauth callback")
 
-	if state != request.session.pop('oauth_state', None):
+	session_state = request.session.pop('oauth_state', None)
+	print(f"State in session: {session_state}")
+	print(f"State from callback: {state}")
+
+	if state != session_state:
 		return HttpResponseBadRequest("Login rejected. Invalid state parameter")
 	
 	data = {
