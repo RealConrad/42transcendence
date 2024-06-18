@@ -9,6 +9,7 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
+from datetime import timedelta
 import environ
 import os
 from pathlib import Path
@@ -68,6 +69,14 @@ REST_FRAMEWORK = {
     ),
 }
 
+SIMPLE_JWT = {
+	'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+	'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+	'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+	'ROTATE_REFRESH_TOKENS': True,
+	'BLACKLIST_AFTER_ROTATION': True,
+}
 
 OAUTH_SETTINGS = {
 	'CLIENT_ID': env('42_CLIENT_UID'),

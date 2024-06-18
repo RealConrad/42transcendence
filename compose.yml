@@ -20,6 +20,7 @@ services:
   auth_service:
     build: ./backend/auth_service
     container_name: auth_service
+    image: auth_service
     ports:
       - "8000:8000"
     env_file:
