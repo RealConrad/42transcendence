@@ -9,12 +9,16 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
+from datetime import timedelta
 import environ
 import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+env = environ.Env(DEBUG=(bool, False))
+environ.Env.read_env(os.path.join(BASE_DIR, '..', '.env'))
 
 
 # Quick-start development settings - unsuitable for production
@@ -38,9 +42,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+	'rest_framework',
+	'rest_framework_simplejwt',
 
 	# Custom Defined
 	'authentication',
+	'oauth'
 ]
 
 MIDDLEWARE = [
@@ -52,6 +59,33 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+
+SIMPLE_JWT = {
+	'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+	'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+	'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+	'ROTATE_REFRESH_TOKENS': True,
+	'BLACKLIST_AFTER_ROTATION': True,
+}
+
+OAUTH_SETTINGS = {
+	'CLIENT_ID': env('42_CLIENT_UID'),
+	'CLIENT_SECRET': env('42_CLIENT_SECRET'),
+	'AUTHORIZATION_URL': 'https://api.intra.42.fr/oauth/authorize',
+	'TOKEN_URL': 'https://api.intra.42.fr/oauth/token',
+	'REDIRECT_URI': 'http://127.0.0.1:8000/api/auth/oauth-callback/',
+	'SCOPE': 'public'
+}
 
 ROOT_URLCONF = 'auth_service.urls'
 
@@ -83,11 +117,6 @@ WSGI_APPLICATION = 'auth_service.wsgi.application'
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
-env = environ.Env(
-	DEBUG=(bool, False)
-)
-
-environ.Env.read_env(os.path.join(BASE_DIR, '..', '.env'))
 
 DATABASES = {
 	"default": {

@@ -55,9 +55,6 @@ class LoginView(generics.GenericAPIView):
 			}
 		}, status=status.HTTP_200_OK)
 
-class CustomTokenRefreshView(TokenRefreshView):
-    permission_classes = (permissions.AllowAny,)
-
 class DeleteUserView(APIView):
 	permission_classes = [permissions.IsAuthenticated]
 
