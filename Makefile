@@ -1,4 +1,6 @@
-DOCKER_COMPOSE     = sudo docker compose -f compose.yml
+NEEDS_SUDO := $(shell if [ "$$(uname)" = "Linux" ]; then echo "sudo"; fi)
+
+DOCKER_COMPOSE     = $(NEEDS_SUDO) docker compose -f compose.yml
 
 all: up
 
