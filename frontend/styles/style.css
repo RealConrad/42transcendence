@@ -1,0 +1,89 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+
+html, body{
+  height: 100%;
+  background-color: black;
+  font-family: 'Press Start 2P';
+}
+body{
+  display: flex;
+  width: 100%;
+  min-width: 900px;
+  /* border: 2px solid red; */
+  flex-direction: column;
+  padding: 20px 50px;
+  position: relative;
+}
+header{
+  height: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+#sign-up{
+  position: absolute;
+  top:15px;
+  right: 15px;
+}
+h1{
+  color: white;
+  font-size: 2.5rem;
+  /* text-align: center; */
+}
+li, p{
+  color: lightgrey;
+}
+main-menu{
+  height: 80%;
+  display: flex;
+  font-size: 2rem;
+}
+left-menu, right-menu{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  list-style-type: none;
+  height: 100%;
+  width: 50%;
+  /* border: 2px solid orange; */
+}
+left-menu{
+  position:relative;
+}
+right-menu{
+  align-items: end;
+}
+left-menu .menu-option{
+  padding-left: 40px;
+}
+right-menu .menu-option{
+  padding-right: 40px;
+}
+.menu-option{
+  display: block;
+  text-decoration: none;
+  height: 50px;
+  line-height: 50px;
+}
+button{
+  all: unset;
+  color: rgb(180, 174, 174);
+  background-color: black;
+}
+left-menu .menu-option:hover{
+  padding-left: 20px;
+  border-left: 6px solid white;
+}
+right-menu .menu-option:hover{
+  padding-right: 20px;
+  border-right: 6px solid white;
+}
+vertical-line{
+  position:absolute;
+  border-left: 6px dotted white;
+  height: 90%;
+  right: -5px;
+  top: 5%;
+}
