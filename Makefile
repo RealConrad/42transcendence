@@ -25,7 +25,7 @@ clean: down
 	docker image prune -f
 
 fclean: clean
-    docker system prune -a -f
+	docker system prune -a -f
 
 re: fclean all
 
