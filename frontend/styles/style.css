@@ -1,18 +1,94 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 
+/* biggest options: */
+:root{
+  --game-height: 721px;
+  --game-width: 1334px;
+  --background-color: black;
+  --color: rgb(201, 201, 201);
+  --font-size: 16px;
+  --body-fit: 100%;
+}
+/* 
+gameplay:
+1334x721 
+*/
+/* 
+native:
+1280x720 
+*/
+@media (width <= 1334px)
+{
+  :root{
+    --game-width: 1200px;
+  }
+  body{
+    border: 2px solid yellow;
+  }
+}
+@media (height <= 800px)
+{
+  :root{
+    --game-height: 630px;
+    --game-width: 1200px;
+  }
+  body{
+    border: 2px solid wheat;
+  }
+}
+
+@media (height <= 700px) or (width <= 850)
+{
+  :root{
+    --game-height: 600px;
+    --game-width: 850px;
+    --body-fit: 100%;
+  }
+  body{
+    border: 2px solid orange;
+  }
+}
+@media (height <= 700px)
+{
+  :root{
+    --game-height: 500px;
+    --game-width: 850px;
+    --body-fit: 100%;
+  }
+  body{
+    border: 2px solid purple;
+  }
+}
+
+
+@media (height <= 600px) or (width <= 900px)
+{
+  :root{
+    --game-height: 400px;
+    --game-width: 600px;
+    --font-size: 11px;
+    --body-fit: none;
+  }
+  body{
+    border: 3px solid pink;
+    height: none;
+  }
+}
+
 
 html, body{
-  /* height: 100%; */
-  background-color: black;
+  height: var(--body-fit);
+  background-color: var(--background-color);
   font-family: 'Press Start 2P';
+  font-size: var(--font-size);
 }
 body{
   /* border: 2px solid green; */
   display: flex;
   align-items: center;
   width: 100%;
-  min-width: 900px;
+  min-width: var(--game-width);
   flex-direction: column;
   padding: 20px 50px;
   position: relative;
@@ -22,6 +98,7 @@ header{
   display: flex;
   justify-content: center;
   align-items: center;
+  padding-bottom: 20px;
 }
 #sign-up{
   position: absolute;
@@ -29,27 +106,27 @@ header{
   right: 15px;
 }
 h1{
-  color: white;
+  color: var(--color);
   font-size: 2.5rem;
   /* text-align: center; */
 }
 li, p{
-  color: lightgrey;
+  color: var(--color);
 }
 main-menu{
   /* background-color: pink; */
   position: relative;
-  height: 600px;
-  width: 900px;
+  height: var(--game-height);  
+  width: var(--game-width);
   display: flex;
   font-size: 2rem;
 }
 canvas{
   /* background-color: pink; */
   position: absolute;
-  height: 600px;
-  width: 900px;
-  border: 6px solid white;
+  height: inherit;
+  width: inherit;
+  border: 6px solid var(--color);
 }
 left-menu, right-menu{
   display: flex;
@@ -81,21 +158,21 @@ right-menu .menu-option{
 }
 button{
   all: unset;
-  color: rgb(180, 174, 174);
-  background-color: black;
+  color: var(--color);
+  background-color: var(--background-color);
 }
 left-menu .menu-option:hover{
   padding-left: 20px;
-  border-left: 11px solid white;
+  border-left: 11px solid var(--color);
 }
 right-menu .menu-option:hover{
   /* background-color: red; */
   padding-right: 20px;
-  border-right: 11px solid white;
+  border-right: 11px solid var(--color);
 }
 vertical-line{
   position:absolute;
-  border-left: 6px dotted white;
+  border-left: 6px dotted var(--color);
   height: 90%;
   right: -5px;
   top: 5%;
