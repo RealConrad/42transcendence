@@ -9,17 +9,14 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-from datetime import timedelta
-import environ
 import os
+from datetime import timedelta
 from pathlib import Path
+
+import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
-env = environ.Env(DEBUG=(bool, False))
-environ.Env.read_env(os.path.join(BASE_DIR, '..', '.env'))
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
@@ -32,7 +29,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -42,12 +38,12 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-	'rest_framework',
-	'rest_framework_simplejwt',
+    'rest_framework',
+    'rest_framework_simplejwt',
 
-	# Custom Defined
-	'authentication',
-	'oauth'
+    # Custom Defined
+    'authentication',
+    'oauth'
 ]
 
 MIDDLEWARE = [
@@ -70,21 +66,21 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-	'ALGORITHM': 'HS256',
+    'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY,
-	'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
-	'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
-	'ROTATE_REFRESH_TOKENS': True,
-	'BLACKLIST_AFTER_ROTATION': True,
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
 }
 
 OAUTH_SETTINGS = {
-	'CLIENT_ID': env('42_CLIENT_UID'),
-	'CLIENT_SECRET': env('42_CLIENT_SECRET'),
-	'AUTHORIZATION_URL': 'https://api.intra.42.fr/oauth/authorize',
-	'TOKEN_URL': 'https://api.intra.42.fr/oauth/token',
-	'REDIRECT_URI': 'http://127.0.0.1:8000/api/auth/oauth-callback/',
-	'SCOPE': 'public'
+    'CLIENT_ID': os.getenv('42_CLIENT_UID'),
+    'CLIENT_SECRET': os.getenv('42_CLIENT_SECRET'),
+    'AUTHORIZATION_URL': 'https://api.intra.42.fr/oauth/authorize',
+    'TOKEN_URL': 'https://api.intra.42.fr/oauth/token',
+    'REDIRECT_URI': 'http://127.0.0.1:8000/api/auth/oauth-callback/',  # TODO: CHANGE
+    'SCOPE': 'public'
 }
 
 ROOT_URLCONF = 'auth_service.urls'
@@ -107,28 +103,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'auth_service.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
 DATABASES = {
-	"default": {
-		"ENGINE": "django.db.backends.postgresql",
-		"NAME": env('POSTGRES_DB'),
-		"USER": env('POSTGRES_USER'),
-		"PASSWORD": env('POSTGRES_PASSWORD'),
-		"HOST": env('DB_HOST', default='db'),
-		"PORT": env('DB_PORT', default='5432'),
-	}
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv('POSTGRES_DB'),
+        "USER": os.getenv('POSTGRES_USER'),
+        "PASSWORD": os.getenv('POSTGRES_PASSWORD'),
+        "HOST": os.getenv('DB_HOST'),
+        "PORT": os.getenv('DB_PORT'),
+    }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -148,7 +135,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.0/topics/i18n/
 
@@ -159,7 +145,6 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
