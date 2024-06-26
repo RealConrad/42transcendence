@@ -1,4 +1,4 @@
-from authentication import serializers
+from rest_framework import serializers
 from .models import GameLobby, GameQueue
 
 
