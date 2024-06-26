@@ -17,10 +17,10 @@ services:
     networks:
       - transcendence
 
-  auth_service:
+  auth-service:
     build: ./backend/auth_service
-    container_name: auth_service
-    image: auth_service
+    container_name: auth-service
+    image: auth-service
     ports:
       - "8000:8000"
     env_file:
@@ -42,10 +42,10 @@ services:
     networks:
       - transcendence
 
-  game_service:
+  game-service:
     build: ./backend/game_service
-    container_name: game_service
-    image: game_service
+    container_name: game-service
+    image: game-service
     ports:
       - "8001:8001"
     env_file:
