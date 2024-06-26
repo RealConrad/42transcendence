@@ -1,6 +1,6 @@
 NEEDS_SUDO := $(shell if [ "$$(uname)" = "Linux" ]; then echo "sudo"; fi)
 
-DOCKER_COMPOSE     = $(NEEDS_SUDO) docker compose -f compose.yml
+DOCKER_COMPOSE     = docker compose -f compose.yml
 
 all: up
 
@@ -20,12 +20,12 @@ stop:
 	$(DOCKER_COMPOSE) stop
 
 clean: down
-	sudo docker container prune -f
-	sudo docker network prune -f
-	sudo docker image prune -f
+	docker container prune -f
+	docker network prune -f
+	docker image prune -f
 
 fclean: clean
-	sudo docker system prune -a -f
+    docker system prune -a -f
 
 re: fclean all
 
