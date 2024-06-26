@@ -1,15 +1,24 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from twisted.conch.endpoints import AuthenticationFailed
 from .models import GameQueue, GameLobby, GuestUser
 from rest_framework import status
 from .serializers import GameQueueSerializer, GameLobbySerializer
+from game_service.utils import verify_token_with_auth_service
 
 
 class FindMatchView(APIView):
     @staticmethod
     def post(request):
-        if request.user.is_authenticated:
-            player = request.user.username
+        # Check if user is registered or guest
+        token = request.headers.get('Authorization', None)
+        if token:
+            token = token.split(' ')[1]
+            try:
+                user_data = verify_token_with_auth_service(token)
+                player = user_data.get('username')
+            except AuthenticationFailed as e:
+                return Response({"error": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
         else:
             player = request.data.get('username')
             if not player:
@@ -24,7 +33,7 @@ class FindMatchView(APIView):
         game_queue = GameQueue.objects.create(player=player)
 
         # Try to match with another player
-        available_queue = GameQueue.objects.exlude(player=player).first()
+        available_queue = GameQueue.objects.exclude(player=player).first()
         if available_queue:
             # We found a match, remove the players from the queue
             GameQueue.objects.filter(player=available_queue.player).delete()
@@ -47,8 +56,14 @@ class FindMatchView(APIView):
 class LeaveMatchQueueView(APIView):
     @staticmethod
     def post(request):
-        if request.user.is_authenticated:
-            player = request.user.username
+        token = request.headers.get('Authorization', None)
+        if token:
+            token = token.split(' ')[1]
+            try:
+                user_data = verify_token_with_auth_service(token)
+                player = user_data.get('username')
+            except AuthenticationFailed as e:
+                return Response({"error": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
         else:
             player = request.data.get('username')
             if not player:

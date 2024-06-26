@@ -18,6 +18,6 @@ class GuestUser(models.Model):
 
 
 class GameQueue(models.Model):
-    player = models.OneToOneField(User, related_name='player', on_delete=models.CASCADE)
+    player = models.CharField(max_length=150)
     created_at = models.DateTimeField(auto_now_add=True)
 
