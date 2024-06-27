@@ -14,8 +14,8 @@
     <header>
       <h1>PONG</h1>
     </header>
-    <main-menu>
-      <canvas></canvas> <!-- it is absolute positioned to fit the whole contents of main menu-->
+    <main-menu id="main-frame">
+      <canvas id="gameCanvas"></canvas> <!-- it is absolute positioned to fit the whole contents of main menu-->
       <left-menu>
         <a href="" class="menu-option"><button>HowTo</button></a>
         <a href="pages/play.html" class="menu-option"><button>Play</button></a>
@@ -23,7 +23,7 @@
         <a href="" class="menu-option"><button>Leaderboard</button></a>
         <a href="" class="menu-option"><button>About</button></a>
         <a href="" class="menu-option"><button>Account</button></a>
-        <vertical-line></vertical-line>
+        <!-- <vertical-line></vertical-line> -->
       </left-menu>
       <right-menu>
         <a href="" class="menu-option"><button>vs P2</button></a>
@@ -40,5 +40,6 @@
         console.log("jo");
       }
     </script>
+    <script src="js/canva.js"></script>
   </body>
   </html>

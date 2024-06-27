@@ -31,14 +31,13 @@ native:
 {
   :root{
     --game-height: 630px;
-    --game-width: 1200px;
   }
   body{
-    border: 2px solid wheat;
+    /* border: 2px solid white; */
   }
 }
 
-@media (height <= 700px) or (width <= 850)
+@media (height <= 700px) or (width <= 1200px)
 {
   :root{
     --game-height: 600px;
@@ -46,18 +45,17 @@ native:
     --body-fit: 100%;
   }
   body{
-    border: 2px solid orange;
+    /* border: 2px solid orange; */
   }
 }
 @media (height <= 700px)
 {
   :root{
     --game-height: 500px;
-    --game-width: 850px;
     --body-fit: 100%;
   }
   body{
-    border: 2px solid purple;
+    /* border: 2px solid purple; */
   }
 }
 
@@ -71,7 +69,7 @@ native:
     --body-fit: none;
   }
   body{
-    border: 3px solid pink;
+    /* border: 3px solid pink; */
     height: none;
   }
 }
@@ -116,16 +114,19 @@ li, p{
 main-menu{
   /* background-color: pink; */
   position: relative;
+  display: flex;
   height: var(--game-height);  
   width: var(--game-width);
-  display: flex;
   font-size: 2rem;
 }
-canvas{
-  /* background-color: pink; */
+
+#main-frame{
+  height: var(--game-height);  
+  width: var(--game-width);
+}
+
+#gameCanvas{
   position: absolute;
-  height: inherit;
-  width: inherit;
   border: 6px solid var(--color);
 }
 left-menu, right-menu{
