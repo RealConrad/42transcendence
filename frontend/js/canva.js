@@ -2,11 +2,8 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-// set canvas height and width according to main-frame
-let element = document.getElementById("main-frame");
-let positionInfo = element.getBoundingClientRect();
-canvas.height = positionInfo.height;
-canvas.width = positionInfo.width;
+canvas.width = canvas.clientWidth;
+canvas.height = canvas.clientHeight;
 
 //draw middle line
 ctx.strokeStyle = "lightgrey";

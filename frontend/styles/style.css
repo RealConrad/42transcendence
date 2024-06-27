@@ -128,6 +128,8 @@ main-menu{
 #gameCanvas{
   position: absolute;
   border: 6px solid var(--color);
+  height: inherit;
+  width: inherit;
 }
 left-menu, right-menu{
   display: flex;
