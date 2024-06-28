@@ -24,7 +24,7 @@ native:
     --game-width: 1200px;
   }
   body{
-    border: 2px solid yellow;
+    /* border: 2px solid yellow; */
   }
 }
 @media (height <= 800px)
