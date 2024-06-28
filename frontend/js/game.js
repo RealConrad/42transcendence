@@ -14,10 +14,10 @@ let rightBat    = new component(batWidth, batHeight, "pink", canvas.width - batW
 let ball        = new component(ballRadius, ballRadius, "red", ballX, ballY);
 
 //useful
-let stop = false;
+let stop = -1;
 
-//calls animate function 30 times per second
-let interval = setInterval(animate, 4);
+//calls animate every x times
+
 
 function component(width, height, color, x, y){
     this.width = width;
@@ -47,23 +47,28 @@ function component(width, height, color, x, y){
 }
 
 //start
+let interval = setInterval(animate, 4);
 function startGame(){
     console.log('starting');
+    console.log('interval over');
 }
 
 //animate
 function animate() {
     clearGame();
     updateGame();
-    if (stop == true){
-        console.log('game end');
+    if (stop == 1){
+        console.log('game end', stop);
         endGame();
     }
 }
 
 //end game
 function endGame(){
+    // stop = -1;
     clearInterval(interval);
+    //on losing: reset everything
+    //on 'end pause': start new interval with same variables
 }
 
 //clearing canvas
@@ -79,7 +84,10 @@ function updateGame() {
     if (Key.isDown(Key.DOWN)) rightBat.moveDown();
     if (Key.isDown(Key.W)) leftBat.moveUp();
     if (Key.isDown(Key.S)) leftBat.moveDown();
-    if (Key.isDown(Key.SPACE)) stop = true;
+    if (Key.isDown(Key.SPACE)){
+        console.log('space key pressed');
+        stop *= -1;
+    }
     updateComponents();
 }
 
