@@ -60,7 +60,6 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
             {
                 'type': 'match_found',
                 'message': {
-                    'lobby_id': game_data['id'],
                     'game': game_data
                 }
             }

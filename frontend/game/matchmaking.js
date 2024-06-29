@@ -7,6 +7,7 @@ const startMatchmaking = () => {
         console.log("Matchmaking socket connection established");
         matchmakingSocket.send(JSON.stringify({
             action: 'join_queue',
+            // Generate a random player name for testing purposes.
             username: 'player_' + Math.random()
         }));
     }

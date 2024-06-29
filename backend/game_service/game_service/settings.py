@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'common',
     'channels',
     'game_socket',
-    'matchmaking_socket',
+    'lobby_manager_socket',
     'game_lobby',
 ]
 

@@ -11,7 +11,7 @@ import os
 from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
-from matchmaking_socket import routing as matchmaking_socket_routing
+from lobby_manager_socket import routing as matchmaking_socket_routing
 
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'game_service.settings')
