@@ -38,19 +38,26 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'common',
     'channels',
     'game_socket',
+    'matchmaking_socket',
     'game_lobby',
 ]
 
 # Point to the ASGI applciation to handle asynchronous communication
 ASGI_APPLICATION = 'game_service.asgi.application'
 
-# CHANNEL_LAYERS = {
-#     'default': {
-#         'BACKEND': 'channels.layers.InMemoryChannelLayer',
-#     }
-# }
+CHANNEL_LAYERS = {
+    'default': {
+        # TODO: Change this to use redis. Current setup is fine for local development, but docs recommends not to use
+        # this for production
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+        # 'CONFIG': {
+        #     'hosts': [('localhost', 6379)],
+        # }
+    }
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
