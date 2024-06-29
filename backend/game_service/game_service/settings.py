@@ -42,7 +42,6 @@ INSTALLED_APPS = [
     'channels',
     'game_socket',
     'lobby_manager_socket',
-    'game_lobby',
 ]
 
 # Point to the ASGI applciation to handle asynchronous communication
