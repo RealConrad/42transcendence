@@ -1,0 +1,274 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+/* biggest options: */
+:root {
+  --top-bottom-height: 10vh; /* Adjust this value to change the height of the top and bottom sections */
+  --game-height: calc(80vh - var(--top-bottom-height)); /* 70vh total for middle part less the top part */
+  --game-width: calc(var(--game-height) * 16 / 9); /* Maintain 16:9 aspect ratio */
+  --background-color: black;
+  --color: rgb(201, 201, 201);
+  --font-size: 16px; /* Adjust font size as necessary */
+}
+
+/* 
+gameplay:
+1334x721 
+*/
+/* 
+native:
+1280x720 
+*/
+
+/* @media (width <= 1334px)
+{
+  :root{
+    --game-width: 1200px;
+  }
+  body{
+    border: 2px solid yellow;
+  }
+}
+@media (height <= 800px)
+{
+  :root{
+    --game-height: 630px;
+  }
+  body{
+    border: 2px solid white;
+  }
+}
+
+@media (height <= 700px) or (width <= 1200px)
+{
+  :root{
+    --game-height: 600px;
+    --game-width: 850px;
+    --body-fit: 100%;
+  }
+  body{
+    border: 2px solid orange;
+  }
+}
+@media (height <= 700px)
+{
+  :root{
+    --game-height: 500px;
+    --body-fit: 100%;
+  }
+  body{
+    border: 2px solid purple;
+  }
+} */
+
+
+@media (height <= 600px) or (width <= 900px)
+{
+  :root{
+    --game-height: 400px;
+    --game-width: 600px;
+    --font-size: 11px;
+    --body-fit: none;
+  }
+  body{
+    border: 3px solid pink;
+    height: none;
+  }
+}
+
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--background-color);
+  font-family: 'Press Start 2P';
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+header {
+  font-size: calc(2vw + 1rem); /* Combines viewport width with a minimum size */
+  color: var(--color);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+
+
+footer {
+  height: var(--top-bottom-height);
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: var(--color);
+  font-size: 2.5rem;
+}
+
+main-menu {
+  width: var(--game-width);
+  height: var(--game-height);
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #fff; /* Set a different color to distinguish the area */
+}
+
+#gameCanvas {
+  width: 100%;
+  height: 100%;
+  background-color: #000; /* Game area background */
+}
+
+
+/* html, body{
+  height: var(--body-fit);
+  background-color: var(--background-color);
+  font-family: 'Press Start 2P';
+  font-size: var(--font-size);
+} */
+/* body{
+  /* border: 2px solid green; */
+  /* display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: var(--game-width);
+  flex-direction: column;
+  padding: 20px 50px;
+  position: relative;
+}
+header{
+  height: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 20px; */
+/* }  */
+
+
+#sign-up{
+  position: absolute;
+  top:15px;
+  right: 15px;
+}
+h1{
+  color: var(--color);
+  font-size: 2.5rem;
+  /* text-align: center; */
+}
+li, p{
+  color: var(--color);
+}
+
+/* main-menu{
+  background-color: pink;
+  position: relative;
+  display: flex;
+  height: var(--game-height);  
+  width: var(--game-width);
+  font-size: 2rem;
+} */
+
+/* #main-frame{
+  height: var(--game-height);  
+  width: var(--game-width);
+} */
+
+#gameCanvas{
+  position: absolute;
+  /* border: 6px solid var(--color); */
+  height: inherit;
+  width: inherit;
+}
+left-menu, right-menu{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  list-style-type: none;
+  height: 100%;
+  width: 50%;
+  /* border: 2px solid orange; */
+}
+left-menu{
+  position:relative;
+}
+right-menu{
+  align-items: end;
+}
+left-menu .menu-option{
+  padding-left: 40px;
+}
+right-menu .menu-option{
+  z-index: 22;
+  padding-right: 40px;
+}
+.menu-option{
+  display: block;
+  text-decoration: none;
+  height: 50px;
+  line-height: 50px;
+}
+button{
+  all: unset;
+  color: var(--color);
+  background-color: var(--background-color);
+}
+left-menu .menu-option:hover{
+  padding-left: 20px;
+  border-left: 11px solid var(--color);
+}
+right-menu .menu-option:hover{
+  /* background-color: red; */
+  padding-right: 20px;
+  border-right: 11px solid var(--color);
+}
+vertical-line{
+  position:absolute;
+  border-left: 6px dotted var(--color);
+  height: 90%;
+  right: -5px;
+  top: 5%;
+}
+
+.paddle {
+  position: absolute;
+  width: 10px; /* Example width */
+  background-color: white; /* Paddle color */
+}
+
+.menu-option {
+  font-size: calc(0.75vw + 0.75rem); /* Responsive font size */
+  padding: calc(0.5vh + 5px) calc(1vw + 5px); /* Responsive padding */
+  display: block;
+  text-decoration: none;
+  color: var(--color);
+  background-color: var(--background-color);
+  border-radius: 5px; /* Optional for styled buttons */
+  margin: 5px 0; /* Spacing between menu options */
+  transition: background-color 0.3s, color 0.3s; /* Smooth transition for hover effects */
+}
+
+.menu-option:hover {
+  background-color: var(--highlight-color); /* Highlight color on hover */
+  color: #fff;
+}
+
+.menu-option button {
+  width: 100%; /* Make the button fill its container */
+  padding: 10px 20px; /* Padding inside the button */
+  font-size: inherit; /* Inherit font size from .menu-option */
+  color: inherit; /* Inherit color from .menu-option */
+  background-color: transparent; /* Maintain the background from .menu-option */
+  border: none; /* No border */
+  cursor: pointer;
+}
+
+.menu-option button:hover {
+  opacity: 0.8; /* Slight transparency on hover for visual effect */
+}
