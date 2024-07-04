@@ -6,7 +6,7 @@
   --top-bottom-height: 10vh;
   --game-height: calc(100vh - var(--top-bottom-height)*2);
   --game-width: calc(var(--game-height) * 16 / 9);
-  --font-size: 3vh; /* Use viewport width for responsive font size */
+  --font-size: 3vh; 
   --background-color: black;
   --highlight-color: rgb(255, 255, 255);
   --color: rgb(172, 172, 172);
@@ -51,7 +51,7 @@ main-menu {
   height: var(--game-height);
   position: relative;
   display: flex;
-  justify-content: space-between; /* Ensure space between left and right menus */
+  justify-content: space-between;
   background-color: #fff;
 }
 
@@ -64,21 +64,24 @@ main-menu {
 left-menu, right-menu {
 
   height: var(--game-height);
-  position: absolute; /* Ensure they are positioned absolutely within the main menu */
+  position: absolute;
   top: 0;
 }
 
 left-menu {
   display: grid;
-  width: 100%;
+  width: 50%;
   grid-template-rows: repeat(9, 1fr);
   padding-left: 1rem;
 }
 
 right-menu {
-  display: grid;
-  width: 100%;
-  grid-template-rows: repeat(9, 1fr);
+  width: 50%; /* Make it a percentage of the menu area */
+  right: 0;
+  text-align: right;
+  /* align-items: end; */
+  /* display: grid; */
+  /* grid-template-rows: repeat(9, 1fr); */
   padding-right: 1rem;
 }
 
@@ -111,19 +114,15 @@ right-menu {
 #right-menu-container {
   width: 100%;
   height: 100%;
-  overflow: hidden; /* Hide any overflow content */
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start; /* Align content to the left */
-  justify-content: flex-start; /* Align content to the top */
+  overflow: hidden; 
   text-align: right;
-  padding-right: 2rem; /* Add margin from the right */
-  padding: 10px; /* Add padding for better spacing */
+    display: grid;
+  grid-template-rows: repeat(9, 1fr);
+  /* padding-right: 2rem;  */
 }
 
 right-menu .menu-option button {
   text-align: right; /* Align text to the right for right-menu */
-
 }
 
 @keyframes flickerGlow {
@@ -223,25 +222,8 @@ right-menu .menu-option button {
     --font-size: 32px;
   }
 
-  /* body {
-    height: 720px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  } */
-
   header, footer {
     display: none; /* Hide header and footer */
   }
 
-  /* main-menu {
-    width: 1280px;
-    height: 720px;
-  }
-
-  #gameCanvas {
-    height: 1280px;
-    width: 720px;
-  } */
 }
