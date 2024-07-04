@@ -2,8 +2,8 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d"); 
 
-canvas.width = canvas.clientWidth;
-canvas.height = canvas.clientHeight;
+canvas.width = document.querySelector('main-menu').clientWidth;
+canvas.height = document.querySelector('main-menu').clientHeight;
 
 console.log(canvas.width, canvas.height);
 
@@ -89,6 +89,9 @@ document.addEventListener('DOMContentLoaded', function() {
   });
   
 
+
+
+
   document.addEventListener('DOMContentLoaded', function() {
 	const leftMenuOptions = document.querySelectorAll('left-menu .menu-option');
 	const rightMenuContainer = document.getElementById('right-menu-container');
@@ -115,10 +118,10 @@ document.addEventListener('DOMContentLoaded', function() {
 	  });
 	});
   
-	rightMenuContainer.addEventListener('mouseleave', () => {
-	  unhighlightLeftOptions();
-	  currentIndex = null;
-	});
+	// rightMenuContainer.addEventListener('mouseleave', () => {
+	//   unhighlightLeftOptions();
+	//   currentIndex = null;
+	// });
   
 	function loadRightMenuContent(index) {
 	  const filePath = rightMenuFiles[index];
@@ -136,21 +139,86 @@ document.addEventListener('DOMContentLoaded', function() {
   
 	function highlightLeftOption(index) {
 	  unhighlightLeftOptions();
-	  leftMenuOptions[index].classList.add('highlighted');
+	  const button = leftMenuOptions[index].querySelector('button');
+	  button.classList.add('glowing-effect');
 	}
   
 	function unhighlightLeftOptions() {
-	  leftMenuOptions.forEach(option => {
-		option.classList.remove('highlighted');
-	  });
+		leftMenuOptions.forEach(option => {
+		  const button = option.querySelector('button');
+		  button.classList.remove('glowing-effect');
+		});
 	}
   });
   
+ // mouse shake effects
+
+ document.addEventListener('DOMContentLoaded', () => {
+    const afterImage = document.createElement('div');
+    afterImage.className = 'cursor-after-image';
+    document.body.appendChild(afterImage);
+
+    const afterAfterImage = document.createElement('div');
+    afterAfterImage.className = 'cursor-after-image';
+    document.body.appendChild(afterAfterImage);
+
+    // Assuming afterImage is always visible and following the cursor
+    document.addEventListener('mousemove', (e) => {
+        afterImage.style.left = `${e.pageX}px`;
+        afterImage.style.top = `${e.pageY}px`;
+		afterAfterImage.style.left = `${e.pageX}px`;
+		afterAfterImage.style.top = `${e.pageY}px`;
+    });
+
+    // Apply glow and shake on hover over clickable elements
+    const clickableElements = document.querySelectorAll('button, a');
+    clickableElements.forEach(element => {
+        element.addEventListener('mouseenter', () => {
+            afterImage.classList.add('after-image-shake', 'enlarged', 'purple');
+			afterAfterImage.classList.add('after-image-after-shake', 'enlarged', 'pink');
+        });
+
+        element.addEventListener('mouseleave', () => {
+            afterImage.classList.remove('after-image-shake', 'enlarged', 'purple');
+			afterAfterImage.classList.remove('after-image-after-shake', 'enlarged', 'pink');
+        });
+    });
+});
+
+
+  // mouse move effects
+  document.addEventListener('DOMContentLoaded', () => {
+    let lastX, lastY;
+    let afterImage = document.createElement('div');
+    afterImage.className = 'cursor-after-image';
+    document.body.appendChild(afterImage);
+
+    document.addEventListener('mousemove', (e) => {
+        if (lastX !== undefined && lastY !== undefined) {
+            const dx = e.pageX - lastX; // Calculate difference in X
+            const dy = e.pageY - lastY; // Calculate difference in Y
+
+            // Calculate new position for the after-image in the opposite direction of movement
+            const newX = e.pageX - dx * 0.3; // Multiplier '2' extends the effect to the opposite side
+            const newY = e.pageY - dy * 0.3;
+
+            afterImage.style.left = `${newX}px`; // Position after-image on the opposite side
+            afterImage.style.top = `${newY}px`;
+        }
+
+        // Update last positions
+        lastX = e.pageX;
+        lastY = e.pageY;
+    });
+});
+
+
+  // Draw the middle line
 
   drawMiddleLine();
 
 window.addEventListener('resize', function() {
-    canvas.width = canvas.clientWidth;
-    canvas.height = canvas.clientHeight;
+	canvas.width = document.querySelector('main-menu').clientWidth;
+	canvas.height = document.querySelector('main-menu').clientHeight;
     drawMiddleLine();  // Your function to redraw the line
 });

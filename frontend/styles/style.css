@@ -1,5 +1,6 @@
 /* Main CSS configurations */
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
 
 :root {
   --top-bottom-height: 10vh;
@@ -9,9 +10,11 @@
   --background-color: black;
   --highlight-color: rgb(255, 255, 255);
   --color: rgb(172, 172, 172);
+  --lowlight-color: rgb(100, 100, 100, 0.7);
 }
 
 html, body {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewport="0 0 10 10" fill="%23ffffff"><rect width="10" height="10" /></svg>'), auto;
   height: 100%;
   margin: 0;
   padding: 0;
@@ -59,25 +62,24 @@ main-menu {
 }
 
 left-menu, right-menu {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between; /* Align the buttons to the top */
-  list-style-type: none;
-  height: 100%;
+
+  height: var(--game-height);
   position: absolute; /* Ensure they are positioned absolutely within the main menu */
   top: 0;
 }
 
 left-menu {
-  width: 50%; /* Make it a percentage of the menu area */
-  left: 0; /* Position the left menu on the left side */
+  display: grid;
+  width: 100%;
+  grid-template-rows: repeat(9, 1fr);
+  padding-left: 1rem;
 }
 
 right-menu {
-  width: 50%; /* Make it a percentage of the menu area */
-  right: 0; /* Position the right menu on the right side */
-  text-align: right;
-  padding-right: 2rem; /* Add margin from the right */
+  display: grid;
+  width: 100%;
+  grid-template-rows: repeat(9, 1fr);
+  padding-right: 1rem;
 }
 
 .menu-option button {
@@ -87,8 +89,14 @@ right-menu {
   font-size: var(--font-size); /* Adjust font size dynamically based on viewport width */
   text-align: left; /* Align text to the left for left-menu */
   background-color: transparent; /* Ensure the background is transparent */
-  cursor: pointer; /* Add cursor pointer for better UX */
-  padding: 1rem; /* Adjust padding to ensure it covers the line */
+  /* cursor: pointer; Add cursor pointer for better UX */
+}
+
+.menu-option .button-description {
+  display: block;
+  font-size: calc(var(--font-size) * 0.4);  /* Smaller font size */
+  color: var(--lowlight-color);  /* Adjust color based on your design, here it's 50% opacity black */
+  font-family: Inter;   /* Different font, customize as needed */
 }
 
 .menu-option {
@@ -118,8 +126,25 @@ right-menu .menu-option button {
 
 }
 
-.menu-option:hover {
-  color: #fff;
+@keyframes flickerGlow {
+  0%, 100% {
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+  }
+  50% {
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+  }
+}
+
+
+.menu-option:hover button {
+  color: #fff; /* Sets text color to white on hover */
+  animation: flickerGlow 1s infinite;
+}
+
+.menu-option button.glowing-effect {
+  color: #fff; /* Sets text color to white */
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5); /* Initial state of glow */
+  animation: flickerGlow 1s infinite; /* Apply the flicker animation */
 }
 
 .paddle {
@@ -129,12 +154,73 @@ right-menu .menu-option button {
 }
 
 
+/* Shaking effect */
+@keyframes shake {
+  0%, 100% { transform: translate(-4px, -4px); }
+  10%, 50%, 90% { transform: translate(-8px, -4px); }
+  20%, 60% { transform: translate(0px, -4px); }
+  30%, 70%, 90% { transform: translate(-4px, -8px); }
+  20%, 40%, 80% { transform: translate(-4px, 0px); }
+}
+
+@keyframes after-shake {
+  90%, 10% { transform: translate(-4px, -4px); }
+  0%, 40%, 100% { transform: translate(-8px, -4px); }
+  10%, 50% { transform: translate(0px, -4px); }
+  20%, 60%, 80% { transform: translate(-4px, -8px); }
+  10%, 30%, 70% { transform: translate(-4px, 0px); }
+}
+
+.after-image-shake {
+  animation: shake 0.6s infinite;
+}
+.after-image-after-shake {
+  animation: after-shake 0.4s infinite;
+}
+
+.cursor-after-image {
+  position: absolute;
+  width: 12px; 
+  height: 12px; 
+  background-color: rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+}
+
+.cursor-after-image.enlarged {
+  width: 18px;
+  height: 18px;
+}
+
+.cursor-after-image.yellow {
+  background-color: rgba(255, 230, 0, 0.445);
+}
+
+.cursor-after-image.red {
+  background-color: rgba(255, 38, 0, 0.404);
+}
+
+.cursor-after-image.blue {
+  background-color: rgba(0, 81, 255, 0.445);
+}
+
+.cursor-after-image.green {
+  background-color: rgba(30, 255, 0, 0.274);
+}
+
+.cursor-after-image.purple {
+  background-color: rgba(99, 1, 112, 0.277);
+}
+
+.cursor-after-image.pink {
+  background-color: rgba(255, 0, 221, 0.277);
+}
+
 @media (max-height: 720px) {
   :root {
     --top-bottom-height: 0vh;
     --game-height: 720px;
     --game-width: 1280px;
-    --font-size: 20px;
+    --font-size: 32px;
   }
 
   /* body {
