@@ -26,9 +26,9 @@ class PongGame:
         self.ball_position['y'] += self.ball_position['y']
 
         # Check for wall collision
-        if self.ball_position['x'] <= 0 or self.ball_velocity['x'] >= 100:
+        if self.ball_position['x'] <= 0 or self.ball_velocity['x'] >= 800:
             self.ball_velocity['x'] = -self.ball_velocity['x']
-        if self.ball_position['y'] <= 0 or self.ball_velocity['y'] >= 100:
+        if self.ball_position['y'] <= 0 or self.ball_velocity['y'] >= 600:
             self.ball_velocity['y'] = -self.ball_velocity['y']
 
         # Check for paddle collisions
@@ -45,4 +45,4 @@ class PongGame:
         if direction == 'up':
             self.paddle_positions[player]['y'] = max(0, self.paddle_positions[player]['y'] - 1)
         elif direction == 'down':
-            self.paddle_positions[player]['y'] = max(100, self.paddle_positions[player]['y'] + 1)
+            self.paddle_positions[player]['y'] = max(600, self.paddle_positions[player]['y'] + 1)
