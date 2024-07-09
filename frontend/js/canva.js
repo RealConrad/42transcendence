@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
 	const canvas = document.getElementById('gameCanvas');
 	const leftPaddle = createPaddle();
 	const rightPaddle = createPaddle();
+	const rightMenuContainer = document.getElementById('right-menu-container');
 	const leftMenuOptions = document.querySelector('left-menu').querySelectorAll('.menu-option');
 	const rightMenuOptions = document.querySelector('right-menu').querySelectorAll('.menu-option');
   
@@ -71,6 +72,21 @@ document.addEventListener('DOMContentLoaded', function() {
 	updatePaddlePositions();
 	window.addEventListener('resize', updatePaddlePositions);
   
+	rightMenuContainer.addEventListener('mouseover', event => {
+        const option = event.target.closest('.menu-option');
+        if (option) {
+            stickPaddleToMenuOption(rightPaddle, option);
+        }
+    });
+
+    // Use event delegation for statically loaded content in the left-menu
+    document.querySelector('left-menu').addEventListener('mouseover', event => {
+        const option = event.target.closest('.menu-option');
+        if (option) {
+            stickPaddleToMenuOption(leftPaddle, option);
+        }
+    });
+
 	document.addEventListener('mousemove', function(e) {
 	  if (!e.target.closest('.menu-option')) {
 		const canvasRect = canvas.getBoundingClientRect();
@@ -162,29 +178,30 @@ document.addEventListener('DOMContentLoaded', function() {
     afterAfterImage.className = 'cursor-after-image';
     document.body.appendChild(afterAfterImage);
 
-    // Assuming afterImage is always visible and following the cursor
     document.addEventListener('mousemove', (e) => {
         afterImage.style.left = `${e.pageX}px`;
         afterImage.style.top = `${e.pageY}px`;
-		afterAfterImage.style.left = `${e.pageX}px`;
-		afterAfterImage.style.top = `${e.pageY}px`;
+        afterAfterImage.style.left = `${e.pageX}px`;
+        afterAfterImage.style.top = `${e.pageY}px`;
     });
 
-    // Apply glow and shake on hover over clickable elements
-    const clickableElements = document.querySelectorAll('button, a');
-    clickableElements.forEach(element => {
-        element.addEventListener('mouseenter', () => {
-            afterImage.classList.add('after-image-shake', 'enlarged', 'purple');
-			afterAfterImage.classList.add('after-image-after-shake', 'enlarged', 'pink');
-        });
+    // Setup event delegation on right-menu-container
+    const rightMenuContainer = document.getElementById('right-menu-container');
 
-        element.addEventListener('mouseleave', () => {
-            afterImage.classList.remove('after-image-shake', 'enlarged', 'purple');
-			afterAfterImage.classList.remove('after-image-after-shake', 'enlarged', 'pink');
-        });
-    });
+    rightMenuContainer.addEventListener('mouseenter', (event) => {
+        if (event.target.tagName === 'BUTTON' || event.target.tagName === 'A') {
+            afterImage.classList.add('after-image-shake', 'enlarged', 'blue');
+            afterAfterImage.classList.add('after-image-after-shake', 'enlarged', 'green');
+        }
+    }, true); // Use capture phase for catching events
+
+    rightMenuContainer.addEventListener('mouseleave', (event) => {
+        if (event.target.tagName === 'BUTTON' || event.target.tagName === 'A') {
+            afterImage.classList.remove('after-image-shake', 'enlarged', 'blue');
+            afterAfterImage.classList.remove('after-image-after-shake', 'enlarged', 'green');
+        }
+    }, true); // Use capture phase for catching events
 });
-
 
   // mouse move effects
   document.addEventListener('DOMContentLoaded', () => {
