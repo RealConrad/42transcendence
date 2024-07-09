@@ -214,6 +214,32 @@ right-menu .menu-option button {
   background-color: rgba(255, 0, 221, 0.277);
 }
 
+
+
+/* Leaderboard setup */
+
+.leaderboard-entry {
+  display: flex;
+  justify-content: space-between; /* Ensures items are justified with space between them */
+  align-items: center; /* Centers items vertically */
+  /* background-color: #222;  Dark background for the entry */
+  /* color: #fff;  White text color */
+  /* padding: 10px 20px; */
+  /* margin: 5px 0; */
+  /* border-radius: 5px; */
+  /* transition: background-color 0.3s, transform 0.3s; */
+}
+
+
+.leaderboard-entry .score {
+  padding-left : 1rem;
+  font-size: 2em;
+  font-weight: bold;
+  text-align: left;
+  color: gold;
+}
+
+
 @media (max-height: 720px) {
   :root {
     --top-bottom-height: 0vh;
