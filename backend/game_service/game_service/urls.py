@@ -19,5 +19,4 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/lobby/', include("game_lobby.urls"))
 ]

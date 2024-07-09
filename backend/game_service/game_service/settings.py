@@ -49,8 +49,7 @@ ASGI_APPLICATION = 'game_service.asgi.application'
 
 CHANNEL_LAYERS = {
     'default': {
-        # TODO: Change this to use redis. Current setup is fine for local development, but docs recommends not to use
-        # this for production
+        # TODO: Change this to use redis. Current setup is fine for local development, but docs recommends not to use this
         'BACKEND': 'channels.layers.InMemoryChannelLayer',
         # 'CONFIG': {
         #     'hosts': [('localhost', 6379)],

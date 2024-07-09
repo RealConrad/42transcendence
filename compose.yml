@@ -55,20 +55,20 @@ services:
     networks:
       - transcendence
 
-#  nginx:
-#    image: nginx:latest
-#    container_name: nginx
-#    ports:
-#      - "443:443"
-#      - "80:80"
-#    env_file:
-#      - .env
-#    volumes:
-#      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-#      - ./nginx/ssl:/etc/nginx/ssl/:ro
-#      - ./frontend:/var/www/transcendence:ro
-#    networks:
-#      - transcendence
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "443:443"
+      - "80:80"
+    env_file:
+      - .env
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl/:ro
+      - ./frontend:/var/www/transcendence:ro
+    networks:
+      - transcendence
 
 volumes:
   auth_postgres_data:
