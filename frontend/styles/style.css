@@ -221,13 +221,6 @@ right-menu .menu-option button {
 .leaderboard-entry {
   display: flex;
   justify-content: space-between; /* Ensures items are justified with space between them */
-  align-items: center; /* Centers items vertically */
-  /* background-color: #222;  Dark background for the entry */
-  /* color: #fff;  White text color */
-  /* padding: 10px 20px; */
-  /* margin: 5px 0; */
-  /* border-radius: 5px; */
-  /* transition: background-color 0.3s, transform 0.3s; */
 }
 
 
@@ -235,10 +228,83 @@ right-menu .menu-option button {
   padding-left : 1rem;
   font-size: 2em;
   font-weight: bold;
-  text-align: left;
+  text-align: center;
   color: gold;
 }
 
+
+/* howTo */
+
+.how-to-container {
+  color: #fff; /* Ensure text is white */
+  padding: 10px; /* Padding around the content */
+}
+
+.description-container {
+  text-align: center;
+  margin-bottom: 20px;
+  height: 100px; /* Fixed height to prevent layout shift */
+}
+
+#power-title {
+  margin: 0;
+  color: #fff;
+  font-size: 20px; /* Larger font size for the title */
+}
+
+#description {
+  margin: 5px 0;
+  color: #ccc;
+  font-size: 16px; /* Smaller font size for the description */
+}
+
+.how-to-title, .atk-powers h2, .def-powers h2, .controls h2 {
+  margin-bottom: 5px;
+}
+
+.atk-def-container {
+  display: flex;
+  justify-content: space-around; /* Space between ATK and DEF */
+  margin-bottom: 20px;
+}
+
+.atk-powers, .def-powers {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.atk-powers button, .def-powers button {
+  margin: 5px;
+  background-color: red;
+  border: 2px solid #fff; /* White border for buttons */
+  padding: 5px;
+}
+
+.atk-powers button:hover, .def-powers button:hover {
+  transform: scale(1.1); /* Slightly enlarge buttons on hover */
+  background-color: #02575a; /* Darken button on hover */
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.control-keys {
+  display: flex;
+  justify-content: space-around;
+  width: 100%;
+}
+
+.control-keys button {
+  padding: 10px;
+  margin: 5px;
+}
+
+
+/* Media queries */
 
 @media (max-height: 720px) {
   :root {

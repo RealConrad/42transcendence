@@ -1,39 +1,33 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>How To</title>
-    <style>
-        #description {
-            margin-bottom: 20px;
-            font-size: 1.2em;
-            color: #333;
-        }
-        .power-button {
-            display: inline-block;
-            margin: 10px;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        .power-button:hover {
-            background-color: #45a049;
-        }
-    </style>
-</head>
-<body>
-    <div id="description">Hover over the power buttons to see their description.</div>
-    <button class="power-button" onmouseover="updateDescription('Speed Boost: Increases your speed for 10 seconds.')">Speed Boost</button>
-    <button class="power-button" onmouseover="updateDescription('Shield: Protects you from damage for 5 seconds.')">Shield</button>
-    <button class="power-button" onmouseover="updateDescription('Double Points: Earn double points for 15 seconds.')">Double Points</button>
-    
-    <script>
-        function updateDescription(text) {
-            document.getElementById('description').innerText = text;
-        }
-    </script>
-</body>
-</html>
+<div class="how-to-container">
+    <div class="description-container">
+        <h1 id="power-title">How To</h1>
+        <p id="description">Hover over the power buttons to see their description.</p>
+    </div>
+    <div class="atk-def-container">
+        <div class="atk-powers">
+            <h2>ATK</h2>
+            <button data-title="Switcheroo" data-desc="Teleport the ball to the other side mirroring its origin position." onmouseover="updatePowerInfo(this)">Switcheroo</button>
+            <button data-title="Run Ball, Run!" data-desc="Increase the ball speed by x3 until a point gets scored." onmouseover="updatePowerInfo(this)">Run Ball, Run!</button>
+            <button data-title="No U!" data-desc="Reverses the direction of the ball." onmouseover="updatePowerInfo(this)">No U!</button>
+            <button data-title="Honey, I Shrunk the Paddle" data-desc="Halves the size of opponent's paddle until he loses a point." onmouseover="updatePowerInfo(this)">Honey, I Shrunk the Paddle</button>
+            <button data-title="Down is the new Up" data-desc="Reverses up and down keys of opponent until a point is scored." onmouseover="updatePowerInfo(this)">Down is the new Up</button>
+        </div>
+        <div class="def-powers">
+            <h2>DEF</h2>
+            <button data-title="You Shall Not Pass!" data-desc="Your paddle becomes the size of the whole game area until it deflects the ball." onmouseover="updatePowerInfo(this)">You Shall Not Pass!</button>
+            <button data-title="Get Over Here!" data-desc="You pull the ball to your paddle." onmouseover="updatePowerInfo(this)">Get Over Here!</button>
+            <button data-title="You have my Paddle! and my Paddle!" data-desc="Spawns two paddles on both sides until a point is scored." onmouseover="updatePowerInfo(this)">You have my Paddle! and my Paddle!</button>
+            <button data-title="Slo-Mo" data-desc="The ball slows down until hits a paddle and then increases speed x2 until next hit." onmouseover="updatePowerInfo(this)">Slo-Mo</button>
+            <button data-title="Mr. Paddles" data-desc="Spawns a second paddle on your side that disappears after one hit." onmouseover="updatePowerInfo(this)">Mr. Paddles</button>
+        </div>
+    </div>
+    <div class="controls">
+        <h2>Controls</h2>
+        <div class="control-keys">
+            <button>W</button> <span>Move Up</span>
+            <button>S</button> <span>Move Down</span>
+            <button>ENTER</button> <span>Emote</span>
+            <button>ESC</button> <span>Surrender</span>
+        </div>
+    </div>
+</div>

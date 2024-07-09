@@ -230,6 +230,27 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
+// howTo
+
+document.addEventListener('DOMContentLoaded', function() {
+    const buttons = document.querySelectorAll('.atk-powers button, .def-powers button');
+    buttons.forEach(button => {
+        button.addEventListener('mouseover', function() {
+            const title = button.getAttribute('data-title');
+            const description = button.getAttribute('data-desc');
+            updatePowerInfo(title, description);
+        });
+    });
+});
+
+function updatePowerInfo(title, description) {
+    const titleElement = document.getElementById('power-title');
+    const descriptionElement = document.getElementById('description');
+    if (titleElement && descriptionElement) {
+        titleElement.innerText = title;
+        descriptionElement.innerText = description;
+    }
+}
   // Draw the middle line
 
   drawMiddleLine();
