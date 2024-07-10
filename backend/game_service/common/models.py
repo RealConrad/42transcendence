@@ -2,8 +2,8 @@ from django.db import models
 
 
 class GameLobby(models.Model):
-    player1 = models.CharField(max_length=150)
-    player2 = models.CharField(max_length=150)
+    player1 = models.CharField(max_length=150, blank=True, null=True)
+    player2 = models.CharField(max_length=150, blank=True, null=True)
     state = models.JSONField(default=dict)
     created_at = models.DateTimeField(auto_now_add=True)
 

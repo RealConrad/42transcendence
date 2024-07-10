@@ -6,6 +6,12 @@ from common.models import GameLobby, GameQueue, GuestUser
 from common.serializers import GameLobbySerializer
 from rest_framework.exceptions import AuthenticationFailed
 
+import logging
+from django.forms.models import model_to_dict
+
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
+
 
 class MatchmakingConsumer(AsyncWebsocketConsumer):
     waiting_players = {}
@@ -49,18 +55,19 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
             channel_name1 = self.waiting_players.pop(player1)
             channel_name2 = self.waiting_players.pop(player2)
 
-            game_lobby, created = await sync_to_async(GameLobby.objects.get_or_create)(player1=player1, player2=player2)
+            game_lobby = await sync_to_async(GameLobby.objects.create)(player1=player1, player2=player2)
+            logging.debug(f'GameLobby created: {model_to_dict(game_lobby)}')
             serializer = GameLobbySerializer(game_lobby).data
-            await self.notify_players(channel_name1, player1, serializer)
-            await self.notify_players(channel_name2, player2, serializer)
+            await self.notify_players(channel_name1, serializer)
+            await self.notify_players(channel_name2, serializer)
 
-    async def notify_players(self, channel_name, player, game_data):
+    async def notify_players(self, channel_name, game_data):
         await self.channel_layer.send(
             channel_name,
             {
                 'type': 'match_found',
                 'message': {
-                    'game': game_data
+                    'message': game_data
                 }
             }
         )
