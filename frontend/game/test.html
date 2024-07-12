@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pong Game</title>
+    <style>
+        body {
+            background: gray;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            flex-direction: column;
+        }
+        canvas {
+            border: 1px solid white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pong Game</h1>
+    <p>Open console to see more</p>
+    <button id="startMatchmakingBtn">Start Matchmaking</button>
+    <canvas id="pongCanvas" width="1280" height="720" style="display:none;"></canvas>
+    <script>
+        var y = Math.random();
+        if (y < 0.5)
+          y = 1;
+        else
+          y= 2;
+        const player = "player" + y;
+        console.log("PLAYER: ", player);
+        const startMatchmaking = () => {
+            console.log("Trying to setup connection....");
+            const matchmakingSocket = new WebSocket('ws://127.0.0.1:8002/ws/matchmaking/');
+
+            matchmakingSocket.onopen = () => {
+                console.log("Matchmaking socket connection established");
+
+                matchmakingSocket.send(JSON.stringify({
+                    action: 'join_queue',
+                    username: player,
+                }));
+            };
+
+            matchmakingSocket.onmessage = (e) => {
+                const data = JSON.parse(e.data);
+                console.log('Message received: ', data);
+
+                if (data.type === 'match_found') {
+                    console.log("Match found: ", data.message);
+                    startGame(data.message.message.id);
+                }
+            };
+
+            matchmakingSocket.onclose = function(e) {
+                console.log('Matchmaking WebSocket connection closed');
+            };
+        };
+
+        const startGame = (lobbyId) => {
+            const canvas = document.getElementById('pongCanvas');
+            const ctx = canvas.getContext('2d');
+            canvas.style.display = 'block';
+
+            const ws = new WebSocket(`ws://127.0.0.1:8002/ws/game/${lobbyId}/`);
+
+            ws.onopen = (event) => {
+                console.log("Websocket is now open!", event);
+            };
+
+            ws.onclose = (event) => {
+                console.log("Websockets connection closed!");
+            };
+
+            ws.onerror = (event) => {
+                console.error("Websocket error observed: ", event);
+            };
+
+            ws.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+                console.log("Got new message: ", data);
+
+                if (data.type === 'game') {
+                    updateGame(data.message);
+                }
+            };
+
+            const updateGame = (gameState) => {
+                if (ctx) {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                    // Draw background
+                    ctx.fillStyle = "#1b1b1b";
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                    // Draw paddles
+                    ctx.fillStyle = "red";
+                    console.log("Player 1 position: (X: ", gameState.paddle_positions.player1.x, " Y: ", gameState.paddle_positions.player1.y);
+                    console.log("Player 2 position: (X: ", gameState.paddle_positions.player2.x, " Y: ", gameState.paddle_positions.player2.y);
+                    ctx.fillRect(gameState.paddle_positions.player1.x, gameState.paddle_positions.player1.y, 10, 75);
+                    ctx.fillRect(gameState.paddle_positions.player2.x, gameState.paddle_positions.player2.y, 10, 75);
+
+                    // Draw ball
+                    ctx.beginPath();
+                    ctx.arc(gameState.ball_position.x, gameState.ball_position.y, 10, 0, Math.PI * 2);
+                    ctx.fillStyle = "red";
+                    ctx.fill();
+                    ctx.closePath();
+                } else {
+                    console.error("Canvas not found or not initialized");
+                }
+            };
+
+            document.addEventListener("keydown", (event) => {
+                let action;
+                if (event.code === "KeyW") {
+                    action = {
+                        action: 'move_paddle',
+                        player: player, // Adjust accordingly
+                        direction: 'up'
+                    };
+                } else if (event.code === "KeyS") {
+                    action = {
+                        action: 'move_paddle',
+                        player: player, // Adjust accordingly
+                        direction: 'down'
+                    };
+                }
+                if (action) {
+                    ws.send(JSON.stringify(action));
+                }
+            });
+        };
+
+        document.getElementById('startMatchmakingBtn').addEventListener('click', startMatchmaking);
+    </script>
+</body>
+</html>
