@@ -243,7 +243,6 @@ right-menu .menu-option button {
   padding: 10px; /* Padding around the content */
   grid-row: 1 / -1;
   grid-column: 1 / -1;
-  background-color: aquamarine; /* Just for visual clarity */
   height: 100%; /* Ensure it fills the parent container */
 }
 
@@ -253,17 +252,27 @@ right-menu .menu-option button {
   grid-column: 1; /* Only one column to consider */
 }
 
-#power-title, #description {
+#power-title {
   margin: 5px 0;
-  color: #ccc;
+  color: #ffffff;
+  font-size: calc(var(--font-size) * 0.8);;
+}
+
+#description {
+  margin: 20px;
+  color: #ffffff;
+  font-size: calc(var(--font-size) * 0.6);
+  font-family: Inter;
 }
 
 .atk-def-container {
   display: flex;
-  justify-content: space-around; /* Space between ATK and DEF */
+  justify-content: center;
+  padding-left: 35%;
+  padding-right: 35%;
+  padding-bottom: 10%;
   grid-row: 2; /* Place in the second row */
   grid-column: 1;
-  background-color: aqua; /* Just for visual clarity */
 }
 
 .atk-powers, .def-powers {

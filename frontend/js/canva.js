@@ -234,19 +234,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // howTo
 const atkPowers = [
-	{ symbol: "||", title: "Switcheroo", desc: "Teleport the ball to the other side mirroring its origin position." },
-	{ symbol: ">>", title: "Run Ball, Run!", desc: "Increase the ball speed by x3 until a point gets scored." },
-	{ symbol: "&", title: "No U!", desc: "Reverses the direction of the ball." },
+	{ symbol: "%", title: "The Paddle Games", desc: "Teleport the ball to the other side mirroring its origin position and direction." },
+	{ symbol: ">", title: "Run Ball, Run!", desc: "Increase the ball speed by x3 until a point gets scored." },
+	{ symbol: "&", title: "No U!", desc: "Reverses the direction of the ball and increase its speed x2 until a point gets scored or 2 seconds." },
 	{ symbol: "-", title: "Honey, I Shrunk the Paddle", desc: "Halves the size of opponent's paddle until he loses a point." },
-	{ symbol: "¿", title: "Down is the new Up", desc: "Reverses up and down keys of an opponent until a point is scored." }
+	{ symbol: "¿", title: "Down is the new Up", desc: "Reverses up and down keys of an opponent until a point is scored or 5 seconds." }
 ];
 
 const defPowers = [
-	{ symbol: "[]", title: "You Shall Not Pass!", desc: "Your paddle becomes the size of the whole game area until it deflects the ball." },
-	{ symbol: "@", title: "Get Over Here!", desc: "You pull the ball to your paddle. It will stick to it for 1s and then shoot straight." },
-	{ symbol: "+", title: "Paddle STRONG!", desc: "Your paddle doubles in size!" },
-	{ symbol: "*", title: "Slo-Mo", desc: "The ball slows down until hits a paddle and then increases speed x2 until next hit." },
-	{ symbol: "=", title: "For Justice!", desc: "teleports both players paddles to a position of a ball and freezes them for 0.5s" }
+	{ symbol: "|", title: "You Shall Not Pass!", desc: "Your paddle becomes the size of the whole game area for 2 seconds or until it deflects the ball with 2x speed for remaining time." },
+	{ symbol: "@", title: "Get Over Here!", desc: "You pull the ball to your paddle. It will stick to it for 1s and then shoot straight with 4x speed for 1 second." },
+	{ symbol: "+", title: "Paddle STRONG!", desc: "Your paddle doubles in size until point scored." },
+	{ symbol: "*", title: "Slow-Mo", desc: "The ball slows down for 2 seconds or until hits a paddle and then increases speed x2 for a duration of slow-mo part." },
+	{ symbol: "=", title: "For Justice!", desc: "Teleports paddles of both players to a position of a ball and freezes them in place for 1 second." }
 ];
 
 function createPowerElement(power, container) {
@@ -278,8 +278,8 @@ function createPowerElement(power, container) {
 	});
 
 	powerDiv.addEventListener('mouseleave', () => {
-		document.getElementById('power-title').textContent = 'How To';
-		document.getElementById('description').textContent = 'Hover over the power buttons to see their description.';
+		document.getElementById('power-title').textContent = 'HowTo?';
+		document.getElementById('description').textContent = 'Hover over the powers to see their description.';
 	});
 
 	container.appendChild(powerDiv);
