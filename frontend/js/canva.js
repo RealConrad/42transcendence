@@ -236,7 +236,7 @@ document.addEventListener('DOMContentLoaded', function() {
 const atkPowers = [
 	{ symbol: "%", title: "The Paddle Games", desc: "Teleport the ball to the other side mirroring its origin position and direction." },
 	{ symbol: ">", title: "Run Ball, Run!", desc: "Increase the ball speed by x3 until a point gets scored." },
-	{ symbol: "&", title: "No U!", desc: "Reverses the direction of the ball and increase its speed x2 until a point gets scored or 2 seconds." },
+	{ symbol: "&", title: "No U!", desc: "Reverses the direction of the ball and increase its speed x2 until a point gets scored." },
 	{ symbol: "-", title: "Honey, I Shrunk the Paddle", desc: "Halves the size of opponent's paddle until he loses a point." },
 	{ symbol: "¿", title: "Down is the new Up", desc: "Reverses up and down keys of an opponent until a point is scored or 5 seconds." }
 ];
@@ -279,7 +279,7 @@ function createPowerElement(power, container) {
 
 	powerDiv.addEventListener('mouseleave', () => {
 		document.getElementById('power-title').textContent = 'HowTo?';
-		document.getElementById('description').textContent = 'Hover over the powers to see their description.';
+		document.getElementById('description').innerHTML = 'Collect Powers and use them with ATK and DEF keys!<br>Hover over the powers to see their descriptions.';
 	});
 
 	container.appendChild(powerDiv);

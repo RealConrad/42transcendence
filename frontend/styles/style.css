@@ -237,10 +237,9 @@ right-menu .menu-option button {
 
 .how-to-container {
   display: grid;
-  grid-template-rows: 2fr 4fr 4fr; /* Allocate space: 20% for description, 40% each for powers and controls */
+  grid-template-rows: 1fr 2fr 2fr; /* Allocate space: 20% for description, 40% each for powers and controls */
   grid-template-columns: 1fr; /* One column layout */
   color: #fff; /* Ensure text is white */
-  padding: 10px; /* Padding around the content */
   grid-row: 1 / -1;
   grid-column: 1 / -1;
   height: 100%; /* Ensure it fills the parent container */
@@ -270,10 +269,11 @@ right-menu .menu-option button {
   justify-content: center;
   padding-left: 35%;
   padding-right: 35%;
-  padding-bottom: 10%;
+  padding-bottom: 5%;
   grid-row: 2; /* Place in the second row */
   grid-column: 1;
 }
+
 
 .atk-powers, .def-powers {
   display: flex;
@@ -289,17 +289,6 @@ right-menu .menu-option button {
   align-items: center;
   grid-row: 3; /* Place in the third row */
   grid-column: 1;
-}
-
-
-.control-keys {
-  display: flex;
-  justify-content: space-around;
-}
-
-.control-keys button {
-  padding: 10px;
-  margin: 5px;
 }
 
 
