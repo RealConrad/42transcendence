@@ -146,6 +146,8 @@ document.addEventListener('DOMContentLoaded', function() {
 		  .then(response => response.text())
 		  .then(data => {
 			rightMenuContainer.innerHTML = data;
+			if (index === 0)
+				initializePowerElements();
 		  })
 		  .catch(error => {
 			console.error('Error fetching HTML content:', error);
@@ -231,26 +233,68 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 // howTo
+const atkPowers = [
+	{ symbol: "||", title: "Switcheroo", desc: "Teleport the ball to the other side mirroring its origin position." },
+	{ symbol: ">>", title: "Run Ball, Run!", desc: "Increase the ball speed by x3 until a point gets scored." },
+	{ symbol: "&", title: "No U!", desc: "Reverses the direction of the ball." },
+	{ symbol: "-", title: "Honey, I Shrunk the Paddle", desc: "Halves the size of opponent's paddle until he loses a point." },
+	{ symbol: "¿", title: "Down is the new Up", desc: "Reverses up and down keys of an opponent until a point is scored." }
+];
 
-document.addEventListener('DOMContentLoaded', function() {
-    const buttons = document.querySelectorAll('.atk-powers button, .def-powers button');
-    buttons.forEach(button => {
-        button.addEventListener('mouseover', function() {
-            const title = button.getAttribute('data-title');
-            const description = button.getAttribute('data-desc');
-            updatePowerInfo(title, description);
-        });
-    });
-});
+const defPowers = [
+	{ symbol: "[]", title: "You Shall Not Pass!", desc: "Your paddle becomes the size of the whole game area until it deflects the ball." },
+	{ symbol: "@", title: "Get Over Here!", desc: "You pull the ball to your paddle. It will stick to it for 1s and then shoot straight." },
+	{ symbol: "+", title: "Paddle STRONG!", desc: "Your paddle doubles in size!" },
+	{ symbol: "*", title: "Slo-Mo", desc: "The ball slows down until hits a paddle and then increases speed x2 until next hit." },
+	{ symbol: "=", title: "For Justice!", desc: "teleports both players paddles to a position of a ball and freezes them for 0.5s" }
+];
 
-function updatePowerInfo(title, description) {
-    const titleElement = document.getElementById('power-title');
-    const descriptionElement = document.getElementById('description');
-    if (titleElement && descriptionElement) {
-        titleElement.innerText = title;
-        descriptionElement.innerText = description;
-    }
+function createPowerElement(power, container) {
+	let powerDiv = document.createElement('div');
+	powerDiv.className = 'power';
+	powerDiv.style.setProperty('--animation-delay-delay', `${Math.random() * 0.5}s`); // Random delay for demo
+
+	let powerText = document.createElement('div');
+	powerText.className = 'power-text';
+	powerText.textContent = power.symbol;
+
+	let afterImage = document.createElement('div');
+	afterImage.className = 'after-image';
+
+	let afterShake = document.createElement('div');
+	afterShake.className = 'after-shake';
+
+	let afterAfterShake = document.createElement('div');
+	afterAfterShake.className = 'after-after-shake';
+
+	powerDiv.appendChild(powerText);
+	powerDiv.appendChild(afterImage);
+	powerDiv.appendChild(afterShake);
+	powerDiv.appendChild(afterAfterShake);
+
+	powerDiv.addEventListener('mouseover', () => {
+		document.getElementById('power-title').textContent = power.title;
+		document.getElementById('description').textContent = power.desc;
+	});
+
+	powerDiv.addEventListener('mouseleave', () => {
+		document.getElementById('power-title').textContent = 'How To';
+		document.getElementById('description').textContent = 'Hover over the power buttons to see their description.';
+	});
+
+	container.appendChild(powerDiv);
 }
+
+function initializePowerElements() {
+    const atkContainer = document.querySelector('.atk-powers');
+    const defContainer = document.querySelector('.def-powers');
+
+    // Assuming `atkPowers` and `defPowers` are globally accessible or passed to this function
+    atkPowers.forEach(power => createPowerElement(power, atkContainer));
+    defPowers.forEach(power => createPowerElement(power, defContainer));
+}
+
+
   // Draw the middle line
 
   drawMiddleLine();
