@@ -1,39 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>How To</title>
-    <style>
-        #description {
-            margin-bottom: 20px;
-            font-size: 1.2em;
-            color: #333;
-        }
-        .power-button {
-            display: inline-block;
-            margin: 10px;
-            padding: 10px 20px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-        .power-button:hover {
-            background-color: #45a049;
-        }
-    </style>
-</head>
-<body>
-    <div id="description">Hover over the power buttons to see their description.</div>
-    <button class="power-button" onmouseover="updateDescription('Speed Boost: Increases your speed for 10 seconds.')">Speed Boost</button>
-    <button class="power-button" onmouseover="updateDescription('Shield: Protects you from damage for 5 seconds.')">Shield</button>
-    <button class="power-button" onmouseover="updateDescription('Double Points: Earn double points for 15 seconds.')">Double Points</button>
-    
-    <script>
-        function updateDescription(text) {
-            document.getElementById('description').innerText = text;
-        }
-    </script>
-</body>
-</html>
+<div class="how-to-container">
+    <div class="description-container">
+        <h1 id="power-title">HowTo?</h1>
+        <p id="description">Collect Powers and use them with ATK and DEF keys!<br> Hover over the powers to see their descriptions.</p>
+    </div>
+    <div class="atk-def-container">
+        <div class="atk-powers">
+            <h2>ATK</h2>
+        </div>
+        <div class="def-powers">
+            <h2>DEF</h2>
+        </div>
+    </div>
+    <div class="controls">
+        <h2>Controls</h2>
+        <img src="styles/keys.png" alt="Controls" style="height: auto; width: auto; pointer-events: none;" />
+    </div>
+</div>
+
