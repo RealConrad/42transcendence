@@ -25,6 +25,7 @@
     <button id="startMatchmakingBtn">Start Matchmaking</button>
     <canvas id="pongCanvas" width="1280" height="720" style="display:none;"></canvas>
     <script>
+        // Temporary to get 2 unique users
         var y = Math.random();
         if (y < 0.5)
           y = 1;
@@ -81,7 +82,6 @@
 
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
-                console.log("Got new message: ", data);
 
                 if (data.type === 'game') {
                     updateGame(data.message);
@@ -90,6 +90,7 @@
 
             const updateGame = (gameState) => {
                 if (ctx) {
+                    console.log("GAME STATE: ", gameState);
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
                     // Draw background
@@ -98,14 +99,13 @@
 
                     // Draw paddles
                     ctx.fillStyle = "red";
-                    console.log("Player 1 position: (X: ", gameState.paddle_positions.player1.x, " Y: ", gameState.paddle_positions.player1.y);
-                    console.log("Player 2 position: (X: ", gameState.paddle_positions.player2.x, " Y: ", gameState.paddle_positions.player2.y);
-                    ctx.fillRect(gameState.paddle_positions.player1.x, gameState.paddle_positions.player1.y, 10, 75);
-                    ctx.fillRect(gameState.paddle_positions.player2.x, gameState.paddle_positions.player2.y, 10, 75);
+                    //console.log(gameState.paddle_data);
+                    ctx.fillRect(gameState.paddle_data.player1.x, gameState.paddle_data.player1.y, gameState.paddle_data.player1.width, gameState.paddle_data.player1.height);
+                    ctx.fillRect(gameState.paddle_data.player2.x, gameState.paddle_data.player2.y, gameState.paddle_data.player2.width, gameState.paddle_data.player2.height);
 
                     // Draw ball
                     ctx.beginPath();
-                    ctx.arc(gameState.ball_position.x, gameState.ball_position.y, 10, 0, Math.PI * 2);
+                    ctx.arc(gameState.ball_data.position.x, gameState.ball_data.position.y, 10, 0, Math.PI * 2);
                     ctx.fillStyle = "red";
                     ctx.fill();
                     ctx.closePath();
@@ -119,13 +119,13 @@
                 if (event.code === "KeyW") {
                     action = {
                         action: 'move_paddle',
-                        player: player, // Adjust accordingly
+                        player: player,
                         direction: 'up'
                     };
                 } else if (event.code === "KeyS") {
                     action = {
                         action: 'move_paddle',
-                        player: player, // Adjust accordingly
+                        player: player,
                         direction: 'down'
                     };
                 }

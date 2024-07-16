@@ -2,10 +2,9 @@ import json
 import asyncio
 import logging
 from channels.generic.websocket import AsyncWebsocketConsumer
-from channels.layers import get_channel_layer
 from asgiref.sync import sync_to_async
 from common.models import GameLobby
-from .game_logic import PongGame
+from game_logic.game_logic import PongGame
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -24,8 +23,8 @@ class GameConsumer(AsyncWebsocketConsumer):
         # Load or create the game state
         self.game_lobby = await sync_to_async(GameLobby.objects.get)(id=self.lobby_id)
         self.game = PongGame(player1=self.game_lobby.player1, player2=self.game_lobby.player2)
-        if self.game_lobby.state:
-            self.game.load_state(self.game_lobby.state)
+        # if self.game_lobby.state:
+        #     self.game.load_state(self.game_lobby.state)
         await self.accept()
         # Start the game loop
         self.game_task = asyncio.create_task(self.game_loop())
@@ -47,7 +46,6 @@ class GameConsumer(AsyncWebsocketConsumer):
             player = data['player']
             direction = data['direction']
             self.game.move_paddle(player, direction)
-            # await self.save_game_state()
 
     async def game_loop(self):
         while True:
