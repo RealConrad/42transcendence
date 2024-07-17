@@ -5,30 +5,55 @@ networks:
 
 
 services:
-  db:
+  auth_db:
     image: postgres:13
-    container_name: postgreSQL
+    container_name: auth_db
     env_file:
-      - .env
+      - .env.auth
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - auth_postgres_data:/var/lib/postgresql/data
     networks:
       - transcendence
 
-  auth_service:
+  auth-service:
     build: ./backend/auth_service
-    container_name: auth_service
-    image: auth_service
+    container_name: auth-service
+    image: auth-service
     ports:
       - "8000:8000"
     env_file:
-      - .env
+      - .env.auth
     depends_on:
-      - db
+      - auth_db
     networks:
       - transcendence
+
+#  game_db:
+#    image: postgres:13
+#    container_name: game_db
+#    env_file:
+#      - .env.game
+#    ports:
+#      - "5433:5432"
+#    volumes:
+#      - game_postgres_data:/var/lib/postgresql/data
+#    networks:
+#      - transcendence
+#
+#  game-service:
+#    build: ./backend/game_service
+#    container_name: game-service
+#    image: game-service
+#    ports:
+#      - "8001:8001"
+#    env_file:
+#      - .env.game
+#    depends_on:
+#      - game_db
+#    networks:
+#      - transcendence
 
   nginx:
     image: nginx:latest
@@ -44,10 +69,7 @@ services:
       - ./frontend:/var/www/transcendence:ro
     networks:
       - transcendence
-    
 
 volumes:
-  postgres_data:
-
-# docker exec -it auth_service python manage.py migrate
-# docker exec -it postgreSQL psql -U admin -d transcendence 
+  auth_postgres_data:
+  game_postgres_data:
