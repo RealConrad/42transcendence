@@ -14,15 +14,52 @@
 	}
 	login-modal{
 		/* border: 2px solid red; */
-		display: none;
+		/* display: none; */
 		position: fixed;
 		z-index: 1;
 		left: 10px;
 		right: 10px;
-		width: 60%;
+		width: 70%;
 		height: 80%;
 		margin: 0 auto;
 		background-color: orange;
+	}
+	.modal-content{
+		position: relative;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		border: 2px solid red;
+		height: 100%;
+		width: 100%;
+	}
+	.modal-content form{
+		display:block;
+		width: 50%;
+	}
+	.modal-content form input{
+		line-height: 40px;
+	}
+	.modal-content form .form-text{
+		font-size: 10px;
+		/* background-color: red; */
+		text-align: center;
+
+	}
+	.modal-content form .form-text p{
+		/* border: 2px solid green; */
+		margin:2px;
+	}
+	#close-button{
+		position: absolute;
+		top: 5px;
+		right: 5px;
+	}
+	div .button-align{
+		display: flex;
+		align-items: center;
+		justify-content: center;
 	}
 	/* https://www.w3schools.com/howto/howto_css_modals.asp */
   </style>
@@ -33,6 +70,26 @@
   <login-modal id="login-modal">
 	<div class="modal-content">
 		<close-button type="button" class="btn btn-dark btn-sm" id="close-button">&times;</close-button>
+		<form>
+			<div class="mb-3">
+				<label for="uname" class="form-label">Username</label>
+				<input type="email" class="form-control" aria-describedby="emailHelp">
+			</div>
+			<div class="mb-3">
+				<label for="pwd" class="form-label">Password</label>
+				<input type="password" class="form-control" aria-label="default password">
+			</div>
+			<div class="mt-4 button-align">
+				<button type="submit" class="btn btn-dark btn-lg" id="submit-button" style="width: 90%">Sign In</button>
+			</div>
+			<div class="form-text">
+				<p>Don’t have an account yet?  <a href="">Create an account</a>.</p>
+				<p>Or directly login with your 42 Account below.</p>
+			</div>
+			<div class="mt-5 button-align">
+				<button type="submit" class="btn btn-dark btn-lg" id="submit-button" style="width: 70%">42 Authentification</button>
+			</div>
+		</form>
 	</div>
   </login-modal>
   <main-menu>
