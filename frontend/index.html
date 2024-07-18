@@ -23,6 +23,8 @@
 		height: 80%;
 		margin: 0 auto;
 		background-color: orange;
+		font-family: Arial, Helvetica, sans-serif;
+		font-size: 20px;
 	}
 	.modal-content{
 		position: relative;
@@ -39,10 +41,10 @@
 		width: 50%;
 	}
 	.modal-content form input{
-		line-height: 40px;
+		line-height: 2.5rem;
 	}
 	.modal-content form .form-text{
-		font-size: 10px;
+		font-size: 1rem;
 		/* background-color: red; */
 		text-align: center;
 
@@ -61,6 +63,13 @@
 		align-items: center;
 		justify-content: center;
 	}
+	#signin-button{
+		font-size: 2rem;
+	}
+	#fortyAuth-button{
+		font-size: 1.5rem;
+		margin-top: 7%;
+	}
 	/* https://www.w3schools.com/howto/howto_css_modals.asp */
   </style>
 </head>
@@ -70,28 +79,33 @@
   <login-modal id="login-modal">
 	<div class="modal-content">
 		<close-button type="button" class="btn btn-dark btn-sm" id="close-button">&times;</close-button>
-		<form>
-			<div class="mb-3">
+		<form name="login-form">
+			<div class="mb-3 mt-5">
 				<label for="uname" class="form-label">Username</label>
-				<input type="email" class="form-control" aria-describedby="emailHelp">
+				<input id="uname" type="email" class="form-control" aria-describedby="emailHelp">
 			</div>
 			<div class="mb-3">
 				<label for="pwd" class="form-label">Password</label>
-				<input type="password" class="form-control" aria-label="default password">
+				<input id="pwd" type="password" class="form-control" aria-label="default password">
 			</div>
 			<div class="mt-4 button-align">
-				<button type="submit" class="btn btn-dark btn-lg" id="submit-button" style="width: 90%">Sign In</button>
+				<button type="submit" class="btn btn-dark btn-lg" id="signin-button" style="width: 90%">Sign In</button>
 			</div>
 			<div class="form-text">
-				<p>Don’t have an account yet?  <a href="">Create an account</a>.</p>
+				<p>Don’t have an account yet?  <button type="button" id="registerButton">Create an account</button>.</p>
 				<p>Or directly login with your 42 Account below.</p>
 			</div>
 			<div class="mt-5 button-align">
-				<button type="submit" class="btn btn-dark btn-lg" id="submit-button" style="width: 70%">42 Authentification</button>
+				<button type="submit" class="btn btn-dark btn-lg" id="fortyAuth-button" style="width: 70%">42 Authentification</button>
 			</div>
 		</form>
 	</div>
   </login-modal>
+  <!-- <login-modal id="register-modal">
+	<div class="modal-content">
+		<close-button type="button" class="btn btn-dark btn-sm" id="close-button">&times;</close-button>
+	</div>
+  </login-modal> -->
   <main-menu>
     <canvas id="gameCanvas"></canvas>
     <left-menu>
