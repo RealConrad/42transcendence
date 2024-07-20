@@ -1,0 +1,73 @@
+login-button{
+    position: absolute;
+    top: 20px;
+    right: 30px;
+}
+login-modal{
+    display: none;
+    background-color: orange;
+    position: fixed;
+    z-index: 4;
+    left: 10px;
+    right: 10px;
+    width: 70%;
+    height: 80%;
+    margin: 0 auto;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 20px;
+}
+
+.modal-content{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    /* border: 2px solid red; */
+    height: 100%;
+    width: 100%;
+}
+.modal-content form{
+    display:block;
+    width: 50%;
+}
+.modal-content form input{
+    line-height: 2.5rem;
+}
+.modal-content form .form-text{
+    font-size: 1rem;
+    /* background-color: red; */
+    text-align: center;
+
+}
+.modal-content form .form-text p{
+    /* border: 2px solid green; */
+    margin:2px;
+}
+div .button-align{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#close-button{
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
+#signin-button{
+    font-size: 2rem;
+}
+#fortyAuth-button{
+    font-size: 1.5rem;
+    margin-top: 7%;
+}
+
+#GoToRegister-button, #GoToSignIn-button{
+    background: none;
+    color: blue;
+    border: none;
+    padding: 0;
+    font: inherit;
+    text-decoration: underline;
+}
+/* https://www.w3schools.com/howto/howto_css_modals.asp */
