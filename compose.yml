@@ -71,18 +71,19 @@ services:
       - transcendence
 
   vault:
-    image: hashicorp/vault:latest
+    build: ./vault/.
     container_name: vault
     ports:
       - "8200:8200"
-    environment:
-      VAULT_DEV_ROOT_TOKEN_ID: "root"
-      VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
     cap_add:
       - IPC_LOCK
     volumes:
-      - ./vault/data:/backend/vault/file
+      - ./vault/vault_config:/vault/config
+      - ./vault/data:/vault/file
+    networks:
+      - transcendence
 
 volumes:
   auth_postgres_data:
   game_postgres_data:
+  vault_data:

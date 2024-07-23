@@ -15,7 +15,6 @@ build:
 
 up: build
 	$(DOCKER_COMPOSE) up
-
 stop:
 	$(DOCKER_COMPOSE) stop
 
