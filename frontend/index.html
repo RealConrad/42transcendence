@@ -10,6 +10,12 @@
   <link rel="stylesheet" href="styles/login.css">
 </head>
 
+<style>
+	#incorrectPasswords{
+		/* display: none; */
+		visibility: hidden;
+	}
+</style>
 <body>
   <header>PONG</header>
   <!-- LOGIN -->
@@ -43,9 +49,9 @@
   <login-modal id="register-modal">
 	<div class="modal-content">
 		<close-button type="button" class="btn btn-sm" id="close-button"><div>&times;</div></close-button>
-		<form name="register-form"> 
+		<form name="register-form" id="register-form"> 
 			<!-- method="post" action="/api/auth/register/" -->
-			<div class="mb-3 mt-5">
+			<div class="mb-3 mt-5 form-group">
 				<label for="registeruname" class="form-label">Username</label>
 				<input id="registeruname" type="text" class="form-control" required>
 			</div>
@@ -56,6 +62,9 @@
 			<div class="mb-3">
 				<label for="registerpwd2" class="form-label">Repeat Password</label>
 				<input id="registerpwd2" type="password" class="form-control" required>
+			</div>
+			<div class="form-text" style="color: red" id="incorrectPasswords">
+				<p>Passwords don't match !</p>
 			</div>
 			<div class="mt-4 button-align">
 				<button type="submit" class="btn btn-dark btn-lg" id="register-button" style="width: 90%">Register</button>
