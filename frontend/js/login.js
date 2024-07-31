@@ -8,6 +8,9 @@ let registerButton = document.querySelector("#register-button");
 let registerInputUsername = document.querySelector("#registeruname");
 let registerInputPassword = document.querySelector("#registerpwd");
 let registerInputPassword2 = document.querySelector("#registerpwd2");
+let signinButton = document.querySelector("#signin-button");
+let loginInputUsername = document.querySelector("#loginuname");
+let loginInputPassword = document.querySelector("#loginpwd");
 
 loginButton.onclick = function() {
 	console.log("clicked loginButton :))");
@@ -33,7 +36,6 @@ ToSignInButton.onclick = function(){
 }
 
 //REGISTRATION
-
 registerButton.addEventListener("click", async function(e){
 	document.querySelector("#incorrectPasswords").style.visibility = "hidden";
 	let valid = document.querySelector("#register-form").checkValidity();
@@ -56,7 +58,7 @@ registerButton.addEventListener("click", async function(e){
 	console.log(data);
 	console.log("JSON: " + registerJSONdata);
 
-	fetch('http://127.0.0.1:80/api/auth/register/', {
+	fetch('http://127.0.0.1:8000/api/auth/register/', {
 		method: 'POST', // Set method here
 		headers: {
 			'Content-Type': 'application/json',
@@ -69,10 +71,23 @@ registerButton.addEventListener("click", async function(e){
 	registerModal.style.display = "none";
 	console.log("You are successfully registered !");
 	})
-	
-	loginButton.addEventListener("click", async function (e) {
-		
-	})
+
+//LOGIN
+signinButton.addEventListener("click", async function (e) {
+	console.log("clicked loginButton ! :)");
+	let valid = document.querySelector("#login-form").checkValidity();
+	if (!valid){
+		return ;
+	}
+	e.preventDefault();
+	// console.log(e);
+	let username = loginInputUsername.value;
+	let password = loginInputPassword.value;
+	const data = {username: username, password: password};
+	console.log(data);
+	const loginJSONdata = JSON.stringify(data);
+	console.log(loginJSONdata);
+})
 	
 function inequalPasswordWarning(){
 console.log("PASSWORDS DONT MATCH");
