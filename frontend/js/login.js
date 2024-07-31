@@ -62,6 +62,7 @@ registerButton.addEventListener("click", async function(e){
 		method: 'POST', // Set method here
 		headers: {
 			'Content-Type': 'application/json',
+			'Access-Control-Allow-Origin': '*',
 		  },
 		body: registerJSONdata,
 	  })
@@ -87,6 +88,19 @@ signinButton.addEventListener("click", async function (e) {
 	console.log(data);
 	const loginJSONdata = JSON.stringify(data);
 	console.log(loginJSONdata);
+
+	fetch('http://127.0.0.1:8000/api/auth/login/', {
+		method: 'POST', // Set method here
+		headers: {
+			'Content-Type': 'application/json',
+			'Access-Control-Allow-Origin': '*',
+		  },
+		body: loginJSONdata,
+	  })
+	  .then(response =>  {
+		response.json();
+		console.log(response.json());
+	})
 })
 	
 function inequalPasswordWarning(){
