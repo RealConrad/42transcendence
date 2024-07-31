@@ -32,59 +32,73 @@ ToSignInButton.onclick = function(){
 	loginModal.style.display = "block";
 }
 
+//REGISTRATION
+
 registerButton.addEventListener("click", async function(e){
 	document.querySelector("#incorrectPasswords").style.visibility = "hidden";
 	let valid = document.querySelector("#register-form").checkValidity();
-	// console.log("valid: " + valid);
 	if (!valid){
 		return ;
 	}
 	e.preventDefault();
-	console.log(e);
+	// console.log(e);
 	let username = registerInputUsername.value;
 	let password = registerInputPassword.value;
 	let password2 = registerInputPassword2.value;
-	console.log("username is: " , username);
-	console.log("password is: " , password);
-	console.log("password2 is: " , password2);
 
-	const comparePassword = password.localeCompare(password2);
-	if (comparePassword != 0){
-		inequalPassword();
+	//see if passwords are matching
+	if (matchingPasswords(password, password2) == false)
 		return ;
-	}
-	console.log("Passwords are matching :)");
 
 	// send data to backend
-
-	// const obj = {name: "John", age: 30, city: "New York"};
 	const data = {"username": username, "email": "default", "password": password};
+	const registerJSONdata = JSON.stringify(data);
 	console.log(data);
+	console.log("JSON: " + registerJSONdata);
 
-	//URL: /api/auth/register/  Method: POST
+	fetch('http://127.0.0.1:80/api/auth/register/', {
+		method: 'POST', // Set method here
+		headers: {
+			'Content-Type': 'application/json',
+		  },
+		body: registerJSONdata,
+	  })
+	  .then(response => response.json())
+	  .then(data => console.log(data))
 	
-	try {
-		const response = await fetch("http://127.0.0.1:80/api/auth/register/", {
-		  method: "POST",
-		  // Set the FormData instance as the request body
-		  body: data,
-		});
-		console.log(await response.json());
-	  } catch (e) {
-		console.error(e);
-	  }
-
 	registerModal.style.display = "none";
 	console.log("You are successfully registered !");
-})
-
-// loginButton.addEventListener("click", async function (e) {
+	})
 	
-// })
-
-function inequalPassword(){
-	console.log("PASSWORDS DONT MATCH");
-	let passwordWarning = document.querySelector("#incorrectPasswords");
-	passwordWarning.style.visibility = "visible";
+	loginButton.addEventListener("click", async function (e) {
+		
+	})
+	
+function inequalPasswordWarning(){
+console.log("PASSWORDS DONT MATCH");
+let passwordWarning = document.querySelector("#incorrectPasswords");
+passwordWarning.style.visibility = "visible";
 }
+		
+function matchingPasswords(p1, p2){
+	if (p1.localeCompare(p2) != 0){
+		inequalPasswordWarning();
+		return false;
+		}	
+		console.log("Passwords are matching :)");
+		return true;
+		}
 
+
+				//URL: /api/auth/register/  Method: POST
+				
+				// try {
+				// 	const response = await fetch("http://127.0.0.1:80/api/auth/register/", {
+				// 	  method: "POST",
+				// 	  // Set the FormData instance as the request body
+				// 	  body: registerJSONdata,
+				// 	});
+				// 	console.log(await response.json());
+				//   } catch (e) {
+				// 	console.error(e);
+				//   }
