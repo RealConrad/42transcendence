@@ -22,6 +22,7 @@ clean: down
 	docker container prune -f
 	docker network prune -f
 	docker image prune -f
+	$(NEEDS_SUDO) rm -rf ./vault/data/*
 
 fclean: clean
 	docker system prune -a -f
