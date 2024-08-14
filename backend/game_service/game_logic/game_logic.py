@@ -1,9 +1,9 @@
 import logging
 from typing import Final
+import math
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-
 
 WIDTH: Final[int] = 1280
 HEIGHT: Final[int] = 720
@@ -18,17 +18,14 @@ class PongGame:
             'velocity': {'x': 5, 'y': 5},
             'radius': 10
         }
-        self.paddle_data = {
-            self.player1: {'x': 10, 'y': 310, 'height': 75, 'width': 10},
-            self.player2: {'x': 1260, 'y': 310, 'height': 75, 'width': 10},
+        self.players_data = {
+            self.player1: {'paddle': {'x': 10, 'y': 310, 'height': 75, 'width': 10}, 'score': 0},
+            self.player2: {'paddle': {'x': 1260, 'y': 310, 'height': 75, 'width': 10}, 'score': 0}
         }
-        self.scores = {self.player1: 0, self.player2: 0}
-        self.game_completed = False,
 
     def load_state(self, state):
-        self.ball_data = state['ball_data']
-        self.paddle_data = state['paddle_data']
-        self.scores = state['scores']
+        self.ball_data = state.get('ball_data', self.ball_data)
+        self.players_data = state.get('players_data', self.players_data)
 
     def update(self):
         # Update ball position based on velocity
@@ -37,44 +34,49 @@ class PongGame:
 
         # Check for wall collision
         if self.ball_data['position']['x'] <= 0 or self.ball_data['position']['x'] >= WIDTH:
-            self.ball_data['velocity']['x'] = -self.ball_data['velocity']['x']
+            self.ball_data['velocity']['x'] *= -1
         if self.ball_data['position']['y'] <= 0 or self.ball_data['position']['y'] >= HEIGHT:
-            self.ball_data['velocity']['y'] = -self.ball_data['velocity']['y']
+            self.ball_data['velocity']['y'] *= -1
+
         self.check_paddle_collision()
+        self.check_if_player_scored()
+
+
+    def check_if_player_scored(self):
+
 
     def check_paddle_collision(self):
         ball_x = self.ball_data['position']['x']
         ball_y = self.ball_data['position']['y']
         ball_radius = self.ball_data['radius']
-        ball_left = ball_x - ball_radius
-        ball_right = ball_x + ball_radius
-        ball_top = ball_y - ball_radius
-        ball_bottom = ball_y + ball_radius
-        for _, paddle in self.paddle_data.items():
-            paddle_left = paddle['x'] - paddle['width']
+
+        for player, data in self.players_data.items():
+            paddle = data['paddle']
+            paddle_left = paddle['x']
             paddle_right = paddle['x'] + paddle['width']
-            paddle_top = paddle['y'] - paddle['height']
+            paddle_top = paddle['y']
             paddle_bottom = paddle['y'] + paddle['height']
-            if (ball_right >= paddle_left and ball_left <= paddle_right and ball_bottom >= paddle_top and
-                    ball_top <= paddle_bottom):
-                self.ball_data['velocity']['x'] = -self.ball_data['velocity']['x']
-                self.ball_data['velocity']['y'] = -self.ball_data['velocity']['y']
-                logging.info("Paddle collision detected!")
+
+            if (
+                    paddle_left <= ball_x + ball_radius <= paddle_right or paddle_left <= ball_x - ball_radius <= paddle_right) and (
+                    paddle_top <= ball_y <= paddle_bottom):
+                self.ball_data['velocity']['x'] *= -1
+                logging.info(f"Collision with {player}'s paddle, new velocity: {self.ball_data['velocity']}")
+                return
 
     def get_state(self):
         return {
-            'player1': self.player1,
-            'player2': self.player2,
             'ball_data': self.ball_data,
-            'paddle_data': self.paddle_data,
-            'scores': self.scores
+            'players_data': self.players_data,
         }
 
     def move_paddle(self, player, direction):
-        if player not in self.paddle_data:
+        if player not in self.players_data:
             logging.error(f"Player {player} not found in paddle_data")
             return
         if direction == 'up':
-            self.paddle_data[player]['y'] = max(0, self.paddle_data[player]['y'] - 50)
+            self.players_data[player]['paddle']['y'] = max(0, self.players_data[player]['paddle']['y'] - 50)
         elif direction == 'down':
-            self.paddle_data[player]['y'] = min(HEIGHT - 75, self.paddle_data[player]['y'] + 50)
+            self.players_data[player]['paddle']['y'] = min(HEIGHT - self.players_data[player]['paddle']['height'],
+                                                           self.players_data[player]['paddle']['y'] + 50)
+        logging.info(f"Player {player} new position y-pos: {self.players_data[player]['paddle']['y']}")

@@ -17,11 +17,24 @@
         canvas {
             border: 1px solid white;
         }
+
+        h1 {
+            bottom: 100px;
+            position: absolute;
+            color: #fff;
+        }
+
+        #player1Score {
+            left: 35%;
+        }
+
     </style>
 </head>
 <body>
     <h1>Pong Game</h1>
     <p>Open console to see more</p>
+    <h1 id="player1Score">0</h1>
+    <h1 id ="player2Score">0</h1>
     <button id="startMatchmakingBtn">Start Matchmaking</button>
     <canvas id="pongCanvas" width="1280" height="720" style="display:none;"></canvas>
     <script>
@@ -100,8 +113,14 @@
                     // Draw paddles
                     ctx.fillStyle = "red";
                     //console.log(gameState.paddle_data);
-                    ctx.fillRect(gameState.paddle_data.player1.x, gameState.paddle_data.player1.y, gameState.paddle_data.player1.width, gameState.paddle_data.player1.height);
-                    ctx.fillRect(gameState.paddle_data.player2.x, gameState.paddle_data.player2.y, gameState.paddle_data.player2.width, gameState.paddle_data.player2.height);
+
+                    // Player 1
+                    ctx.fillRect(gameState.players_data.player1.paddle.x, gameState.players_data.player1.paddle.y,
+                        gameState.players_data.player1.paddle.width, gameState.players_data.player1.paddle.height);
+
+                    // Player 2
+                    ctx.fillRect(gameState.players_data.player2.paddle.x, gameState.players_data.player2.paddle.y,
+                        gameState.players_data.player2.paddle.width, gameState.players_data.player2.paddle.height);
 
                     // Draw ball
                     ctx.beginPath();

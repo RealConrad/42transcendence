@@ -23,8 +23,6 @@ class GameConsumer(AsyncWebsocketConsumer):
         # Load or create the game state
         self.game_lobby = await sync_to_async(GameLobby.objects.get)(id=self.lobby_id)
         self.game = PongGame(player1=self.game_lobby.player1, player2=self.game_lobby.player2)
-        # if self.game_lobby.state:
-        #     self.game.load_state(self.game_lobby.state)
         await self.accept()
         # Start the game loop
         self.game_task = asyncio.create_task(self.game_loop())
