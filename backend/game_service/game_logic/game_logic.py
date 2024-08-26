@@ -1,6 +1,6 @@
 import logging
 from typing import Final
-import math
+import random
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -10,31 +10,27 @@ HEIGHT: Final[int] = 720
 
 
 class PongGame:
+    MAX_SCORE = 3
+
     def __init__(self, player1, player2):
         self.player1 = player1
         self.player2 = player2
-        self.ball_data = {
-            'position': {'x': WIDTH / 2, 'y': HEIGHT / 2},
-            'velocity': {'x': 5, 'y': 5},
-            'radius': 10
-        }
-        # TODO: ADD POWERUPS
-        self.players_data = {
-            self.player1: {'paddle': {'x': 10, 'y': 310, 'height': 75, 'width': 10}},
-            self.player2: {'paddle': {'x': 1260, 'y': 310, 'height': 75, 'width': 10}}
-        }
-        self.scores = {
-            self.player1: 0,
-            self.player2: 0,
-        }
+        self.players_data = {}
+        self.ball_data = {}
+        self.match_time = 0
+        self.winner = None
+        self.game_over = False
+        self.scores = {self.player1: 0, self.player2: 0}
+        self.reset()
 
     def reset(self):
         logging.info("Resetting game state...")
         self.ball_data = {
             'position': {'x': WIDTH / 2, 'y': HEIGHT / 2},
-            'velocity': {'x': 5, 'y': 5},
+            'velocity': {'x': 5 * (-1 if random.choice([True, False]) else 1), 'y': 5},
             'radius': 10
         }
+        self.match_time = 0
         self.players_data = {
             self.player1: {'paddle': {'x': 10, 'y': 310, 'height': 75, 'width': 10}},
             self.player2: {'paddle': {'x': 1260, 'y': 310, 'height': 75, 'width': 10}}
@@ -52,7 +48,6 @@ class PongGame:
         # Check for wall collision (top & bottom)
         if self.ball_data['position']['y'] <= 0 or self.ball_data['position']['y'] >= HEIGHT:
             self.ball_data['velocity']['y'] *= -1
-
         self.check_paddle_collision()
         self.check_if_player_scored()
 
@@ -65,8 +60,17 @@ class PongGame:
     def increase_score(self, player):
         logging.info(f'{player} scored!')
         self.scores[player] += 1
-        logging.info("Resetting game state now....")
-        self.reset()
+        if self.scores[player] == self.MAX_SCORE:
+            self.game_over = True
+            self.winner = player
+        else:
+            self.reset()
+
+    def get_winner(self):
+        return self.winner
+
+    def is_game_over(self):
+        return self.game_over
 
     def check_paddle_collision(self):
         ball_x = self.ball_data['position']['x']
@@ -94,16 +98,16 @@ class PongGame:
             'player1': self.player1,
             'player2': self.player2,
             'scores': self.scores,
+            'game_over': self.game_over
         }
 
     def move_paddle(self, player, direction):
         if player not in self.players_data:
             logging.error(f"Player {player} not found in paddle_data")
             return
+        paddle = self.players_data[player]['paddle']
+        speed = 50  # TODO: SHOULD NOT BE HARD CODED!
         if direction == 'up':
-            self.players_data[player]['paddle']['y'] = max(0, self.players_data[player]['paddle']['y'] - 50)
+            paddle['y'] = max(0, paddle['y'] - speed)
         elif direction == 'down':
-            self.players_data[player]['paddle']['y'] = min(HEIGHT - self.players_data[player]['paddle']['height'],
-                                                           self.players_data[player]['paddle']['y'] + 50)
-        # logging.info(f"Player {player} new position y-pos: {self.players_data[player]['paddle']['y']}")
-
+            paddle['y'] = min(HEIGHT - paddle['height'], paddle['y'] + speed)
