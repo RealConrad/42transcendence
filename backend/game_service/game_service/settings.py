@@ -140,3 +140,35 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_SERVICE_URL = 'http://auth-service:8000'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'INFO',  # Suppress DEBUG messages
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+        'django.server': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'channels': {
+            'handlers': ['console'],
+            'level': 'INFO',  # Suppress DEBUG messages from Django Channels
+            'propagate': False,
+        },
+        'channels_redis': {
+            'handlers': ['console'],
+            'level': 'INFO',  # Suppress DEBUG messages from channels_redis
+            'propagate': False,
+        },
+    },
+}
