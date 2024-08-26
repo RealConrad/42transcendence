@@ -64,10 +64,10 @@
 
             matchmakingSocket.onmessage = (e) => {
                 const data = JSON.parse(e.data);
-                {#console.log('Message received: ', data);#}
+                //console.log('Message received: ', data);
 
                 if (data.type === 'match_found') {
-                    {#console.log("Match found: ", data.message);#}
+                     // console.log("Match found: ", data.message);
                     startGame(data.message.message.id);
                 }
             };
@@ -99,9 +99,12 @@
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
 
-                if (data.type === 'game') {
+                if (data.type === 'game_state') {
                     updateGame(data.message);
                     updateScores(data.message.scores);
+                }
+                else if (data.type == 'game_over') {
+                    console.log(data.message.winner + " has won!");
                 }
             };
 
@@ -112,7 +115,6 @@
 
             const updateGame = (gameState) => {
                 if (ctx) {
-                    {#console.log("GAME STATE: ", gameState);#}
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
                     // Draw background
