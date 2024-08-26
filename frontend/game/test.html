@@ -19,13 +19,16 @@
         }
 
         h1 {
-            bottom: 100px;
+            bottom: 50%;
             position: absolute;
             color: #fff;
         }
 
         #player1Score {
-            left: 35%;
+            left: 30%;
+        }
+        #player2Score {
+            right: 30%;
         }
 
     </style>
@@ -61,10 +64,10 @@
 
             matchmakingSocket.onmessage = (e) => {
                 const data = JSON.parse(e.data);
-                console.log('Message received: ', data);
+                {#console.log('Message received: ', data);#}
 
                 if (data.type === 'match_found') {
-                    console.log("Match found: ", data.message);
+                    {#console.log("Match found: ", data.message);#}
                     startGame(data.message.message.id);
                 }
             };
@@ -98,12 +101,18 @@
 
                 if (data.type === 'game') {
                     updateGame(data.message);
+                    updateScores(data.message.scores);
                 }
             };
 
+            const updateScores = (scores) => {
+                document.getElementById('player1Score').innerHTML = scores.player1;
+                document.getElementById('player2Score').innerHTML = scores.player2;
+            }
+
             const updateGame = (gameState) => {
                 if (ctx) {
-                    console.log("GAME STATE: ", gameState);
+                    {#console.log("GAME STATE: ", gameState);#}
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
                     // Draw background

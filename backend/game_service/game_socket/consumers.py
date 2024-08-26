@@ -31,9 +31,6 @@ class GameConsumer(AsyncWebsocketConsumer):
         # Cancel the game loop
         self.game_task.cancel()
 
-        # Persist the current game state to Redis
-        # await self.save_game_state()
-
         # Remove this channel from the group
         await self.channel_layer.group_discard(self.lobby_group_name, self.channel_name)
 
@@ -50,7 +47,7 @@ class GameConsumer(AsyncWebsocketConsumer):
             self.game.update()
             await self.save_game_state()
             await self.send_game_state()
-            await asyncio.sleep(1 / 30)
+            await asyncio.sleep(1 / 30)  # 30 FPS
 
     async def save_game_state(self):
         # Update the game state in the database
