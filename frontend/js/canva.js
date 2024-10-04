@@ -5,20 +5,24 @@ const ctx = canvas.getContext("2d");
 canvas.width = document.querySelector('main-menu').clientWidth;
 canvas.height = document.querySelector('main-menu').clientHeight;
 
+paddleWidth = canvas.width / 128;
+svgCursor = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="${paddleWidth}" height="${paddleWidth}" fill="%23ffffff"><rect width="${paddleWidth}" height="${paddleWidth}" /></svg>'), auto`;
+document.body.style.cursor = svgCursor;
+
 console.log(canvas.width, canvas.height);
 
 
 
 function drawMiddleLine() {
-    ctx.strokeStyle = "white";
-    ctx.lineWidth = 5;
-    ctx.setLineDash([10, 10]); // 10px dash, 10px gap
+	ctx.strokeStyle = "white";
+    ctx.lineWidth = paddleWidth * 1.0;
+    ctx.setLineDash([paddleWidth * 1.0, paddleWidth * 1.0]);
+
     ctx.beginPath();
-    for (let y = 0; y < canvas.height; y += 20) {
-        ctx.moveTo(canvas.width / 2 - 2, y);
-        ctx.lineTo(canvas.width / 2 + 2, y);
-    }
+    ctx.moveTo(canvas.width / 2, 0); // Start at the top middle of the canvas
+    ctx.lineTo(canvas.width / 2, canvas.height); // Draw a vertical line to the bottom of the canvas
     ctx.stroke();
+
     ctx.setLineDash([]); // Reset line dash to solid
 }
 
@@ -234,19 +238,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // howTo
 const atkPowers = [
-	{ symbol: "%", title: "The Paddle Games", desc: "Teleport the ball to the other side mirroring its origin position and direction." },
+	{ symbol: "%", title: "The Paddle Games", desc: "Teleport the ball to the other side<br>mirroring its origin position and direction." },
 	{ symbol: ">", title: "Run Ball, Run!", desc: "Increase the ball speed by x3 until a point gets scored." },
-	{ symbol: "&", title: "No U!", desc: "Reverses the direction of the ball and increase its speed x2 until a point gets scored." },
+	{ symbol: "&", title: "No U!", desc: "Reverses the direction of the ball and<br>increase its speed x2 until a point gets scored." },
 	{ symbol: "-", title: "Honey, I Shrunk the Paddle", desc: "Halves the size of opponent's paddle until he loses a point." },
-	{ symbol: "¿", title: "Down is the new Up", desc: "Reverses up and down keys of an opponent until a point is scored or 5 seconds." }
+	{ symbol: "¿", title: "Down is the new Up", desc: "Reverses up and down keys of an opponent until<br>a point is scored or 5 seconds." }
 ];
 
 const defPowers = [
-	{ symbol: "|", title: "You Shall Not Pass!", desc: "Your paddle becomes the size of the whole game area for 2 seconds or until it deflects the ball with 2x speed for remaining time." },
-	{ symbol: "@", title: "Get Over Here!", desc: "You pull the ball to your paddle. It will stick to it for 1s and then shoot straight with 4x speed for 1 second." },
+	{ symbol: "|", title: "You Shall Not Pass!", desc: "Your paddle becomes the max size for 2 seconds or<br>until it deflects the ball with 2x speed for remaining time." },
+	{ symbol: "@", title: "Get Over Here!", desc: "Pull the ball to your paddle, stick it for 1s and<br>shoot straight with 4x speed for 1 second." },
 	{ symbol: "+", title: "Paddle STRONG!", desc: "Your paddle doubles in size until point scored." },
-	{ symbol: "*", title: "Slow-Mo", desc: "The ball slows down for 2 seconds or until hits a paddle and then increases speed x2 for a duration of slow-mo part." },
-	{ symbol: "=", title: "For Justice!", desc: "Teleports paddles of both players to a position of a ball and freezes them in place for 1 second." }
+	{ symbol: "*", title: "Slow-Mo", desc: "The ball slows down for 2 seconds or until hits a paddle and<br>increases speed x2 for a duration of slow-mo part." },
+	{ symbol: "=", title: "For Justice!", desc: "Teleports paddles of both players to a ball position and<br>freezes them in place for 1 second." }
 ];
 
 function createPowerElement(power, container) {
@@ -274,7 +278,7 @@ function createPowerElement(power, container) {
 
 	powerDiv.addEventListener('mouseover', () => {
 		document.getElementById('power-title').textContent = power.title;
-		document.getElementById('description').textContent = power.desc;
+		document.getElementById('description').innerHTML = power.desc;
 	});
 
 	powerDiv.addEventListener('mouseleave', () => {
@@ -302,5 +306,8 @@ function initializePowerElements() {
 window.addEventListener('resize', function() {
 	canvas.width = document.querySelector('main-menu').clientWidth;
 	canvas.height = document.querySelector('main-menu').clientHeight;
-    drawMiddleLine();  // Your function to redraw the line
+	paddleWidth = canvas.width / 128;
+	svgCursor = `url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="${paddleWidth}" height="${paddleWidth}" fill="%23ffffff"><rect width="${paddleWidth}" height="${paddleWidth}" /></svg>'), auto`;
+    document.body.style.cursor = svgCursor;
+	drawMiddleLine();
 });
