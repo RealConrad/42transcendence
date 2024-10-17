@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 import os
+import hvac
 from datetime import timedelta
 from pathlib import Path
 
@@ -44,6 +45,7 @@ INSTALLED_APPS = [
     # Custom Defined
     'authentication',
     'oauth'
+	'hvac'
 ]
 
 MIDDLEWARE = [
@@ -155,3 +157,16 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Vault Configuration
+
+VAULT_ADDR = os.getenv('VAULT_ADDR', "http://127.0.0.1:8200")
+with open('/vault/django/auth_service/role_id.txt', 'r') as f:
+	ROLE_ID = f.read().strip()
+with open('/vault/django/auth_service/secret_id.txt', 'r') as f:
+	SECRET_ID = f.read().strip()
+
+client = hvac.Client(url=VAULT_ADDR)
+client.auth.approle.login(role_id=ROLE_ID, secret_id=SECRET_ID)
+secret = client.secrets.kv.v2.read_secret_version(path='secret/auth_service')
+

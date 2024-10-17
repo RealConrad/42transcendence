@@ -23,6 +23,7 @@ clean: down
 	docker network prune -f
 	docker image prune -f
 	$(NEEDS_SUDO) rm -rf ./vault/data/*
+	$(NEEDS_SUDO) rm -f ./vault/vault_config/init-keys.txt ./vault/vault_config/log.log
 
 fclean: clean
 	docker system prune -a -f

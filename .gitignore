@@ -7,3 +7,5 @@ db.sqlite3
 .env.game
 *.key
 vault.secrets
+vault/*/*.txt
+vault/*/*.log

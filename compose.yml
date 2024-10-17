@@ -14,6 +14,8 @@ services:
       - "5432:5432"
     volumes:
       - auth_postgres_data:/var/lib/postgresql/data
+    depends_on:
+      - vault
     networks:
       - transcendence
 
@@ -26,7 +28,13 @@ services:
     env_file:
       - .env.auth
     depends_on:
-      - auth_db
+      vault:
+        condition: service_healthy
+        restart: true
+      auth_db:
+        condition: service_started
+    volumes:
+      - ./vault/django/auth_service:/vault/django/auth_service
     networks:
       - transcendence
 
@@ -50,6 +58,8 @@ services:
 #      - "8001:8001"
 #    env_file:
 #      - .env.game
+#    volumes:
+#      - ./vault/django/game_service:/vault/django/game_service
 #    depends_on:
 #      - game_db
 #    networks:
@@ -63,7 +73,7 @@ services:
       - "80:80"
     env_file:
       - .env
-    volumes:
+    volumes: 
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/ssl:/etc/nginx/ssl/:ro
       - ./frontend:/var/www/transcendence:ro
@@ -75,11 +85,21 @@ services:
     container_name: vault
     ports:
       - "8200:8200"
+      - "8201:8201"
     cap_add:
       - IPC_LOCK
+    healthcheck:
+      test: ["CMD-SHELL", "curl http://localhost:8200/v1/sys/health | grep -E '\"sealed\":false,\"initialized\":true' || exit 1"]
+      interval: 3s
+      timeout: 10s
+      retries: 5
+      start_period: 5s
     volumes:
-      - ./vault/vault_config:/vault/config
+      - ./vault/vault_config:/vault/vault_config
       - ./vault/data:/vault/file
+      - ./vault/keys:/vault/keys
+      - ./vault/django/auth_service:/vault/django/auth_service
+      # - ./vault/django/game_service:/vault/django/game_service
     networks:
       - transcendence
 
