@@ -5,30 +5,30 @@ networks:
 
 
 services:
-#  auth_db:
-#    image: postgres:13
-#    container_name: auth_db
-#    env_file:
-#      - .env.auth
-#    ports:
-#      - "5432:5432"
-#    volumes:
-#      - auth_postgres_data:/var/lib/postgresql/data
-#    networks:
-#      - transcendence
-#
-#  auth-service:
-#    build: ./backend/auth_service
-#    container_name: auth-service
-#    image: auth-service
-#    ports:
-#      - "8000:8000"
-#    env_file:
-#      - .env.auth
-#    depends_on:
-#      - auth_db
-#    networks:
-#      - transcendence
+  auth_db:
+    image: postgres:13
+    container_name: auth_db
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"
+    volumes:
+      - auth_postgres_data:/var/lib/postgresql/data
+    networks:
+      - transcendence
+
+  auth-service:
+    build: ./backend/auth_service
+    container_name: auth-service
+    image: auth-service
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env.auth
+    depends_on:
+      - auth_db
+    networks:
+      - transcendence
 
   game_db:
     image: postgres:13

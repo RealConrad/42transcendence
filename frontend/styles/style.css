@@ -6,6 +6,8 @@
   --top-bottom-height: 10vh;
   --game-height: calc(100vh - var(--top-bottom-height)*2);
   --game-width: calc(var(--game-height) * 16 / 9);
+  --paddle-width: calc(var(--game-width) / 128);
+  --paddle-height: calc(var(--game-height) / 10);
   --font-size: 3vh; 
   --background-color: black;
   --highlight-color: rgb(255, 255, 255);
@@ -14,7 +16,7 @@
 }
 
 html, body {
-  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewport="0 0 10 10" fill="%23ffffff"><rect width="10" height="10" /></svg>'), auto;
+  /* cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewport="0 0 10 10" fill="%23ffffff"><rect width="10" height="10" /></svg>'), auto; */
   height: 100%;
   margin: 0;
   padding: 0;
@@ -24,6 +26,7 @@ html, body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  overflow: hidden;
 }
 
 header {
@@ -62,7 +65,6 @@ main-menu {
 }
 
 left-menu, right-menu {
-
   height: var(--game-height);
   position: absolute;
   top: 0;
@@ -76,12 +78,9 @@ left-menu {
 }
 
 right-menu {
-  width: 50%; /* Make it a percentage of the menu area */
+  width: 50%;
   right: 0;
   text-align: right;
-  /* align-items: end; */
-  /* display: grid; */
-  /* grid-template-rows: repeat(9, 1fr); */
   padding-right: 1rem;
 }
 
@@ -89,25 +88,23 @@ right-menu {
   all: unset;
   display: block;
   width: 100%;
-  font-size: var(--font-size); /* Adjust font size dynamically based on viewport width */
-  text-align: left; /* Align text to the left for left-menu */
-  background-color: transparent; /* Ensure the background is transparent */
-  /* cursor: pointer; Add cursor pointer for better UX */
+  font-size: var(--font-size);
+  text-align: left;
+  background-color: transparent;
 }
 
 .menu-option .button-description {
   display: block;
-  font-size: calc(var(--font-size) * 0.4);  /* Smaller font size */
-  color: var(--lowlight-color);  /* Adjust color based on your design, here it's 50% opacity black */
-  font-family: Inter;   /* Different font, customize as needed */
+  font-size: calc(var(--font-size) * 0.4);
+  color: var(--lowlight-color);
+  font-family: Inter;
 }
 
 .menu-option {
   display: block;
   text-decoration: none;
-  font-size: var(--font-size); /* Adjust font size dynamically based on viewport width */
+  font-size: var(--font-size);
   color: var(--color);
-  border-radius: 5px;
   margin: 0.5rem 0;
 }
 
@@ -118,19 +115,18 @@ right-menu {
   text-align: right;
   display: grid;
   grid-template-rows: repeat(9, 1fr);
-  /* padding-right: 2rem;  */
 }
 
 right-menu .menu-option button {
-  text-align: right; /* Align text to the right for right-menu */
+  text-align: right;
 }
 
 @keyframes flickerGlow {
   0%, 100% {
-    text-shadow: 0 0 8px rgba(255, 255, 255, 0.5);
+    text-shadow: 0 0 calc(var(--paddle-width) * 0.8) rgba(255, 255, 255, 0.5);
   }
   50% {
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.7);
+    text-shadow: 0 0 calc(var(--paddle-width) * 1.0) rgba(255, 255, 255, 0.7);
   }
 }
 
@@ -142,32 +138,32 @@ right-menu .menu-option button {
 
 .menu-option button.glowing-effect {
   color: #fff; /* Sets text color to white */
-  text-shadow: 0 0 8px rgba(255, 255, 255, 0.5); /* Initial state of glow */
+  text-shadow: 0 0 calc(var(--paddle-width) * 0.8) rgba(255, 255, 255, 0.5); /* Initial state of glow */
   animation: flickerGlow 1s infinite; /* Apply the flicker animation */
 }
 
 .paddle {
   position: absolute;
-  width: 10px;
+  width: var(--paddle-width);
   background-color: white;
 }
 
 
 /* Shaking effect */
 @keyframes shake {
-  0%, 100% { transform: translate(-4px, -4px); }
-  10%, 50%, 90% { transform: translate(-8px, -4px); }
-  20%, 60% { transform: translate(0px, -4px); }
-  30%, 70%, 90% { transform: translate(-4px, -8px); }
-  20%, 40%, 80% { transform: translate(-4px, 0px); }
+  0%, 100% { transform: translate(calc(var(--paddle-width) * -0.4), calc(var(--paddle-width) * -0.4)); }
+  10%, 50%, 90% { transform: translate(calc(var(--paddle-width) * -0.8), calc(var(--paddle-width) * -0.4)); }
+  20%, 60% { transform: translate(0px, calc(var(--paddle-width) * -0.4)); }
+  30%, 70%, 90% { transform: translate(calc(var(--paddle-width) * -0.4), calc(var(--paddle-width) * -0.8)); }
+  20%, 40%, 80% { transform: translate(calc(var(--paddle-width) * -0.4), 0px); }
 }
 
 @keyframes after-shake {
-  90%, 10% { transform: translate(-4px, -4px); }
-  0%, 40%, 100% { transform: translate(-8px, -4px); }
-  10%, 50% { transform: translate(0px, -4px); }
-  20%, 60%, 80% { transform: translate(-4px, -8px); }
-  10%, 30%, 70% { transform: translate(-4px, 0px); }
+  90%, 10% { transform: translate(calc(var(--paddle-width) * -0.4), calc(var(--paddle-width) * -0.4)); }
+  0%, 40%, 100% { transform: translate(calc(var(--paddle-width) * -0.8), calc(var(--paddle-width) * -0.4)); }
+  10%, 50% { transform: translate(0px, calc(var(--paddle-width) * -0.4)); }
+  20%, 60%, 80% { transform: translate(calc(var(--paddle-width) * -0.4), calc(var(--paddle-width) * -0.8)); }
+  10%, 30%, 70% { transform: translate(calc(var(--paddle-width) * -0.4), 0px); }
 }
 
 .after-image-shake {
@@ -179,15 +175,15 @@ right-menu .menu-option button {
 
 .cursor-after-image {
   position: absolute;
-  width: 12px; 
-  height: 12px; 
+  width: calc(var(--paddle-width) * 1.2); 
+  height: calc(var(--paddle-width) * 1.2); 
   background-color: rgba(255, 255, 255, 0.2);
   pointer-events: none;
 }
 
 .cursor-after-image.enlarged {
-  width: 18px;
-  height: 18px;
+  width: calc(var(--paddle-width) * 1.8);
+  height: calc(var(--paddle-width) * 1.8);
 }
 
 .cursor-after-image.yellow {
@@ -252,23 +248,22 @@ right-menu .menu-option button {
 }
 
 #power-title {
-  margin: 5px 0;
   color: #ffffff;
-  font-size: calc(var(--font-size) * 0.8);;
+  font-size: calc(var(--font-size) * 0.8);
 }
 
 #description {
-  margin: 20px;
   color: #ffffff;
   font-size: calc(var(--font-size) * 0.6);
   font-family: Inter;
 }
 
 .atk-def-container {
+  font-size: calc(var(--font-size) * 0.8);
   display: flex;
   justify-content: center;
-  padding-left: 35%;
-  padding-right: 35%;
+  padding-left: 30%;
+  padding-right: 30%;
   padding-bottom: 5%;
   grid-row: 2; /* Place in the second row */
   grid-column: 1;
@@ -284,11 +279,10 @@ right-menu .menu-option button {
 }
 
 .controls {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
   grid-row: 3; /* Place in the third row */
   grid-column: 1;
+  display: flex;
+  justify-content: center;
 }
 
 
@@ -296,23 +290,23 @@ right-menu .menu-option button {
 /* power */
 
 .power {
-  width: 30px;
+  width: calc(var(--paddle-width) * 3.0);
   z-index: 10;
-  height: 30px;
+  height: calc(var(--paddle-width) * 3.0);
   background-color: rgba(255, 255, 255, 0.4);
   color: black;
   display: flex;
   justify-content: center;
   align-items: center;
   position: relative;
-  font-size: 14px; /* Adjust size as needed for a single character */
+  font-size: calc(var(--paddle-width) * 1.4); /* Adjust size as needed for a single character */
   
 }
 
 .after-image, .after-shake, .after-after-shake {
   z-index: 5;
-  width: 38px;
-  height: 38px;
+  width: calc(var(--paddle-width) * 3.8);
+  height: calc(var(--paddle-width) * 3.8);
   position: absolute;
   background-color: rgba(255, 255, 255, 0.2);
   animation: shake 1.5s infinite;
@@ -320,12 +314,12 @@ right-menu .menu-option button {
 }
 
 .after-shake {
-  height: 40px;
+  height: calc(var(--paddle-width) * 4.0);
   animation-delay: calc(var(--animation-delay-delay) + 0.5s);
 }
 
 .after-after-shake {
-  width: 40px;
+  width: calc(var(--paddle-width) * 4.0);
   animation-delay: calc(var(--animation-delay-delay) + 1.0s);
 }
 
@@ -336,7 +330,7 @@ right-menu .menu-option button {
   justify-content: center;
   align-items: center;
   /* padding-top: 3px; */
-  font-size: 18px;
+  font-size: calc(var(--paddle-width) * 1.8);
   font-weight: bold;
   color: black;
 }
