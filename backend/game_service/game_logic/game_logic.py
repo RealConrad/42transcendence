@@ -27,7 +27,7 @@ class PongGame:
         logging.info("Resetting game state...")
         self.ball_data = {
             'position': {'x': WIDTH / 2, 'y': HEIGHT / 2},
-            'velocity': {'x': 5 * (-1 if random.choice([True, False]) else 1), 'y': 5},
+            'velocity': {'x': 10 * (-1 if random.choice([True, False]) else 1), 'y': 10},
             'radius': 10
         }
         self.match_time = 0
