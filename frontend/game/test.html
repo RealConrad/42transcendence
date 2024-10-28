@@ -17,14 +17,31 @@
         canvas {
             border: 1px solid white;
         }
+
+        h1 {
+            bottom: 50%;
+            position: absolute;
+            color: #fff;
+        }
+
+        #player1Score {
+            left: 30%;
+        }
+        #player2Score {
+            right: 30%;
+        }
+
     </style>
 </head>
 <body>
     <h1>Pong Game</h1>
     <p>Open console to see more</p>
+    <h1 id="player1Score">0</h1>
+    <h1 id ="player2Score">0</h1>
     <button id="startMatchmakingBtn">Start Matchmaking</button>
     <canvas id="pongCanvas" width="1280" height="720" style="display:none;"></canvas>
     <script>
+        // Temporary to get 2 unique users
         var y = Math.random();
         if (y < 0.5)
           y = 1;
@@ -47,10 +64,10 @@
 
             matchmakingSocket.onmessage = (e) => {
                 const data = JSON.parse(e.data);
-                console.log('Message received: ', data);
+                //console.log('Message received: ', data);
 
                 if (data.type === 'match_found') {
-                    console.log("Match found: ", data.message);
+                     // console.log("Match found: ", data.message);
                     startGame(data.message.message.id);
                 }
             };
@@ -81,12 +98,20 @@
 
             ws.onmessage = (event) => {
                 const data = JSON.parse(event.data);
-                console.log("Got new message: ", data);
 
-                if (data.type === 'game') {
+                if (data.type === 'game_state') {
                     updateGame(data.message);
+                    updateScores(data.message.scores);
+                }
+                else if (data.type == 'game_over') {
+                    console.log(data.message.winner + " has won!");
                 }
             };
+
+            const updateScores = (scores) => {
+                document.getElementById('player1Score').innerHTML = scores.player1;
+                document.getElementById('player2Score').innerHTML = scores.player2;
+            }
 
             const updateGame = (gameState) => {
                 if (ctx) {
@@ -98,14 +123,19 @@
 
                     // Draw paddles
                     ctx.fillStyle = "red";
-                    console.log("Player 1 position: (X: ", gameState.paddle_positions.player1.x, " Y: ", gameState.paddle_positions.player1.y);
-                    console.log("Player 2 position: (X: ", gameState.paddle_positions.player2.x, " Y: ", gameState.paddle_positions.player2.y);
-                    ctx.fillRect(gameState.paddle_positions.player1.x, gameState.paddle_positions.player1.y, 10, 75);
-                    ctx.fillRect(gameState.paddle_positions.player2.x, gameState.paddle_positions.player2.y, 10, 75);
+                    //console.log(gameState.paddle_data);
+
+                    // Player 1
+                    ctx.fillRect(gameState.players_data.player1.paddle.x, gameState.players_data.player1.paddle.y,
+                        gameState.players_data.player1.paddle.width, gameState.players_data.player1.paddle.height);
+
+                    // Player 2
+                    ctx.fillRect(gameState.players_data.player2.paddle.x, gameState.players_data.player2.paddle.y,
+                        gameState.players_data.player2.paddle.width, gameState.players_data.player2.paddle.height);
 
                     // Draw ball
                     ctx.beginPath();
-                    ctx.arc(gameState.ball_position.x, gameState.ball_position.y, 10, 0, Math.PI * 2);
+                    ctx.arc(gameState.ball_data.position.x, gameState.ball_data.position.y, 10, 0, Math.PI * 2);
                     ctx.fillStyle = "red";
                     ctx.fill();
                     ctx.closePath();
@@ -119,13 +149,13 @@
                 if (event.code === "KeyW") {
                     action = {
                         action: 'move_paddle',
-                        player: player, // Adjust accordingly
+                        player: player,
                         direction: 'up'
                     };
                 } else if (event.code === "KeyS") {
                     action = {
                         action: 'move_paddle',
-                        player: player, // Adjust accordingly
+                        player: player,
                         direction: 'down'
                     };
                 }
