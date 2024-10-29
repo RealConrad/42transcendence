@@ -1,6 +1,8 @@
 import json
 import asyncio
 import logging
+from contextlib import nullcontext
+
 from channels.generic.websocket import AsyncWebsocketConsumer
 from asgiref.sync import sync_to_async
 from common.models import GameLobby
@@ -10,6 +12,13 @@ logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %
 
 
 class GameConsumer(AsyncWebsocketConsumer):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.lobby_id = 0
+        self.lobby_group_name = nullcontext
+        self.game_lobby = nullcontext
+        self.game = nullcontext
+
     async def connect(self):
         self.lobby_id = self.scope['url_route']['kwargs']['lobby_id']
         if not self.lobby_id:
@@ -37,11 +46,16 @@ class GameConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data):
         data = json.loads(text_data)
         action = data.get('action')
+        player = data.get('player')
         if action == 'move_paddle':
-            player = data.get('player')
             direction = data.get('direction')
             async with GameManager.get_lock(self.lobby_id):
-                self.game.move_paddle(player, direction)
+                game = GameManager.get_game(self.lobby_id)
+                game.move_paddle(player, direction)
+        elif action == 'stop_paddle':
+            async with GameManager.get_lock(self.lobby_id):
+                game = GameManager.get_game(self.lobby_id)
+                game.stop_paddle(player)
 
     async def game_state(self, event):
         message = event['message']

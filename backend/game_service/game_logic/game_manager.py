@@ -34,10 +34,15 @@ class GameManager:
 
     @classmethod
     async def game_loop(cls, lobby_id, game, channel_layer, group_name):
+        last_update_time = asyncio.get_event_loop().time()
         try:
             while True:
+                # Calculate delta time
+                current_time = asyncio.get_event_loop().time()
+                delta_time = current_time - last_update_time
+                last_update_time = current_time
                 async with cls.get_lock(lobby_id):
-                    game.update()
+                    game.update(delta_time)
                     state = game.get_state()
 
                 # Broadcast game state to all players
@@ -51,7 +56,7 @@ class GameManager:
                 if game.is_game_over():
                     await cls.end_game(lobby_id, channel_layer, group_name, game.get_winner())
                     break
-                await asyncio.sleep(1 / 30)  # 30 FPS
+                await asyncio.sleep(1 / 60)  # 60 FPS
         except asyncio.CancelledError:
             logging.info(f"Game loop for lobby {lobby_id} was cancelled")
             cls._game_tasks[lobby_id] = None
