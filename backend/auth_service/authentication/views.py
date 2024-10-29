@@ -47,6 +47,7 @@ class RegisterView(generics.CreateAPIView):
         refresh = CustomTokenObtainPairSerializer.get_token(user)  # Generates JWT tokens
         return Response({
             "user": {
+                "user_id": user.id,
                 "username": user.username,
                 "email": user.email
             },
@@ -69,6 +70,7 @@ class LoginView(generics.GenericAPIView):
             'refresh': str(refresh),
             'access': str(refresh.access_token),
             'user': {
+                'user_id': user.id,
                 'username': user.username,
                 'email': user.email
             }
