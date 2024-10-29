@@ -1,0 +1,97 @@
+#login-button{
+    position: absolute;
+    top: 20px;
+    right: 30px;
+    background-color: #FFCB13;
+}
+login-modal{
+    display: none;
+    background-color: #FFCB13;
+    position: fixed;
+    z-index: 4;
+    left: 10px;
+    right: 10px;
+    width: 70%;
+    height: 80%;
+    min-height: 800px;
+    margin: 0 auto;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 20px;
+	border-radius: 12px;
+}
+
+.modal-content{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    /* border: 2px solid red; */
+    height: 100%;
+    width: 100%;
+}
+.modal-content form{
+    display:block;
+    width: 50%;
+}
+.modal-content form input{
+    line-height: 4rem;
+	font-size: 2rem;
+}
+.modal-content form .form-text{
+    font-size: 1rem;
+    /* background-color: red; */
+    text-align: center;
+
+}
+.modal-content form .form-text p{
+    /* border: 2px solid green; */
+    margin:2px;
+}
+div .button-align{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+button[type=submit]
+{
+	background-color: black;
+}
+
+#close-button{
+	font-family: 'Press Start 2P';
+    position: absolute;
+    top: 20px;
+    right: 20px;
+	color: white;
+	border: 1px solid white;
+	border-radius: 5px;
+	font-size: 1.5rem;
+	display: flex;
+	justify-content: center;
+	align-self: center;
+	padding: 0;
+}
+#close-button div{
+	/* border: 2px solid red; */
+	padding: 0px 7px;
+	padding-left: 9px;
+}
+#signin-button, #register-button{
+    font-size: 2rem;
+}
+#fortyAuth-button{
+    font-size: 1.5rem;
+    margin-top: 7%;
+}
+
+#GoToRegister-button, #GoToSignIn-button{
+    background: none;
+    color: blue;
+    border: none;
+    padding: 0;
+    font: inherit;
+    text-decoration: underline;
+}
+/* https://www.w3schools.com/howto/howto_css_modals.asp */
