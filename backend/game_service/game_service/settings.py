@@ -41,17 +41,29 @@ INSTALLED_APPS = [
     'common',
     'channels',
     'game_socket',
-    'lobby_manager_socket',
+    'matchmaking',
 ]
 
 # Point to the ASGI applciation to handle asynchronous communication
 ASGI_APPLICATION = 'game_service.asgi.application'
 
+# REDIS_HOST = (os.getenv('REDIS_HOST'), 'redis')
+# REDIS_PORT = (os.getenv('REDIS_PORT'), '6379')
+#
+# CHANNEL_LAYERS = {
+#     'default': {
+#         'BACKEND': 'channels_redis.core.RedisChannelLayer',
+#         'CONFIG': {
+#             'hosts': [f"redis://{REDIS_HOST}:{REDIS_PORT}"],
+#         },
+#     },
+# }
+
 CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': [(os.getenv('REDIS_HOST'), os.getenv('REDIS_PORT'))],
+            'hosts': ["redis://127.0.0.1:6379"],
         },
     },
 }
@@ -146,7 +158,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'handlers': {
         'console': {
-            'level': 'INFO',  # Suppress DEBUG messages
+            'level': 'DEBUG',  # Show all levels including DEBUG
             'class': 'logging.StreamHandler',
         },
     },
@@ -162,12 +174,18 @@ LOGGING = {
         },
         'channels': {
             'handlers': ['console'],
-            'level': 'INFO',  # Suppress DEBUG messages from Django Channels
+            'level': 'INFO',
             'propagate': False,
         },
         'channels_redis': {
             'handlers': ['console'],
-            'level': 'INFO',  # Suppress DEBUG messages from channels_redis
+            'level': 'INFO',
+            'propagate': False,
+        },
+        # Add a logger for your application modules
+        'common.matchmaking_task': {
+            'handlers': ['console'],
+            'level': 'DEBUG',  # or INFO
             'propagate': False,
         },
     },

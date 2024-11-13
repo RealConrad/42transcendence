@@ -92,6 +92,12 @@ const updateGame = (deltaTime) => {
 }
 
 const startGame = (lobbyID) => {
+
+    const updateScores = (scores) => {
+        document.getElementById('player1Score').innerHTML = scores.player1;
+        document.getElementById('player2Score').innerHTML = scores.player2;
+    }
+
     if (canvas) {
         canvas.style.display = 'block';
     }
@@ -110,10 +116,22 @@ const startGame = (lobbyID) => {
         console.error("Websocket error observed: ", event);
     };
 
-    // TODO: Add onmessage event
+    ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
 
-
-
+        if (data.type === 'game_state') {
+            gameState = data.message;
+            updateScores(gameState.scores);
+            interpolatedBallPosition.x = gameState.ball_data.position.x;
+            interpolatedBallPosition.y = gameState.ball_data.position.y;
+            ['player1', 'player2'].forEach(player => {
+                interpolatedPaddlePositions[player].y = gameState.players_data[player].paddle.y;
+            });
+        }
+        else if (data.type === 'game_over') {
+            console.log(data.message.winner + " has won!");
+        }
+    };
 
     const sendPaddleMove = () => {
         let direction;
@@ -159,25 +177,33 @@ const startGame = (lobbyID) => {
 
 const startMatchmaking = () => {
     console.log("Starting matchmaking...");
-    const matchMakingSocket = new WebSocket("ws://127.0.0.1:8002/ws/matchmaking/");
+    const matchmakingSocket = new WebSocket("ws://127.0.0.1:8002/ws/matchmaking/");
 
-    matchMakingSocket.onopen(() => {
+    matchmakingSocket.onopen = () => {
         console.log("Matchmaking socket connection established");
 
-        matchMakingSocket.send(JSON.stringify({
+        matchmakingSocket.send(JSON.stringify({
             action: 'join_queue',
-            username: 'player'
+            username: player
         }));
-    });
+    };
 
-    matchMakingSocket.onmessage = (e) => {
+    matchmakingSocket.onmessage = (e) => {
         const data = JSON.parse(e.data);
+        console.log("Message received: ", data);
         if (data.type === 'match_found') {
-            console.log("Match found: ", data.message);
-            startGame(data.message.message.id);
+            const gameId = data.message.game_id;
+
+            if (gameId) {
+                console.log("Match found with game ID:", gameId);
+                // startGame(gameId);
+            } else {
+                console.error("Match found but no game ID provided. Data:", data.message);
+            }
         }
-    }
-    matchMakingSocket.onclose = (e) => {
+    };
+
+    matchmakingSocket.onclose = (e) => {
         console.log('Matchmaking WebSocket connection closed');
     };
 }
