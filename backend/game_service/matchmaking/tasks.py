@@ -9,14 +9,16 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-async def matchmaking_task(channel_layer):
-    logger.info("Starting matchmaking task...")
-    r = redis.Redis(host='127.0.0.1', port=6379, db=0)
-    while True:
+matchmaking_lock = asyncio.Lock()  # Initialize a global lock
+
+async def attempt_matchmaking(channel_layer):
+    logger.info("Attempting matchmaking...")
+    async with matchmaking_lock:  # Acquire the lock
+        r = redis.Redis(host='127.0.0.1', port=6379, db=0)
         length = await r.llen("matchmaking_queue")
         logger.debug(f"Current matchmaking queue length: {length}")
         if length >= 2:
-            # Try to match up to half the queue (each match uses 2 players)
+            # Attempt to match up to half the queue (each match uses 2 players)
             for _ in range(length // 2):
                 player1_data_json, player2_data_json = await pop_two_players(r)
                 if player1_data_json and player2_data_json:
@@ -24,7 +26,7 @@ async def matchmaking_task(channel_layer):
                     player2_data = json.loads(player2_data_json)
                     game_id = str(uuid.uuid4())
 
-                    # Create a game if either player is registered
+                    # Create a game if needed
                     await create_game_if_needed(game_id, player1_data, player2_data)
 
                     # Notify players of the match
@@ -33,7 +35,7 @@ async def matchmaking_task(channel_layer):
                 else:
                     # If unable to pop two players, break out of the loop
                     break
-        await asyncio.sleep(1)
+
 
 async def pop_two_players(r):
     """

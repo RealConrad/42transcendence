@@ -6,9 +6,9 @@ from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib.auth.models import User
 from game_service.utils import verify_token_with_auth_service
+from .tasks import attempt_matchmaking  # Import the on-demand matchmaking logic
 
 logger = logging.getLogger(__name__)
-
 
 class MatchmakingConsumer(AsyncWebsocketConsumer):
     def __init__(self, **kwargs):
@@ -28,6 +28,7 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, code):
         if self.redis:
+            await self.remove_from_queue()  # Ensure player is removed from the queue if present
             await self.redis.close()
         # Remove from personal group
         await self.channel_layer.group_discard(f"user_{self.player_id}", self.channel_name)
@@ -65,12 +66,6 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
         # Add player to queue
         await self.enqueue_player()
 
-    async def handle_leave_queue(self):
-        # Remove player from queue if present
-        logger.debug(f"Player {self.player_id} requested to leave queue")
-        await self.redis.lrem('matchmaking_queue', 0, json.dumps(self.get_player_data()))
-        await self.send(json.dumps({'status': 'left_queue'}))
-
     async def enqueue_player(self):
         player_data = self.get_player_data()
         player_data_json = json.dumps(player_data)
@@ -78,6 +73,22 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
         await self.redis.rpush('matchmaking_queue', player_data_json)
         await self.send(json.dumps({'status': 'waiting_in_queue'}))
         logger.debug(f"Player {self.player_id} enqueued for matchmaking with data: {player_data}")
+
+        # Attempt matchmaking each time a new player joins
+        await attempt_matchmaking(self.channel_layer)
+
+    async def handle_leave_queue(self):
+        # Remove player from queue if present
+        await self.remove_from_queue()
+        await self.send(json.dumps({'status': 'left_queue'}))
+        logger.debug(f"Player {self.player_id} requested to leave queue")
+
+    async def remove_from_queue(self):
+        player_data = self.get_player_data()
+        player_data_json = json.dumps(player_data)
+        # Remove player from the queue
+        await self.redis.lrem('matchmaking_queue', 0, player_data_json)
+        logger.debug(f"Player {self.player_id} removed from matchmaking queue")
 
     def get_player_data(self):
         return {

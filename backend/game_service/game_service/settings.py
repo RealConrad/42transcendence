@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'common',
     'channels',
     'game_socket',
-    'matchmaking',
+    'matchmaking'
 ]
 
 # Point to the ASGI applciation to handle asynchronous communication
@@ -183,10 +183,10 @@ LOGGING = {
             'propagate': False,
         },
         # Add a logger for your application modules
-        'common.matchmaking_task': {
+        'matchmaking': {
             'handlers': ['console'],
             'level': 'DEBUG',  # or INFO
-            'propagate': False,
+            'propagate': True,
         },
     },
 }
