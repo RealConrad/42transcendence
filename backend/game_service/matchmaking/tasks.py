@@ -2,9 +2,6 @@ import asyncio
 import json
 import uuid
 import redis.asyncio as redis
-from asgiref.sync import sync_to_async
-from django.contrib.auth.models import User
-from common.models import GameLobby, Player
 import logging
 
 logger = logging.getLogger(__name__)
@@ -26,8 +23,7 @@ async def attempt_matchmaking(channel_layer):
                     player2_data = json.loads(player2_data_json)
                     game_id = str(uuid.uuid4())
 
-                    # Create a game if needed
-                    await create_game_if_needed(game_id, player1_data, player2_data)
+                    await r.set(f"game_state:{game_id}", json.dumps({}))
 
                     # Notify players of the match
                     logger.info(f"Matched players {player1_data['player_id']} and {player2_data['player_id']} in game {game_id}")
@@ -35,7 +31,6 @@ async def attempt_matchmaking(channel_layer):
                 else:
                     # If unable to pop two players, break out of the loop
                     break
-
 
 async def pop_two_players(r):
     """
@@ -47,33 +42,6 @@ async def pop_two_players(r):
     if player1_data and not player2_data:
         await r.lpush("matchmaking_queue", player1_data)
     return player1_data, player2_data
-
-async def create_game_if_needed(game_id, player1_data, player2_data):
-    """
-    Creates a game lobby in the database if either player is registered.
-    """
-    logger.debug(f"Creating game if needed for game_id: {game_id}")
-    player1_user = None
-    player2_user = None
-    if 'user_id' in player1_data and player1_data['user_id']:
-        player1_user = await sync_to_async(User.objects.get)(id=player1_data['user_id'])
-    if 'user_id' in player2_data and player2_data['user_id']:
-        player2_user = await sync_to_async(User.objects.get)(id=player2_data['user_id'])
-
-    if player1_user or player2_user:
-        # Retrieve Player model instances
-        player1 = await sync_to_async(Player.objects.get)(user=player1_user) if player1_user else None
-        player2 = await sync_to_async(Player.objects.get)(user=player2_user) if player2_user else None
-
-        # Create the game lobby
-        await sync_to_async(GameLobby.objects.create)(
-            game_id=game_id,
-            player1=player1,
-            player2=player2,
-            player1_username=player1_data['username'] if not player1_user else None,
-            player2_username=player2_data['username'] if not player2_user else None
-        )
-        logger.debug(f"Game lobby created for game_id: {game_id}")
 
 async def notify_players(channel_layer, game_id, player1_data, player2_data):
     """

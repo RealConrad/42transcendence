@@ -6,7 +6,7 @@ from asgiref.sync import sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
 from django.contrib.auth.models import User
 from game_service.utils import verify_token_with_auth_service
-from .tasks import attempt_matchmaking  # Import the on-demand matchmaking logic
+from .tasks import attempt_matchmaking
 
 logger = logging.getLogger(__name__)
 
@@ -14,7 +14,8 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.redis = None
-        self.player_id = str(uuid.uuid4())  # Unique identifier for this connection
+        # Unique identifier for this connection, temporary for redis to identify different players
+        self.player_id = str(uuid.uuid4())
         self.username = None
         self.user = None
 
@@ -23,16 +24,18 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
         # Create Redis connection
         self.redis = redis.Redis(host='127.0.0.1', port=6379, db=0)
         # Add the player's channel to their personal group
-        await self.channel_layer.group_add(f"user_{self.player_id}", self.channel_name)
-        logger.debug(f"Player connected: {self.player_id}")
+        group_name = f"user_{self.player_id}"
+        await self.channel_layer.group_add(group_name, self.channel_name)
+        logger.debug(f"Player connected and added to group {group_name}: {self.player_id}")
 
     async def disconnect(self, code):
         if self.redis:
             await self.remove_from_queue()  # Ensure player is removed from the queue if present
             await self.redis.close()
         # Remove from personal group
-        await self.channel_layer.group_discard(f"user_{self.player_id}", self.channel_name)
-        logger.debug(f"Player disconnected: {self.player_id} with code {code}")
+        group_name = f"user_{self.player_id}"
+        await self.channel_layer.group_discard(group_name, self.channel_name)
+        logger.debug(f"Player disconnected and removed from group {group_name}: {self.player_id} with code {code}")
 
     async def receive(self, text_data=None, bytes_data=None):
         data = json.loads(text_data)
@@ -51,9 +54,15 @@ class MatchmakingConsumer(AsyncWebsocketConsumer):
         if token:  # For registered users
             user_info = await sync_to_async(verify_token_with_auth_service)(token)
             if user_info:
-                self.user = await sync_to_async(User.objects.get)(id=user_info['user_id'])
-                self.username = self.user.username
-                logger.debug(f"Registered player joined queue: {self.username} (ID: {self.player_id})")
+                try:
+                    self.user = await sync_to_async(User.objects.get)(id=user_info['user_id'])
+                    self.username = self.user.username
+                    logger.debug(f"Registered player joined queue: {self.username} (ID: {self.player_id})")
+                except User.DoesNotExist:
+                    await self.send(json.dumps({'error': 'User not found'}))
+                    await self.close(code=400)
+                    logger.error("User not found for matchmaking")
+                    return
             else:
                 await self.send(json.dumps({'error': 'Invalid token'}))
                 await self.close(code=400)
