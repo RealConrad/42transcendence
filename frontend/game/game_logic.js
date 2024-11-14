@@ -5,6 +5,7 @@ if (y < 0.5)
 else
   y= 2;
 const player = "player" + y;
+let player_id;
 console.log("PLAYER: ", player);
 
 const canvas = document.getElementById('pongCanvas');
@@ -18,91 +19,49 @@ let interpolatedPaddlePositions = {
 }
 let keyPressed = {} // keeps track of which keys are pressed
 
+const updateGame = (gameState) => {
+    if (ctx) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-const gameLoop = (currentTime) => {
-    const deltaTime = (currentTime - lastUpdateTime) / 1000; // convert to seconds
-    lastUpdateTime = currentTime;
-    if (gameState) {
-        updateGame(deltaTime);
-    }
-    requestAnimationFrame(gameLoop);
-}
-requestAnimationFrame(gameLoop);
+        // Draw background
+        ctx.fillStyle = "#1b1b1b";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-const updateAndDrawPaddles = (deltaTime) => {
-    ['player1', 'player2'].forEach(player => {
-        const paddle = gameState.players_data[player].paddle;
-        const velocityY = gameState.players_data[player].y = paddle.y;
+        // Draw paddles
+        ctx.fillStyle = "red";
+        //console.log(gameState.paddle_data);
 
-        // Update interpolated paddle data
-        if (!interpolatedPaddlePositions[player].y) {
-            interpolatedPaddlePositions[player].y = paddle.y;
-        } else {
-            interpolatedPaddlePositions[player].y += velocityY * deltaTime;
-        }
-        // Clamp position between canvas boundaries
-        interpolatedPaddlePositions[player].y = Math.max(
-            0,
-            Math.min(canvas.height - paddle.hieght, interpolatedPaddlePositions[player].y)
-        );
-        ctx.fillStyle = "red"; // TODO: This is temporary, change this
-        ctx.fillRect(
-            paddle.x,
-            interpolatedPaddlePositions[player].y,
-            paddle.width,
-            paddle.height
-        );
-    });
-}
+        // Player 1
+        player1_paddle = gameState.state.player1.paddle
+        ctx.fillRect(player1_paddle.x, player1_paddle.y, player1_paddle.width, player1_paddle.height);
 
-const updateAndDrawBall = (deltaTime) => {
-    const ball = gameState.ball_data;
-    const velocityX = ball.velocity.x;
-    const velocityY = ball.velocity.y;
+        // player 2
+        player2_paddle = gameState.state.player2.paddle
+        ctx.fillRect(player2_paddle.x, player2_paddle.y, player2_paddle.width, player2_paddle.height);
 
-    // Interpolate ball position
-    if (!interpolatedBallPosition.x || !interpolatedBallPosition.y) {
-        interpolatedBallPosition.x = ball.position.x;
-        interpolatedBallPosition.y = ball.position.y;
+        // Draw ball
+        ctx.beginPath();
+        ctx.arc(gameState.state.ball.x, gameState.state.ball.y, 10, 0, Math.PI * 2);
+        ctx.fillStyle = "red";
+        ctx.fill();
+        ctx.closePath();
     } else {
-        interpolatedBallPosition.x = velocityX * deltaTime;
-        interpolatedBallPosition.y = velocityY * deltaTime;
+        console.error("Canvas not found or not initialized");
     }
+};
 
-    ctx.beginPath();
-    ctx.arc(interpolatedBallPosition.x, interpolatedBallPosition.y, ball.radius, 0, Math.PI * 2);
-    ctx.fillStyle = "red"
-    ctx.fill();
-    ctx.closePath();
-}
+const startGame = (game_id) => {
 
-const updateGame = (deltaTime) => {
-    if (!ctx) {
-        console.error("Canvas context not found!");
-        return;
-    }
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Draw background
-    ctx.fillStyle = "#1b1b1b";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    updateAndDrawPaddles(deltaTime);
-    updateAndDrawBall(deltaTime);
-}
-
-const startGame = (lobbyID) => {
-
-    const updateScores = (scores) => {
-        document.getElementById('player1Score').innerHTML = scores.player1;
-        document.getElementById('player2Score').innerHTML = scores.player2;
+    const updateScores = (gameState) => {
+        document.getElementById('player1Score').innerHTML = gameState.state.player1.score;
+        document.getElementById('player2Score').innerHTML = gameState.state.player2.score;
     }
 
     if (canvas) {
         canvas.style.display = 'block';
     }
 
-    const ws = new WebSocket(`ws://127.0.0.1:8002/ws/game/${lobbyID}/`);
+    const ws = new WebSocket(`ws://127.0.0.1:8002/ws/game/${game_id}/`);
 
     ws.onopen = (event) => {
         console.log("Websocket is now open!", event);
@@ -118,15 +77,12 @@ const startGame = (lobbyID) => {
 
     ws.onmessage = (event) => {
         const data = JSON.parse(event.data);
+        // console.log(data)
 
         if (data.type === 'game_state') {
-            gameState = data.message;
-            updateScores(gameState.scores);
-            interpolatedBallPosition.x = gameState.ball_data.position.x;
-            interpolatedBallPosition.y = gameState.ball_data.position.y;
-            ['player1', 'player2'].forEach(player => {
-                interpolatedPaddlePositions[player].y = gameState.players_data[player].paddle.y;
-            });
+            gameState = data;
+            updateScores(gameState);
+            updateGame(gameState)
         }
         else if (data.type === 'game_over') {
             console.log(data.message.winner + " has won!");
@@ -145,14 +101,16 @@ const startGame = (lobbyID) => {
         ws.send(JSON.stringify(({
             action: 'move_paddle',
             player: player,
-            direction: direction
+            player_id: player_id,
+            direction: direction,
         })));
     }
 
     const sendPaddleStop = () => {
         ws.send(JSON.stringify({
             action: 'stop_paddle',
-            player: player
+            player: player,
+            player_id: player_id
         }));
     }
 
@@ -193,9 +151,9 @@ const startMatchmaking = () => {
         console.log("Message received: ", data);
         if (data.type === 'match_found') {
             const gameId = data.message.game_id;
+            player_id = data.message.player_id;
             console.log("Match found with game ID:", gameId);
-            // proceed to start the game
-            // startGame(gameId)
+            startGame(gameId)
         } else if (data.status === 'waiting_in_queue') {
             console.log("Waiting in queue for an opponent");
         }
