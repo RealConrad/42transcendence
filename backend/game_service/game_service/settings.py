@@ -37,9 +37,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
 
     'common',
-    'channels',
     'matchmaking',
     'game_logic'
 ]
@@ -163,29 +163,33 @@ LOGGING = {
         },
     },
     'loggers': {
-        'django': {
-            'handlers': ['console'],
-            'level': 'INFO',
-        },
-        'django.server': {
-            'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'channels': {
-            'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        'channels_redis': {
-            'handlers': ['console'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-        # Add a logger for your application modules
+        # 'django': {
+        #     'handlers': ['console'],
+        #     'level': 'INFO',
+        # },
+        # 'django.server': {
+        #     'handlers': ['console'],
+        #     'level': 'INFO',
+        #     'propagate': False,
+        # },
+        # 'channels': {
+        #     'handlers': ['console'],
+        #     'level': 'INFO',
+        #     'propagate': False,
+        # },
+        # 'channels_redis': {
+        #     'handlers': ['console'],
+        #     'level': 'INFO',
+        #     'propagate': False,
+        # },
         'matchmaking': {
             'handlers': ['console'],
-            'level': 'DEBUG',  # or INFO
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'game_logic': {
+            'handlers': ['console'],
+            'level': 'INFO',
             'propagate': True,
         },
     },
