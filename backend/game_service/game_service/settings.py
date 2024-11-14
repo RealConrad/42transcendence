@@ -40,8 +40,8 @@ INSTALLED_APPS = [
 
     'common',
     'channels',
-    'game_socket',
-    'matchmaking'
+    'matchmaking',
+    'game_logic'
 ]
 
 # Point to the ASGI applciation to handle asynchronous communication
