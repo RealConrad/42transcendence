@@ -9,13 +9,18 @@ services:
     image: postgres:13
     container_name: auth_db
     env_file:
-      - .env
+      - .env.auth
     ports:
       - "5432:5432"
     volumes:
       - auth_postgres_data:/var/lib/postgresql/data
     networks:
       - transcendence
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d transcendence" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   auth-service:
     build: ./backend/auth_service
@@ -26,7 +31,8 @@ services:
     env_file:
       - .env.auth
     depends_on:
-      - auth_db
+      auth_db:
+        condition: service_healthy
     networks:
       - transcendence
 
