@@ -6,162 +6,69 @@ from .game_objects import GameState
 
 logger = logging.getLogger(__name__)
 
-class GameLogic:
-    def __init__(self, game_state: GameState, redis_client):
+class PongGame:
+    def __init__(self, game_state: GameState, redis_client, channel_layer, group_name):
         self.game_state = game_state
         self.redis = redis_client
+        self.channel_layer = channel_layer
+        self.group_name = group_name
         self.update_interval = 1 / FRAMES
-        self.lock = self.redis.lock(f"lock:game_logic:{self.game_state.game_id}")
+        self.input_queue = asyncio.Queue()
+        self.game_state_key = f"game_state:{game_state.game_id}"
+        self.game_task = None
 
-    async def start_game(self, channel_layer, group_name):
+    async def enqueue_input(self, action, player_id):
+        await self.input_queue.put((action, player_id))
+
+    async def start_game(self):
         logger.info(f"Starting game loop for game: {self.game_state.game_id}")
         try:
             while self.game_state.game_running:
+                await self.process_inputs()
                 self.game_state.update()
                 await self.sync_with_redis()
-                await self.broadcast_game_state(channel_layer, group_name)
+                await self.broadcast_game_state()
                 await asyncio.sleep(self.update_interval)
+        except asyncio.CancelledError:
+            logger.info(f"Game loop task cancelled for game: {self.game_state.game_id}")
+        except Exception as e:
+            logger.exception(f"Exception in game loop for game {self.game_state.game_id}: {e}")
         finally:
-            if self.lock.locked():
-                await self.lock.release()
+            self.game_state.game_running = False
+            logger.info(f"Game loop ended for game: {self.game_state.game_id}")
+
+    async def process_inputs(self):
+        while not self.input_queue.empty():
+            action, player_id = await self.input_queue.get()
+            self.apply_action(action, player_id)
+            self.input_queue.task_done()
+
+    def apply_action(self, action, player_id):
+        if player_id == self.game_state.player1.player_id:
+            paddle = self.game_state.player1.paddle
+        elif player_id == self.game_state.player2.player_id:
+            paddle = self.game_state.player2.paddle
+        else:
+            logger.error(f"Unknown player_id: {player_id} in game {self.game_state.game_id}")
+            return
+
+        if action == 'up':
+            paddle.move_up()
+        elif action == 'down':
+            paddle.move_down()
+        elif action == 'stop':
+            paddle.stop()
+        else:
+            logger.error(f"Invalid action: {action} from player {player_id}")
 
     async def sync_with_redis(self):
-        game_state_key = f"game_state:{self.game_state.game_id}"
-        await self.redis.set(game_state_key, json.dumps(self.game_state.serialize()))
+        await self.redis.set(self.game_state_key, json.dumps(self.game_state.serialize()))
 
-    async def broadcast_game_state(self, channel_layer, group_name):
-        await channel_layer.group_send(
-            group_name,
+    async def broadcast_game_state(self):
+        await self.channel_layer.group_send(
+            self.group_name,
             {
                 'type': 'game_state_update',
                 'state': self.game_state.serialize()
             }
         )
-
-
-
-
-
-
-
-
-
-
-
-# OLD CODE:
-#
-# class PongGame:
-#
-#     def __init__(self, player1, player2):
-#         self.player1 = player1
-#         self.player2 = player2
-#         self.players_data = {}
-#         self.ball_data = {}
-#         self.match_time = 0
-#         self.winner = None
-#         self.game_over = False
-#         self.scores = {self.player1: 0, self.player2: 0}
-#         self.reset()
-#
-#     def reset(self):
-#         logging.info("Resetting game state...")
-#         self.ball_data = {
-#             'position': {'x': WIDTH / 2, 'y': HEIGHT / 2},
-#             'velocity': {'x': 10 * (-1 if random.choice([True, False]) else 1), 'y': 10},
-#             'radius': 10
-#         }
-#         self.match_time = 0
-#         self.players_data = {
-#             self.player1: {'paddle': {'x': 10, 'y': 310, 'height': 75, 'width': 10, 'velocityY': 0}},
-#             self.player2: {'paddle': {'x': 1260, 'y': 310, 'height': 75, 'width': 10, 'velocityY': 0}}
-#         }
-#
-#     def load_state(self, state):
-#         self.ball_data = state.get('ball_data', self.ball_data)
-#         self.players_data = state.get('players_data', self.players_data)
-#
-#     def update(self, delta_time):
-#         # Update ball position based on velocity and delta_time
-#         self.ball_data['position']['x'] += self.ball_data['velocity']['x'] * delta_time
-#         self.ball_data['position']['y'] += self.ball_data['velocity']['y'] * delta_time
-#
-#         # Update paddle positions based on velocities
-#         for player, data in self.players_data.items():
-#             paddle = data['paddle']
-#             velocityY = paddle.get('velocityY', 0)
-#             paddle['y'] += velocityY * delta_time
-#             # Clamp paddle position within game bounds
-#             paddle['y'] = max(0, min(HEIGHT - paddle['height'], paddle['y']))
-#
-#         # Check for wall collision (top & bottom)
-#         if self.ball_data['position']['y'] <= 0 or self.ball_data['position']['y'] >= HEIGHT:
-#             self.ball_data['velocity']['y'] *= -1
-#         self.check_paddle_collision()
-#         self.check_if_player_scored()
-#
-#
-#     def check_paddle_collision(self):
-#         ball_x = self.ball_data['position']['x']
-#         ball_y = self.ball_data['position']['y']
-#         ball_radius = self.ball_data['radius']
-#
-#         for player, data in self.players_data.items():
-#             paddle = data['paddle']
-#             paddle_left = paddle['x']
-#             paddle_right = paddle['x'] + paddle['width']
-#             paddle_top = paddle['y']
-#             paddle_bottom = paddle['y'] + paddle['height']
-#
-#             if (
-#                     paddle_left <= ball_x + ball_radius <= paddle_right or paddle_left <= ball_x - ball_radius <= paddle_right) and (
-#                     paddle_top <= ball_y <= paddle_bottom):
-#                 self.ball_data['velocity']['x'] *= -1
-#                 # logging.info(f"Collision with {player}'s paddle, new velocity: {self.ball_data['velocity']}")
-#                 return
-#
-#     def move_paddle(self, player, direction):
-#         if player not in self.players_data:
-#             logging.error(f"Player {player} not found in paddle_data")
-#             return
-#         paddle = self.players_data[player]['paddle']
-#         speed = 50  # TODO: SHOULD NOT BE HARD CODED!
-#         if direction == 'up':
-#             paddle['velocityY'] = -speed
-#         elif direction == 'down':
-#             paddle['velocityY'] = speed
-#
-#     def stop_paddle(self, player):
-#         if player in self.players_data:
-#             self.players_data[player]['paddle']['velocityY'] = 0;
-#
-#     def check_if_player_scored(self):
-#         if self.ball_data['position']['x'] <= 0:  # Player 2 scores
-#             self.increase_score(self.player2)
-#         elif self.ball_data['position']['x'] >= WIDTH:  # Player 1 scores
-#             self.increase_score(self.player1)
-#
-#     def increase_score(self, player):
-#         logging.info(f'{player} scored!')
-#         self.scores[player] += 1
-#         if self.scores[player] == self.MAX_SCORE:
-#             self.game_over = True
-#             self.winner = player
-#         else:
-#             self.reset()
-#
-#     def get_winner(self):
-#         return self.winner
-#
-#     def is_game_over(self):
-#         return self.game_over
-#
-#     def get_state(self):
-#         return {
-#             'ball_data': self.ball_data,
-#             'players_data': self.players_data,
-#             'player1': self.player1,
-#             'player2': self.player2,
-#             'scores': self.scores,
-#             'game_over': self.game_over,
-#             'timestamp': asyncio.get_event_loop().time()
-#         }

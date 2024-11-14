@@ -98,6 +98,7 @@ const startGame = (game_id) => {
         } else {
             return;
         }
+        console.log("Player ID: ", player_id)
         ws.send(JSON.stringify(({
             action: 'move_paddle',
             player: player,
@@ -108,7 +109,8 @@ const startGame = (game_id) => {
 
     const sendPaddleStop = () => {
         ws.send(JSON.stringify({
-            action: 'stop_paddle',
+            action: 'move_paddle',
+            direction: 'stop',
             player: player,
             player_id: player_id
         }));

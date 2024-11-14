@@ -39,8 +39,8 @@ async def pop_two_players(r):
     player1_data = await r.lpop("matchmaking_queue")
     player2_data = await r.lpop("matchmaking_queue")
     # If not enough players, push one back if popped
-    if player1_data and not player2_data:
-        await r.lpush("matchmaking_queue", player1_data)
+    # if player1_data and not player2_data:
+    #     await r.lpush("matchmaking_queue", player1_data)
     return player1_data, player2_data
 
 async def notify_players(channel_layer, game_id, player1_data, player2_data):

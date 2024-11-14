@@ -48,7 +48,7 @@ class Paddle:
         self.height = 75
         self.width = 10
         self.velocity_y = 0
-        self.speed = 50
+        self.speed = 10
 
     def move_up(self):
         self.velocity_y = -self.speed
