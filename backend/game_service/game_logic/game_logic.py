@@ -1,39 +1,54 @@
 import asyncio
+import json
 import logging
-from typing import Final
-import random
+from .constants import FRAMES
+from .game_objects import GameState
 
-# Configure logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
-WIDTH: Final[int] = 1280
-HEIGHT: Final[int] = 720
-MAX_SCORE = 3
+class GameLogic:
+    def __init__(self, game_state: GameState, redis_client):
+        self.game_state = game_state
+        self.redis = redis_client
+        self.update_interval = 1 / FRAMES
+        self.lock = self.redis.lock(f"lock:game_logic:{self.game_state.game_id}")
+
+    async def start_game(self, channel_layer, group_name):
+        logger.info(f"Starting game loop for game: {self.game_state.game_id}")
+        try:
+            while self.game_state.game_running:
+                self.game_state.update()
+                await self.sync_with_redis()
+                await self.broadcast_game_state(channel_layer, group_name)
+                await asyncio.sleep(self.update_interval)
+        finally:
+            if self.lock.locked():
+                await self.lock.release()
+
+    async def sync_with_redis(self):
+        game_state_key = f"game_state:{self.game_state.game_id}"
+        await self.redis.set(game_state_key, json.dumps(self.game_state.serialize()))
+
+    async def broadcast_game_state(self, channel_layer, group_name):
+        await channel_layer.group_send(
+            group_name,
+            {
+                'type': 'game_state_update',
+                'state': self.game_state.serialize()
+            }
+        )
 
 
-class Ball:
-    def __init__(self):
-        self.position = {'x': WIDTH / 2, 'y': HEIGHT / 2}
-        self.velocity = {'x': 10 * (-1 if random.choice([True, False]) else 1), 'y': 10},
-        self.radius = 10
-
-
-class Paddle:
-    def __init__(self, x, y):
-        self.x = x
-        self.y = y
-        self.height = 75
-        self.width = 10
-        self.velocity_y = 0
-
-
-class GameState:
-    def __init__(self):
-        pass
 
 
 
 
+
+
+
+
+
+# OLD CODE:
 #
 # class PongGame:
 #
