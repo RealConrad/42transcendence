@@ -1,4 +1,4 @@
-import {CANVAS_HEIGHT, CANVAS_WIDTH} from "../utils/constants.js";
+import {CANVAS_HEIGHT, CANVAS_WIDTH} from "../../utils/constants.js";
 
 export default class Ball {
     constructor(x, y, radius, speedX, speedY) {

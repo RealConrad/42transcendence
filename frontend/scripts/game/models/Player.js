@@ -1,8 +1,9 @@
 export default class Player {
-    constructor(username) {
+    constructor(username, paddle, controller) {
         this.username = username
         this.score = 0;
-        this.paddle = null;
+        this.paddle = paddle;
+        this.controller = controller;
     }
 
     incrementScore() {
