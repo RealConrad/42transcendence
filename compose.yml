@@ -5,46 +5,44 @@ networks:
 
 
 services:
-  auth_db:
-    image: postgres:13
-    container_name: auth_db
-    env_file:
-      - .env
-    ports:
-      - "5432:5432"
-    volumes:
-      - auth_postgres_data:/var/lib/postgresql/data
-    networks:
-      - transcendence
-
-  auth-service:
-    build: ./backend/auth_service
-    container_name: auth-service
-    image: auth-service
-    ports:
-      - "8000:8000"
-    env_file:
-      - .env.auth
-    depends_on:
-      - auth_db
-    networks:
-      - transcendence
-
-#  nginx:
-#    image: nginx:latest
-#    container_name: nginx
-#    ports:
-#      - "443:443"
-#      - "80:80"
+#  auth_db:
+#    image: postgres:13
+#    container_name: auth_db
 #    env_file:
 #      - .env
+#    ports:
+#      - "5432:5432"
 #    volumes:
-#      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-#      - ./nginx/ssl:/etc/nginx/ssl/:ro
-#      - ./frontend:/var/www/transcendence:ro
+#      - auth_postgres_data:/var/lib/postgresql/data
+#    networks:
+#      - transcendence
+#
+#  auth-service:
+#    build: ./backend/auth_service
+#    container_name: auth-service
+#    image: auth-service
+#    ports:
+#      - "8000:8000"
+#    env_file:
+#      - .env.auth
+#    depends_on:
+#      - auth_db
 #    networks:
 #      - transcendence
 
-volumes:
-  auth_postgres_data:
-  game_postgres_data:
+  nginx:
+    image: nginx:latest
+    container_name: nginx
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl/:ro
+      - ./frontend:/var/www/transcendence:ro
+    networks:
+      - transcendence
+
+#volumes:
+#  auth_postgres_data:
+#  game_postgres_data:
