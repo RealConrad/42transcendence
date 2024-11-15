@@ -1,7 +1,11 @@
+import {CANVAS_HEIGHT, CANVAS_WIDTH} from "../utils/constants.js";
+
 export default class Ball {
     constructor(x, y, radius, speedX, speedY) {
         this.x = x;
         this.y = y;
+        this.initialX = x;
+        this.initialY = y;
         this.radius = radius;
         this.speedX = speedX;
         this.speedY = speedY;
@@ -20,11 +24,11 @@ export default class Ball {
         ctx.closePath();
     }
 
-    reset(canvasWidth, canvasHeight) {
-        this.x = canvasWidth / 2;
-        this.y = canvasHeight / 2;
+    reset() {
+        this.x = this.initialX;
+        this.y = this.initialY;
         // TODO: Change these values to something more interesting
-        this.speedX = -this.speedX;
+        this.speedX = 5;
         this.speedY = 5;
     }
 }

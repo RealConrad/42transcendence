@@ -1,9 +1,10 @@
-import { CANVAS_HEIGHT } from "../utils/constants.js";
+import {CANVAS_HEIGHT, CANVAS_WIDTH} from "../utils/constants.js";
 
 export default class Paddle {
     constructor(x, y, width, height, speed) {
         this.x = x;
         this.y = y;
+        this.initialY = y;
         this.width = width;
         this.height = height;
         this.speed = speed;
@@ -23,5 +24,9 @@ export default class Paddle {
     draw(ctx) {
         ctx.fillStyle = 'red';
         ctx.fillRect(this.x, this.y, this.width, this.height);
+    }
+
+    reset() {
+        this.y = this.initialY;
     }
 }
