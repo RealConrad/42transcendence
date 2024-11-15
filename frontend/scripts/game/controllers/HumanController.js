@@ -1,6 +1,8 @@
-export default class HumanController {
+import Controller from "./Controller.js";
+
+export default class HumanController extends Controller {
     constructor(paddle, upKey, downKey) {
-        this.paddle = paddle;
+        super(paddle);
         this.upKey = upKey;
         this.downKey = downKey;
         this.keys = {};
@@ -28,5 +30,4 @@ export default class HumanController {
     update() {
         this.paddle.move();
     }
-
 }
