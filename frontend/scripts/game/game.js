@@ -6,10 +6,11 @@ import Ball from "./models/Ball.js";
 import HumanController from "./controllers/HumanController.js";
 import RenderManager from "./managers/RenderManager.js";
 import CollisionManager from "./managers/CollisionManager.js";
+import AIController from "./controllers/AIController.js";
 
 
 export default class Game {
-    constructor(canvas) {
+    constructor(canvas, vsAI) {
         this.isGameOver = false;
         this.isGamePaused = false;
         this.winner = null;
@@ -23,11 +24,16 @@ export default class Game {
 
         // Setup player models and controllers
         const playerPaddle = new Paddle(10, canvas.height / 2, PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_SPEED)
-        const opponentPaddle = new Paddle(canvas.width - 10, canvas.height / 2, PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_SPEED)
-        const playerController = new HumanController(playerPaddle, 'w', 's');
-        const opponentController = new HumanController(opponentPaddle, 'ArrowUp', 'ArrowDown'); // TODO: DETERMINE IF ITS AI OR NOT
-        this.player1 = new Player('Player 1', playerPaddle, playerController);
-        this.player2 = new Player('Player 2', opponentPaddle, opponentController);
+        const player2Paddle = new Paddle(canvas.width - 10, canvas.height / 2, PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_SPEED)
+        const player1Controller = new HumanController(playerPaddle, 'w', 's');
+        let player2Controller = null;
+        if (vsAI) {
+            player2Controller = new AIController(player2Paddle, this.ball);
+        } else {
+            player2Controller = new HumanController(player2Paddle, 'ArrowUp', 'ArrowDown');
+        }
+        this.player1 = new Player('Player 1', playerPaddle, player1Controller);
+        this.player2 = new Player('Player 2', player2Paddle, player2Controller);
 
         // Setup Managers
         this.renderManager = new RenderManager(this.ctx);
