@@ -1,33 +1,21 @@
 import Controller from "./Controller.js";
 
 export default class HumanController extends Controller {
-    constructor(paddle, upKey, downKey) {
+    constructor(paddle, upKey, downKey, inputManager) {
         super(paddle);
         this.upKey = upKey;
         this.downKey = downKey;
-        this.keys = {};
-
-        window.addEventListener('keydown', (e) => {
-            this.keys[e.key] = true;
-            this.handleInput();
-        });
-
-        window.addEventListener('keyup', (e) => {
-            this.keys[e.key] = false;
-            this.handleInput();
-        });
-    }
-
-    handleInput() {
-        if (this.keys[this.upKey])
-            this.paddle.dy = -this.paddle.speed;
-        else if (this.keys[this.downKey])
-            this.paddle.dy = this.paddle.speed;
-        else
-            this.paddle.dy = 0;
+        this.inputManager = inputManager;
     }
 
     update() {
+        if (this.inputManager.isKeyPressed(this.upKey)) {
+            this.paddle.dy = this.paddle.speed;
+        } else if (this.inputManager.isKeyPressed(this.downKey)) {
+            this.paddle.dy = this.paddle.speed;
+        } else {
+            this.paddle.dy = 0;
+        }
         this.paddle.move();
     }
 }
