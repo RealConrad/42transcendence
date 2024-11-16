@@ -3,7 +3,7 @@ import eventEmitter from "../EventEmitter.js";
 export default class InputManager {
     constructor() {
         this.keys = {}
-        this.discreteKeys = new Set(['Escape', 'p', 'P']);
+        this.discreteKeys = new Set(['Escape']);
         this.handleKeyDown = this.handleKeyDown.bind(this);
         this.handleKeyUp = this.handleKeyUp.bind(this);
         window.addEventListener('keydown', this.handleKeyDown);
@@ -17,26 +17,23 @@ export default class InputManager {
             this.emitDiscreteAction(key, true);
             return;
         }
-        this.keys[e.key] = true;
+        this.keys[key] = true;
     }
 
     handleKeyUp(e) {
         const key = e.key;
         if (this.discreteKeys.has(key) && this.keys[key]) {
             this.keys[e.key] = false;
-            this.emitDiscreteAction(key, false);
+            // this.emitDiscreteAction(key, false);
+            return;
         }
-        this.keys[e.key] = false;
+        this.keys[key] = false;
     }
 
     emitDiscreteAction(key, isPressed) {
         switch (key) {
             case 'Escape':
                 eventEmitter.emit('toggleMenu', isPressed);
-                break;
-            case 'p':
-            case 'P':
-                eventEmitter.emit('togglePause', isPressed);
                 break;
             default:
                 break;
@@ -45,5 +42,10 @@ export default class InputManager {
 
     isKeyPressed(key) {
         return !!this.keys[key];
+    }
+
+    destroy() {
+        window.removeEventListener('keydown', this.handleKeyDown);
+        window.removeEventListener('keyup', this.handleKeyUp);
     }
 }

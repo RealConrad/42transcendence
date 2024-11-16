@@ -4,36 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pong Game</title>
-    <style>
-        body {
-            background: gray;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            flex-direction: column;
-        }
-        canvas {
-            border: 1px solid white;
-        }
-
-        h1 {
-            bottom: 50%;
-            position: absolute;
-            color: #fff;
-        }
-
-        #player1Score {
-            left: 30%;
-        }
-        #player2Score {
-            right: 30%;
-        }
-
-    </style>
+    <link rel="stylesheet" href="styles/game/game.css">
 </head>
 <body>
+    <div id="menu" class="overlay hidden">
+        MENU COMPONENT
+    </div>
     <h1>Pong Game</h1>
     <h1 id="player1Score">0</h1>
     <h1 id ="player2Score">0</h1>

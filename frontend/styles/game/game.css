@@ -1,0 +1,44 @@
+body {
+    background: gray;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    flex-direction: column;
+}
+canvas {
+    border: 1px solid white;
+}
+
+h1 {
+    bottom: 50%;
+    position: absolute;
+    color: #fff;
+}
+
+#player1Score {
+    left: 30%;
+}
+#player2Score {
+    right: 30%;
+}
+
+.overlay {
+    position: absolute;
+    width: 80vh;
+    height: 80vh;
+    background: rgba(0, 0, 0, 1);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+}
+.overlay.hidden {
+    display: none;
+}
+.overlay:not(.hidden) {
+    display: flex;
+}
