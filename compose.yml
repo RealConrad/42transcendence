@@ -9,7 +9,7 @@ services:
     image: postgres:13
     container_name: auth_db
     env_file:
-      - .env
+      - .env.auth
     ports:
       - "5432:5432"
     volumes:
@@ -43,6 +43,6 @@ services:
     networks:
       - transcendence
 
-#volumes:
-#  auth_postgres_data:
-#  game_postgres_data:
+volumes:
+  auth_postgres_data:
+  game_postgres_data:
