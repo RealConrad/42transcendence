@@ -40,8 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
-
-    # Custom Defined
+    'corsheaders',
     'authentication',
     'oauth'
 ]
@@ -49,12 +48,16 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -77,8 +80,8 @@ SIMPLE_JWT = {
 }
 
 OAUTH_SETTINGS = {
-    'CLIENT_ID': os.getenv('42_CLIENT_UID'),
-    'CLIENT_SECRET': os.getenv('42_CLIENT_SECRET'),
+    'CLIENT_ID': os.getenv('FT_CLIENT_UID'),
+    'CLIENT_SECRET': os.getenv('FT_CLIENT_SECRET'),
     'AUTHORIZATION_URL': 'https://api.intra.42.fr/oauth/authorize',
     'TOKEN_URL': 'https://api.intra.42.fr/oauth/token',
     'REDIRECT_URI': 'http://127.0.0.1:8000/api/auth/oauth-callback/',  # TODO: CHANGE
@@ -157,3 +160,26 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'INFO',  # Suppress DEBUG messages
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django.server': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'oauth': {
+            'handlers': ['console'],
+            'level': 'INFO',  # Suppress DEBUG messages from channels_redis
+            'propagate': False,
+        },
+    },
+}

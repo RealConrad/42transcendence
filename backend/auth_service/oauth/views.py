@@ -9,6 +9,11 @@ from django.utils import timezone
 from rest_framework_simplejwt.tokens import RefreshToken
 import requests
 
+
+import logging
+
+logger = logging.getLogger(__name__)
+
 def oauthLogin(request):
 	state = get_random_string(64)
 	# Store the state so we can verify when user gets redirected back.
@@ -47,7 +52,6 @@ def oauthCallback(request):
 	response = requests.post(settings.OAUTH_SETTINGS['TOKEN_URL'], data=data)
 	if response.status_code != 200:
 		return HttpResponseBadRequest("Failed to obtain tokens")
-	
 	tokens = response.json()
 	access_token = tokens.get('access_token')
 	refresh_token = tokens.get('refresh_token')
