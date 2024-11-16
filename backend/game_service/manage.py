@@ -2,11 +2,6 @@
 """Django's command-line utility for administrative tasks."""
 import os
 import sys
-import warnings
-from cryptography.utils import CryptographyDeprecationWarning
-
-# TODO: Find a better fix instead of ignoring it. No idea why its complaining about it, all packages are up-to-date
-warnings.filterwarnings("ignore", category=CryptographyDeprecationWarning)
 
 
 def main():

@@ -4,24 +4,13 @@ ASGI config for game_service project.
 It exposes the ASGI callable as a module-level variable named ``application``.
 
 For more information on this file, see
-https://docs.djangoproject.com/en/5.0/howto/deployment/asgi/
+https://docs.djangoproject.com/en/5.1/howto/deployment/asgi/
 """
 
 import os
-from django.core.asgi import get_asgi_application
-from channels.routing import ProtocolTypeRouter, URLRouter
-from channels.auth import AuthMiddlewareStack
-from lobby_manager_socket import routing as matchmaking_socket_routing
-from game_socket.routing import websocket_urlpatterns as game_socket_urlpatterns
 
+from django.core.asgi import get_asgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'game_service.settings')
 
-application = ProtocolTypeRouter({
-    "http": get_asgi_application(),
-    "websocket": AuthMiddlewareStack(
-        URLRouter(
-            matchmaking_socket_routing.websocket_urlpatterns + game_socket_urlpatterns
-        )
-    ),
-})
+application = get_asgi_application()

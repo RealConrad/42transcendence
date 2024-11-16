@@ -6,3 +6,4 @@ db.sqlite3
 .env.auth
 .env.game
 *.key
+*.rdb
