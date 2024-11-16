@@ -23,7 +23,7 @@ export default class PowerUp extends Renderable {
     }
 
     reset(ctx) {
-        //
+        // TODO: Reset all powerups
     }
 
     update() {
