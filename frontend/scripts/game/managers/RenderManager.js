@@ -1,7 +1,6 @@
-import {CANVAS_WIDTH, CANVAS_HEIGHT} from "../../utils/constants.js";
-
 export default class RenderManager {
-    constructor(ctx) {
+    constructor(ctx, canvas) {
+		this.canvas = canvas;
         this.ctx = ctx;
         this.renderables = [];
     }
@@ -15,8 +14,7 @@ export default class RenderManager {
     }
 
     render() {
-        // console.log("Rendering obj!");
-        this.ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         this.renderables.forEach(obj => obj.draw(this.ctx));
     }
 

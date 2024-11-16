@@ -1,7 +1,8 @@
-import {CANVAS_HEIGHT, CANVAS_WIDTH} from "../../utils/constants.js";
+import Renderable from "./Renderable.js";
 
-export default class Ball {
+export default class Ball extends Renderable {
     constructor(x, y, radius, speedX, speedY) {
+        super();
         this.x = x;
         this.y = y;
         this.initialX = x;
