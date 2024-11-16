@@ -1,3 +1,5 @@
+import {CANVAS_HEIGHT} from "../../utils/constants.js";
+
 export default class CollisionManager {
     constructor(game) {
         this.game = game;
@@ -5,7 +7,7 @@ export default class CollisionManager {
 
     checkWallCollision() {
         const ball = this.game.ball;
-        if (ball.y - ball.radius < 0 || ball.y + ball.radius > this.game.canvas.height) {
+        if (ball.y - ball.radius < 0 || ball.y + ball.radius > CANVAS_HEIGHT) {
             ball.speedY *= -1;
         }
     }

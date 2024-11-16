@@ -1,4 +1,4 @@
-import {PADDLE_HEIGHT, PADDLE_SPEED, PADDLE_WIDTH, MAX_SCORE} from "../utils/constants.js";
+import {PADDLE_HEIGHT, PADDLE_SPEED, PADDLE_WIDTH, MAX_SCORE, CANVAS_HEIGHT, CANVAS_WIDTH} from "../utils/constants.js";
 import Paddle from "./models/Paddle.js";
 import Player from "./models/Player.js";
 import Ball from "./models/Ball.js";
@@ -11,7 +11,7 @@ import AIController from "./controllers/AIController.js";
 export default class Game {
     constructor(canvas, vsAI = true) {
         this.isGameOver = false;
-        this.isGamePaused = true;
+        this.isGamePaused = false;
         this.winner = null;
         this.maxScore = MAX_SCORE;
 
@@ -19,20 +19,20 @@ export default class Game {
         this.canvas = canvas;
         this.ctx = this.canvas.getContext('2d');
 
-        this.ball = new Ball(canvas.width / 2, canvas.height / 2, 10, 5, 5);
+        this.ball = new Ball(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 10, 5, 5);
 
         // Setup player models and controllers
         const playerPaddle = new Paddle(
             10,
-            canvas.height / 2,
+            CANVAS_HEIGHT / 2,
             PADDLE_WIDTH,
             PADDLE_HEIGHT,
             PADDLE_SPEED,
             this.canvas
         )
         const player2Paddle = new Paddle(
-            canvas.width - 10,
-            canvas.height / 2,
+            CANVAS_WIDTH - 10,
+            CANVAS_HEIGHT / 2,
             PADDLE_WIDTH,
             PADDLE_HEIGHT,
             PADDLE_SPEED,
@@ -86,7 +86,9 @@ export default class Game {
             this.resetGameState();
             this.updateScoreUI();
         }
-        else if (this.ball.x + this.ball.radius > this.canvas.height) {
+        else if (this.ball.x + this.ball.radius > CANVAS_WIDTH) {
+            console.log("BALL: X:", this.ball.x, "R:",this.ball.radius);
+            console.log("CANVAS H:", this.canvas.height, "W:",this.canvas.width);
             this.player1.incrementScore();
             this.resetGameState();
             this.updateScoreUI();
