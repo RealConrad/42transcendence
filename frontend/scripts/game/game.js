@@ -1,5 +1,4 @@
-import { CANVAS_WIDTH, CANVAS_HEIGHT, MAX_SCORE } from "../utils/constants.js";
-import {PADDLE_HEIGHT, PADDLE_SPEED, PADDLE_WIDTH} from "../utils/constants.js";
+import {PADDLE_HEIGHT, PADDLE_SPEED, PADDLE_WIDTH, MAX_SCORE} from "../utils/constants.js";
 import Paddle from "./models/Paddle.js";
 import Player from "./models/Player.js";
 import Ball from "./models/Ball.js";
@@ -10,21 +9,35 @@ import AIController from "./controllers/AIController.js";
 
 
 export default class Game {
-    constructor(canvas, vsAI) {
+    constructor(canvas, vsAI = true) {
         this.isGameOver = false;
-        this.isGamePaused = false;
+        this.isGamePaused = true;
         this.winner = null;
         this.maxScore = MAX_SCORE;
 
         // Setup canvas
         this.canvas = canvas;
-        this.ctx = canvas.getContext('2d');
+        this.ctx = this.canvas.getContext('2d');
 
         this.ball = new Ball(canvas.width / 2, canvas.height / 2, 10, 5, 5);
 
         // Setup player models and controllers
-        const playerPaddle = new Paddle(10, canvas.height / 2, PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_SPEED)
-        const player2Paddle = new Paddle(canvas.width - 10, canvas.height / 2, PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_SPEED)
+        const playerPaddle = new Paddle(
+            10,
+            canvas.height / 2,
+            PADDLE_WIDTH,
+            PADDLE_HEIGHT,
+            PADDLE_SPEED,
+            this.canvas
+        )
+        const player2Paddle = new Paddle(
+            canvas.width - 10,
+            canvas.height / 2,
+            PADDLE_WIDTH,
+            PADDLE_HEIGHT,
+            PADDLE_SPEED,
+            this.canvas
+        )
         const player1Controller = new HumanController(playerPaddle, 'w', 's');
         let player2Controller = null;
         if (vsAI) {
@@ -36,7 +49,7 @@ export default class Game {
         this.player2 = new Player('Player 2', player2Paddle, player2Controller);
 
         // Setup Managers
-        this.renderManager = new RenderManager(this.ctx);
+        this.renderManager = new RenderManager(this.ctx, this.canvas);
         this.collisionManager = new CollisionManager(this);
 
         // Register renderable objects
@@ -73,7 +86,7 @@ export default class Game {
             this.resetGameState();
             this.updateScoreUI();
         }
-        else if (this.ball.x + this.ball.radius > CANVAS_WIDTH) {
+        else if (this.ball.x + this.ball.radius > this.canvas.height) {
             this.player1.incrementScore();
             this.resetGameState();
             this.updateScoreUI();
