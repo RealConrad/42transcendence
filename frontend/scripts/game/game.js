@@ -82,24 +82,11 @@ export default class Game {
         this.ball.move();
         this.player1.controller.update();
         this.player2.controller.update();
-        this.checkScoring();
         this.checkWinCondition();
         this.renderManager.render();
         requestAnimationFrame(this.gameLoop.bind(this));
     }
 
-    checkScoring() {
-        if (this.ball.x - this.ball.radius < 0) {
-            this.player2.incrementScore();
-            this.resetGameState();
-            this.updatePlayerScore();
-        }
-        else if (this.ball.x + this.ball.radius > CANVAS_WIDTH) {
-            this.player1.incrementScore();
-            this.resetGameState();
-            this.updatePlayerScore();
-        }
-    }
 
     checkWinCondition() {
         if (this.player1.score === this.maxScore) {
