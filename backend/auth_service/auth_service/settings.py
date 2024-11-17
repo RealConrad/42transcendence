@@ -80,6 +80,13 @@ SIMPLE_JWT = {
     'USER_ID_CLAIM': 'user_id',
 }
 
+# TODO: Ensure cookies are only sent over HTTPS in prod
+# CSRF_COOKIE_SECURE = True
+# SESSION_COOKIE_SECURE = True
+
+CSRF_COOKIE_SAMESITE = 'Strict'
+SESSION_COOKIE_SAMESITE = 'Strict'
+
 OAUTH_SETTINGS = {
     'CLIENT_ID': os.getenv('FT_CLIENT_UID'),
     'CLIENT_SECRET': os.getenv('FT_CLIENT_SECRET'),

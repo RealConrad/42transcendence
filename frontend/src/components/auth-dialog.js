@@ -193,9 +193,35 @@ class AuthDialog extends HTMLElement {
 			}
 
 			if (isValid) {
-				alert("Registration successful");
+				this.register(username, password);
 			}
 		});
+	}
+
+	register(username, password) {
+		fetch("http://127.0.0.1:8000/api/auth/register/", {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+			credentials: "include",
+			body: JSON.stringify({
+				"username": username,
+				"password": password
+			})
+		}).then((response) => {
+			if (response.ok) {
+				return response.json();
+			} else {
+				return response.json().then((err) => {
+					throw new Error(JSON.stringify(err));
+				})
+			}
+		}).then((data) => {
+			console.log(data);
+			this.setTokens(data.access);
+			this.close();
+		}).catch(err => console.log(err));
 	}
 
 	login(username, password) {
@@ -204,21 +230,29 @@ class AuthDialog extends HTMLElement {
 			headers: {
 				"Content-Type": "application/json"
 			},
+			credentials: "include",
 			body: JSON.stringify({
 				"username": username,
-				"email": "conrad6@example.com",
 				"password": password
 			})
 		}).then((response) => {
 			if (response.ok) {
 				return response.json();
 			} else {
-				console.error(response);
-				throw new Error("Something wrong with api");
+				return response.json().then((err) => {
+					throw new Error(JSON.stringify(err));
+
+				})
 			}
 		}).then((data) => {
 			console.log(data);
+			this.setTokens(data.access);
+			this.close();
 		}).catch(err => console.log(err));
+	}
+
+	setTokens(accessToken) {
+		localStorage.setItem("access_token", accessToken);
 	}
 
 	connectedCallback() {

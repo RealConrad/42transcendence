@@ -27,7 +27,17 @@ class CustomTokenVerifyView(TokenVerifyView):
 
 
 class CustomTokenRefreshView(TokenRefreshView):
-    serializer_class = CustomTokenObtainPairSerializer
+    def post(self, request, *args, **kwargs):
+        refresh_token = request.COOKIES.get('refresh_token')
+
+        if not refresh_token:
+            return Response({"error": "Refresh token is missing"}, status=status.HTTP_401_UNAUTHORIZED)
+
+        serializer = self.get_serializer(data={"refresh": refresh_token})
+        serializer.is_valid(raise_exception=True)
+
+        # Return the new access token
+        return Response(serializer.validated_data, status=status.HTTP_200_OK)
 
 
 class RegisterView(generics.CreateAPIView):
@@ -45,15 +55,25 @@ class RegisterView(generics.CreateAPIView):
 
         user = serializer.save()  # Save the user
         refresh = CustomTokenObtainPairSerializer.get_token(user)  # Generates JWT tokens
-        return Response({
+        access_token = str(refresh.access_token)
+
+        response = Response({
             "user": {
                 "user_id": user.id,
                 "username": user.username,
             },
-            "refresh": str(refresh),
-            "access": str(refresh.access_token),
+            "access": access_token,
             "message": "Created new user"
         }, status=status.HTTP_201_CREATED)
+
+        response.set_cookie(
+            key="refresh_token",
+            value=str(refresh),
+            httponly=True,
+            secure=False,
+            samesite="Strict",
+        )
+        return response
 
 
 class LoginView(generics.GenericAPIView):
@@ -65,14 +85,26 @@ class LoginView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data
         refresh = CustomTokenObtainPairSerializer.get_token(user)
-        return Response({
-            'refresh': str(refresh),
-            'access': str(refresh.access_token),
+        access_token = str(refresh.access_token)
+
+        response = Response({
+            'access': access_token,
             'user': {
                 'user_id': user.id,
                 'username': user.username,
             }
         }, status=status.HTTP_200_OK)
+
+        # Set the refresh token in an HTTP-only cookie
+        response.set_cookie(
+            key='refresh_token',
+            value=str(refresh),
+            httponly=True,
+            secure=False,  # TODO: Use True in production with HTTPS
+            samesite='Strict',
+        )
+
+        return response
 
 
 class DeleteUserView(APIView):
@@ -90,13 +122,16 @@ class LogoutView(APIView):
 
     def post(self, request):
         try:
-            # Retrieve the refresh token from the request body
-            refresh_token = request.data.get("refresh")
+            refresh_token = request.COOKIES.get("refresh_token")
             if not refresh_token:
-                return Response({"error": "Refresh token is required"}, status=400)
+                return Response({"error": "Refresh token is required"}, status=status.HTTP_400_BAD_REQUEST)
+
             token = RefreshToken(refresh_token)
             token.blacklist()
 
-            return Response({"message": "Successfully logged out."}, status=200)
+            response = Response({"message": "Successfully logged out."}, status=status.HTTP_200_OK)
+            response.delete_cookie("refresh_token")
+            return response
+
         except Exception as e:
-            return Response({"error": str(e)}, status=400)
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
