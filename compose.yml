@@ -17,6 +17,19 @@ services:
     networks:
       - transcendence
 
+  mfa_db:
+    image: postgres:13
+    container_name: mfadb
+    restart: always
+    env_file:
+      - .env.mfa
+    volumes:
+      - mfa_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    networks:
+      - transcendence
+
   auth-service:
     build: ./backend/auth_service
     container_name: auth-service
@@ -27,6 +40,19 @@ services:
       - .env.auth
     depends_on:
       - auth_db
+    networks:
+      - transcendence
+
+  mfaservice:
+    build: ./backend/mfa
+    container_name: mfaservice
+    restart: always
+    ports:
+      - "8001:8001"
+    depends_on:
+      - mfa_db
+    env_file:
+      - .env.mfa
     networks:
       - transcendence
 
@@ -46,3 +72,4 @@ services:
 volumes:
   auth_postgres_data:
   game_postgres_data:
+  mfa_postgres_data:

@@ -5,6 +5,7 @@ db.sqlite3
 .env
 .env.auth
 .env.game
+.env.mfa
 *.key
 *.rdb
 *.idea/
