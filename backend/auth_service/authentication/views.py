@@ -49,7 +49,6 @@ class RegisterView(generics.CreateAPIView):
             "user": {
                 "user_id": user.id,
                 "username": user.username,
-                "email": user.email
             },
             "refresh": str(refresh),
             "access": str(refresh.access_token),
@@ -72,7 +71,6 @@ class LoginView(generics.GenericAPIView):
             'user': {
                 'user_id': user.id,
                 'username': user.username,
-                'email': user.email
             }
         }, status=status.HTTP_200_OK)
 
@@ -86,3 +84,15 @@ class DeleteUserView(APIView):
         return Response({
             'message': "User has been deleted"
         }, status=status.HTTP_200_OK)
+
+class LogoutView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        try:
+            refresh_token = request.data["refresh"]
+            token = RefreshToken(refresh_token)
+            token.blacklist()
+            return Response({"message": "Successfully logged out."}, status=200)
+        except Exception as e:
+            return Response({"error": str(e)}, status=400)
