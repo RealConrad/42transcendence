@@ -6,6 +6,8 @@ from django.dispatch import receiver
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
     mfa_enabled = models.BooleanField(default=False)
+    total_matches_won = models.IntegerField(default=0)
+    total_matches_lost = models.IntegerField(default=0)
 
     def __str__(self):
         return f"{self.user.username}'s Profile"

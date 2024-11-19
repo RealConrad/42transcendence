@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
+
+from .models import UserProfile
 from .serializers import (
     RegisterSerializer,
     LoginSerializer,
@@ -56,7 +58,6 @@ class RegisterView(generics.CreateAPIView):
         user = serializer.save()  # Save the user
         refresh = CustomTokenObtainPairSerializer.get_token(user)  # Generates JWT tokens
         access_token = str(refresh.access_token)
-
         response = Response({
             "user": {
                 "user_id": user.id,
@@ -135,3 +136,19 @@ class LogoutView(APIView):
 
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UpdateUserStats(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, user_id):
+        try:
+            profile = UserProfile.objects.get(user_id=user_id)
+            if request.data.get('won'):
+                profile.total_matches_won += 1
+            else:
+                profile.total_matches_lost += 1
+            profile.save()
+            return Response({"message": "User stats updated successfully"}, status=status.HTTP_200_OK)
+        except UserProfile.DoesNotExist:
+            return Response({"error": "User profile does not exist"}, status=status.HTTP_404_NOT_FOUND)

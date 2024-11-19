@@ -1,12 +1,12 @@
 from multiprocessing.context import AuthenticationError
 
-from rest_framework.generics import GenericAPIView, CreateAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import BasePermission
 from rest_framework import status
 from match.models import Match
 from match.serializers import MatchSerializer
-from match.utils import verify_token_with_auth_service
+from match.utils import verify_token_with_auth_service, update_user_match_stats
 
 
 class IsAuthenticatedViaAuthService(BasePermission):
@@ -25,7 +25,15 @@ class SaveMatchView(CreateAPIView):
     permission_classes = [IsAuthenticatedViaAuthService]
 
     def perform_create(self, serializer):
-        serializer.save(user_id=self.request.user_id)
+        match = serializer.save(user_id=self.request.user_id)
+        token = self.request.headers.get("Authorization", "").split("Bearer ")[-1]
+        won = match.winner == match.player1_username
+        update_user_match_stats(match.user_id, won, token)
 
-class MatchHistoryView(APIView):
-    serializer
+class MatchHistoryView(ListAPIView):
+    permission_classes = [IsAuthenticatedViaAuthService]
+    serializer_class = MatchSerializer
+
+    def get_queryset(self):
+        user_id = self.request.user_id
+        return Match.objects.filter(user_id=user_id)
