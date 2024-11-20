@@ -18,6 +18,5 @@ from django.contrib import admin
 from django.urls import path, include
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('2fa/', include('two_factor_auth.urls')),
+    path('api-2fa/', include('two_factor_auth.urls')),
 ]
