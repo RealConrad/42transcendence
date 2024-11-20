@@ -33,7 +33,6 @@ class CustomTokenVerifyView(TokenVerifyView):
 class CustomTokenRefreshView(TokenRefreshView):
     def post(self, request, *args, **kwargs):
         refresh_token = request.COOKIES.get('refresh_token')
-        # logger.info("REFRESH:", refresh_token)
 
         if not refresh_token:
             return Response({"error": "Refresh token is missing"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -41,9 +40,35 @@ class CustomTokenRefreshView(TokenRefreshView):
         serializer = self.get_serializer(data={"refresh": refresh_token})
         serializer.is_valid(raise_exception=True)
 
-        # Return the new access token
-        return Response(serializer.validated_data, status=status.HTTP_200_OK)
+        # Generate a new access token and a new refresh token
+        validated_data = serializer.validated_data
+        new_access_token = validated_data.get("access")
+        new_refresh_token = str(RefreshToken.for_user(serializer.user))  # Generate a new refresh token
 
+        # Blacklist the old refresh token (optional, for added security)
+        try:
+            old_refresh_token = RefreshToken(refresh_token)
+            old_refresh_token.blacklist()
+        except Exception as e:
+            return Response({"error": f"token already blacklisted: {e}"}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Set the new tokens in cookies
+        response = Response({"access": new_access_token}, status=status.HTTP_200_OK)
+        response.set_cookie(
+            key="access_token",
+            value=new_access_token,
+            httponly=True,
+            secure=False,
+            samesite="Lax",
+        )
+        response.set_cookie(
+            key="refresh_token",
+            value=new_refresh_token,
+            httponly=True,
+            secure=False,
+            samesite="Lax",
+        )
+        return response
 
 class RegisterView(generics.CreateAPIView):
     # These variables are used by the parent class 'generics.CreateAPIView'
@@ -66,16 +91,21 @@ class RegisterView(generics.CreateAPIView):
                 "user_id": user.id,
                 "username": user.username,
             },
-            "access": access_token,
             "message": "Created new user"
         }, status=status.HTTP_201_CREATED)
-
+        response.set_cookie(
+            key="access_token",
+            value=str(access_token),
+            httponly=True,
+            secure=True,
+            samesite="Lax",
+        )
         response.set_cookie(
             key="refresh_token",
             value=str(refresh),
             httponly=True,
             secure=True,
-            samesite="Lax", # Use "Strict" only for same-origin requests. "Lax" allows cross-origin GETs
+            samesite="Lax",
         )
         return response
 
@@ -92,22 +122,28 @@ class LoginView(generics.GenericAPIView):
         access_token = str(refresh.access_token)
 
         response = Response({
-            'access': access_token,
             'user': {
                 'user_id': user.id,
                 'username': user.username,
-            }
+            },
+            'message': 'User logged in'
         }, status=status.HTTP_200_OK)
 
-        # Set the refresh token in an HTTP-only cookie
+        # Set the tokens in an HTTP-only cookie
         response.set_cookie(
-            key='refresh_token',
+            key="access_token",
+            value=str(access_token),
+            httponly=True,
+            secure=True,
+            samesite="Lax",
+        )
+        response.set_cookie(
+            key="refresh_token",
             value=str(refresh),
             httponly=True,
-            secure=False,  # TODO: Use True in production with HTTPS
-            samesite='Lax', # Use "Strict" only for same-origin requests. "Lax" allows cross-origin GETs
+            secure=True,
+            samesite="Lax",
         )
-
         return response
 
 
