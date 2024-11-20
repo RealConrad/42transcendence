@@ -5,26 +5,27 @@ networks:
 
 
 services:
-#  auth_db:
-#    image: postgres:13
-#    container_name: auth_db
-#    env_file:
-#      - .env.auth
-#    ports:
-#      - "5432:5432"
-#    volumes:
-#      - auth_postgres_data:/var/lib/postgresql/data
-#    networks:
-#      - transcendence
+  auth_db:
+    image: postgres:13
+    container_name: auth_db
+    env_file:
+      - .env.auth
+    ports:
+      - "5432:5432"
+    volumes:
+      - auth_postgres_data:/var/lib/postgresql/data
+    networks:
+      - transcendence
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   mfa_db:
     image: postgres:13
     container_name: mfa_db
     restart: always
-#    environment:
-#      - POSTGRES_DB=postgres
-#      - POSTGRES_USER=postgres
-#      - POSTGRES_PASSWORD=postgres
     env_file:
       - .env.mfa
     volumes:
@@ -39,18 +40,19 @@ services:
       timeout: 5s
       retries: 5
 
-#  auth-service:
-#    build: ./backend/auth_service
-#    container_name: auth-service
-#    image: auth-service
-#    ports:
-#      - "8000:8000"
-#    env_file:
-#      - .env.auth
-#    depends_on:
-#      - auth_db
-#    networks:
-#      - transcendence
+  auth-service:
+    build: ./backend/auth_service
+    container_name: auth-service
+    image: auth-service
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env.auth
+    depends_on:
+      auth_db:
+        condition: service_healthy
+    networks:
+      - transcendence
 
   mfa-service:
     build: ./backend/mfa_service
