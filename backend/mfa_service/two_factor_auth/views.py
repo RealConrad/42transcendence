@@ -8,6 +8,10 @@ from .helpers import (
 from .models import UserProfile
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+
 
 # Create your views here.
 
@@ -42,33 +46,28 @@ def enable_2fa(request):
         return json_error(str(e))
 
 
-@csrf_exempt
-def verify_2fa(request):
-    if request.method != "POST":
-        return json_error("Method not allowed", 405)
+class Verify2FAView(APIView):
+    def post(self, request):
+        token = get_token(request)
+        if not token:
+            return json_error("Authorization Token is missing")
 
-    token = get_token(request)
-    if not token:
-        return json_error("Authorization Token is missing")
+        otp_code = request.POST.get('otp_code')
+        if not otp_code:
+            return json_error("OTP Code is missing")
 
-    otp_code = request.POST.get('otp_code')
-    if not otp_code:
-        return json_error("OTP Code is missing")
+        try:
+            user, _ = decode_jwt_and_get_user_data(token) # decode jwt token
+            otp_secret = UserProfile.objects.get(user=user).otp_secret # extract otp secret
+            totp = pyotp.TOTP(otp_secret)
 
-    try:
-        user, _ = decode_jwt_and_get_user_data(token) # decode jwt token
-        otp_secret = UserProfile.objects.get(user=user).otp_secret # extract otp secret
-        totp = pyotp.TOTP(otp_secret)
+            if totp.verify(otp_code):
+                return Response({"message": "2FA verification successful"}, status=status.HTTP_200_OK)
+            else:
+                return Response({"detail": "Bad request. Invalid or missing 2FA Code"}, status=status.HTTP_400_BAD_REQUEST)
 
-        if totp.verify(otp_code):
-            return JsonResponse({"message": "2FA verification successful"}, status=200)
-        else:
-            return json_error("Invalid OTP Code")
-
-    except UserProfile.DoesNotExist:
-        return json_error("User does not exist")
-    except ValueError as e:
-        return json_error(str(e))
+        except ValueError as e:
+            return json_error(str(e))
 
 
 @csrf_exempt
