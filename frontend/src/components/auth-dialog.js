@@ -219,7 +219,6 @@ class AuthDialog extends HTMLElement {
 			}
 		}).then((data) => {
 			console.log(data);
-			this.setTokens(data.access);
 			this.close();
 		}).catch(err => console.log(err));
 	}
@@ -246,15 +245,11 @@ class AuthDialog extends HTMLElement {
 			}
 		}).then((data) => {
 			console.log(data);
-			this.setTokens(data.access);
 			this.close();
-			scheduleTokenRefresh();
+			// scheduleTokenRefresh();
 		}).catch(err => console.log(err));
 	}
 
-	setTokens(accessToken) {
-		localStorage.setItem("access_token", accessToken);
-	}
 
 	connectedCallback() {
 		this.render();
