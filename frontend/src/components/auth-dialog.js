@@ -5,7 +5,7 @@ class AuthDialog extends HTMLElement {
 	}
 
 	async html() {
-		await Promise.resolve();
+		await Promise.resolve(); // wait a short duraiton
 		return `
 			<link rel="stylesheet" href="../../styles/auth-dialog.css">
 			<div class="overlay" id="overlay">
@@ -248,6 +248,7 @@ class AuthDialog extends HTMLElement {
 			console.log(data);
 			this.setTokens(data.access);
 			this.close();
+			scheduleTokenRefresh();
 		}).catch(err => console.log(err));
 	}
 

@@ -1,4 +1,3 @@
-
 const scheduleTokenRefresh = () => {
     const accessToken = localStorage.getItem("access_token");
     if (!accessToken) {
@@ -16,28 +15,28 @@ const scheduleTokenRefresh = () => {
 
     if (delay <= 0) {
         console.error("Token expired");
+        localStorage.removeItem("access_token");
         return;
     }
-
+    console.log("attempting to refresh");
     setTimeout(async () => {
         console.log("Refreshing token..");
         await refreshAccessToken();
         scheduleTokenRefresh();
-    }, delay)
+    }, 5000)
 }
-
-document.addEventListener("DOMContentLoaded", scheduleTokenRefresh);
 
 const refreshAccessToken = async() => {
     try {
-        const response = await fetch("http://127.0.0.1:8000/token/refresh/", {
+        const response = await fetch("http://127.0.0.1:8000/api/auth/token/refresh/", {
             method: "POST",
             credentials: "include",
         });
 
         if (!response.ok) {
-            console.error("error")
-            throw new Error("Failed to refresh token");
+            return response.json().then((err) => {
+                throw new Error(JSON.stringify(err));
+            })
         }
 
         const data = await response.json();
@@ -47,3 +46,5 @@ const refreshAccessToken = async() => {
         console.error("Error refreshing access token:", error);
     }
 }
+
+document.addEventListener("DOMContentLoaded", scheduleTokenRefresh);
