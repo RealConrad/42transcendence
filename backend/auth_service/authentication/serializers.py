@@ -34,18 +34,12 @@ class RegisterSerializer(serializers.ModelSerializer):
     # Metaclass specifies which model to use and which fields to include in the serialized output
     class Meta:
         model = User
-        fields = ('email', 'username', 'password')
+        fields = ('username', 'password')
         extra_kwargs = {'password': {'write_only': True}}
-
-    def validate_email(self, value):
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError("This email is already in use")
-        return value
 
     # Create a new user
     def create(self, validated_data):
         user = User.objects.create_user(
-            email=validated_data['email'],
             username=validated_data['username'],
             password=validated_data['password']
         )
