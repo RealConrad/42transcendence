@@ -30,30 +30,30 @@ services:
     networks:
       - transcendence
 
-  game_db:
-    image: postgres:13
-    container_name: game_db
-    env_file:
-      - .env.game
-    ports:
-      - "5433:5432"
-    volumes:
-      - game_postgres_data:/var/lib/postgresql/data
-    networks:
-      - transcendence
-
-  gameservice:
-    build: ./backend/game_service
-    container_name: gameservice
-    image: gameservice
-    ports:
-      - "8001:8001"
-    env_file:
-      - .env.game
-    depends_on:
-      - game_db
-    networks:
-      - transcendence
+#  game_db:
+#    image: postgres:13
+#    container_name: game_db
+#    env_file:
+#      - .env.game
+#    ports:
+#      - "5433:5432"
+#    volumes:
+#      - game_postgres_data:/var/lib/postgresql/data
+#    networks:
+#      - transcendence
+#
+#  gameservice:
+#    build: ./backend/game_service
+#    container_name: gameservice
+#    image: gameservice
+#    ports:
+#      - "8001:8001"
+#    env_file:
+#      - .env.game
+#    depends_on:
+#      - game_db
+#    networks:
+#      - transcendence
 
   nginx:
     image: nginx:latest
