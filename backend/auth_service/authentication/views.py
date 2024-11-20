@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
-
+import logging
 from .models import UserProfile
 from .serializers import (
     RegisterSerializer,
@@ -12,6 +12,8 @@ from .serializers import (
     CustomTokenObtainPairSerializer,
     CustomTokenVerifySerializer
 )
+
+logger = logging.getLogger(__name__)
 
 """
 In Django REST Framework (DRF), the views generally return a Response object instead of the standard Django HttpResponse.
@@ -31,6 +33,7 @@ class CustomTokenVerifyView(TokenVerifyView):
 class CustomTokenRefreshView(TokenRefreshView):
     def post(self, request, *args, **kwargs):
         refresh_token = request.COOKIES.get('refresh_token')
+        # logger.info("REFRESH:", refresh_token)
 
         if not refresh_token:
             return Response({"error": "Refresh token is missing"}, status=status.HTTP_401_UNAUTHORIZED)
@@ -71,8 +74,8 @@ class RegisterView(generics.CreateAPIView):
             key="refresh_token",
             value=str(refresh),
             httponly=True,
-            secure=False,
-            samesite="Strict",
+            secure=True,
+            samesite="Lax", # Use "Strict" only for same-origin requests. "Lax" allows cross-origin GETs
         )
         return response
 
@@ -102,7 +105,7 @@ class LoginView(generics.GenericAPIView):
             value=str(refresh),
             httponly=True,
             secure=False,  # TODO: Use True in production with HTTPS
-            samesite='Strict',
+            samesite='Lax', # Use "Strict" only for same-origin requests. "Lax" allows cross-origin GETs
         )
 
         return response
