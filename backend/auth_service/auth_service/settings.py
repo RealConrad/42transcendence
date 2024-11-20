@@ -27,7 +27,18 @@ SECRET_KEY = 'django-insecure-b*0=nfugzshg3aebw+0l8q)_@zamiav&pw-74x4g@t(@-*#)ho
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['*']
+# Use "Strict" only for same-origin requests. "Lax" allows cross-origin GETs
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+ALLOWED_HOSTS = ['authservice', 'localhost', '127.0.0.1']
+
+CORS_ORIGIN_WHITELIST = [
+    "http://localhost",
+    "http://127.0.0.1",
+]
+
+CORS_ALLOW_CREDENTIALS = True
 
 # Application definition
 
@@ -47,18 +58,15 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
-CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_CREDENTIALS = True
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -79,13 +87,6 @@ SIMPLE_JWT = {
     'USER_ID_FIELD': 'id',
     'USER_ID_CLAIM': 'user_id',
 }
-
-# TODO: Ensure cookies are only sent over HTTPS in prod
-# CSRF_COOKIE_SECURE = True
-# SESSION_COOKIE_SECURE = True
-
-CSRF_COOKIE_SAMESITE = 'Strict'
-SESSION_COOKIE_SAMESITE = 'Strict'
 
 OAUTH_SETTINGS = {
     'CLIENT_ID': os.getenv('FT_CLIENT_UID'),
@@ -179,15 +180,20 @@ LOGGING = {
         },
     },
     'loggers': {
-        'django.server': {
+        # 'django.server': {
+        #     'handlers': ['console'],
+        #     'level': 'INFO',
+        #     'propagate': False,
+        # },
+        # 'oauth': {
+        #     'handlers': ['console'],
+        #     'level': 'INFO',  # Suppress DEBUG messages from channels_redis
+        #     'propagate': False,
+        # },
+        'authentication': {
             'handlers': ['console'],
             'level': 'INFO',
-            'propagate': False,
-        },
-        'oauth': {
-            'handlers': ['console'],
-            'level': 'INFO',  # Suppress DEBUG messages from channels_redis
-            'propagate': False,
+            'propagate': True,
         },
     },
 }
