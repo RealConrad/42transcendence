@@ -11,7 +11,7 @@ from qrcode.image.styles.moduledrawers.pil import RoundedModuleDrawer
 
 def decode_jwt_and_get_user_data(token):
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=['HS256'])
+        payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=['HS256'])
         username = payload.get('username')
         user_id = payload.get('user_id')
         user, created = User.objects.get_or_create(id=user_id, username=username)

@@ -1,93 +1,100 @@
 import pyotp
 from .helpers import (
-    decode_jwt_and_get_user_data,
     create_otp_secret_for_user,
     generate_qr_code,
     send_qr_code_response
 )
-from .models import UserProfile
+# from .models import UserProfile
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+# from django.http import HttpResponse, Http404, HttpResponseBadRequest
+from .permissions import IsOwnerAndNotDelete
 
 
 # Create your views here.
 
-def get_token(request):
-    """Extracts JWT token from request"""
-    auth_header = request.headers.get('Authorization', '')
-    return auth_header.split(" ")[1] if auth_header else None
+class Enable2FAView(APIView):
+    """
+    API to enable two-factor authentication.
+    """
+    permission_classes = [IsAuthenticated, IsOwnerAndNotDelete]
 
-def json_error(msg, status_code=400):
-    """Returns a Json error with message and status code"""
-    return JsonResponse({"error": msg}, status=status_code)
-
-@csrf_exempt
-def enable_2fa(request):
-    if request.method != "POST":
-        return json_error("Method not allowed", 405)
-
-    token = get_token(request)
-    if not token:
-        return json_error("Authorization Token is missing")
-
-    try:
-        user, is_new = decode_jwt_and_get_user_data(token)
-        if not is_new:
-            return json_error("2FA already enabled")
+    def post(self, request):
+        user = request.user
+        user_profile = user.userprofile
+        if user_profile.otp_secret:
+            return Response(
+                {'detail': '2FA is already enabled.'}
+            )
 
         otp_secret = create_otp_secret_for_user(user)
         qr_code = generate_qr_code(otp_secret, user)
-        return send_qr_code_response(qr_code)
-
-    except ValueError as e:
-        return json_error(str(e))
+        response = send_qr_code_response(qr_code)
+        return response
 
 
 class Verify2FAView(APIView):
-    def post(self, request):
-        token = get_token(request)
-        if not token:
-            return json_error("Authorization Token is missing")
+    permission_classes = [IsAuthenticated, IsOwnerAndNotDelete]
 
-        otp_code = request.POST.get('otp_code')
+    def post(self, request):
+        user = request.user
+        otp_code = request.data.get('otp_code')
         if not otp_code:
-            return json_error("OTP Code is missing")
+            return Response(
+                {"detail": "OTP Code is missing."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         try:
-            user, _ = decode_jwt_and_get_user_data(token) # decode jwt token
-            otp_secret = UserProfile.objects.get(user=user).otp_secret # extract otp secret
+            otp_secret = user.userprofile.otp_secret # extract otp secret
+            if not otp_secret:
+                return Response(
+                    {"detail": "2FA is not enabled."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
             totp = pyotp.TOTP(otp_secret)
-
             if totp.verify(otp_code):
-                return Response({"message": "2FA verification successful"}, status=status.HTTP_200_OK)
+                return Response(
+                    {"message": "2FA verification successful"},
+                    status=status.HTTP_200_OK
+                )
             else:
-                return Response({"detail": "Bad request. Invalid or missing 2FA Code"}, status=status.HTTP_400_BAD_REQUEST)
-
-        except ValueError as e:
-            return json_error(str(e))
-
-
-@csrf_exempt
-def disable_2fa(request):
-    if request.method != "POST":
-        return json_error("Method not allowed", 405)
-
-    token = get_token(request)
-    if not token:
-        return json_error("Authorization Token is missing")
-
-    try:
-        user, _ = decode_jwt_and_get_user_data(token)
-        UserProfile.objects.get(user=user).delete()
-        return JsonResponse({"message": "2FA disabled"}, status=200)
-
-    except UserProfile.DoesNotExist:
-        return json_error("User does not exist")
-    except ValueError as e:
-        return json_error(str(e))
+                return Response(
+                    {"detail": "Bad request. Invalid or missing 2FA Code"},
+                    status=status.HTTP_400_BAD_REQUEST)
 
 
+        except AttributeError:  # Handle missing userprofile
+            return Response(
+                {"detail": "UserProfile not found for this user."},
+                status=status.HTTP_404_NOT_FOUND
+            )
 
+        except Exception as e:  # Catch any other unexpected errors
+            return Response(
+                {"detail": f"An error occurred: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class Disable2FAView(APIView):
+    permission_classes = [IsAuthenticated, IsOwnerAndNotDelete]
+
+    def put(self, request):
+        user = request.user
+        user_profile = user.userprofile
+        if not user_profile.otp_secret:
+            return Response(
+                {"detail": "2FA is already disabled."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        user_profile.otp_secret = None
+        user_profile.save()
+        return Response(
+            {"message": "2FA disabled."},
+            status=status.HTTP_200_OK
+        )
