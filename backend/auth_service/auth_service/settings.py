@@ -27,7 +27,18 @@ SECRET_KEY = 'django-insecure-b*0=nfugzshg3aebw+0l8q)_@zamiav&pw-74x4g@t(@-*#)ho
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['*']
+# Use "Strict" only for same-origin requests. "Lax" allows cross-origin GETs
+CSRF_COOKIE_SAMESITE = 'Lax'
+SESSION_COOKIE_SAMESITE = 'Lax'
+
+ALLOWED_HOSTS = ['authservice', 'localhost', '127.0.0.1']
+
+CORS_ORIGIN_WHITELIST = [
+    "http://localhost",
+    "http://127.0.0.1",
+]
+
+CORS_ALLOW_CREDENTIALS = True
 
 # Application definition
 
@@ -40,13 +51,15 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework_simplejwt',
-
-    # Custom Defined
+    'rest_framework_simplejwt.token_blacklist',
+    'corsheaders',
     'authentication',
     'oauth'
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'auth_service.middleware.middleware.RefreshTokensMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -68,8 +81,8 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY,
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=90),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': True,
     'BLACKLIST_AFTER_ROTATION': True,
     'USER_ID_FIELD': 'id',
@@ -77,8 +90,8 @@ SIMPLE_JWT = {
 }
 
 OAUTH_SETTINGS = {
-    'CLIENT_ID': os.getenv('42_CLIENT_UID'),
-    'CLIENT_SECRET': os.getenv('42_CLIENT_SECRET'),
+    'CLIENT_ID': os.getenv('FT_CLIENT_UID'),
+    'CLIENT_SECRET': os.getenv('FT_CLIENT_SECRET'),
     'AUTHORIZATION_URL': 'https://api.intra.42.fr/oauth/authorize',
     'TOKEN_URL': 'https://api.intra.42.fr/oauth/token',
     'REDIRECT_URI': 'http://127.0.0.1:8000/api/auth/oauth-callback/',  # TODO: CHANGE
@@ -157,3 +170,31 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'INFO',  # Suppress DEBUG messages
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        # 'django.server': {
+        #     'handlers': ['console'],
+        #     'level': 'INFO',
+        #     'propagate': False,
+        # },
+        # 'oauth': {
+        #     'handlers': ['console'],
+        #     'level': 'INFO',  # Suppress DEBUG messages from channels_redis
+        #     'propagate': False,
+        # },
+        'authentication': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
+}
