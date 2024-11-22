@@ -1,3 +1,5 @@
+from datetime import timedelta, datetime
+from time import timezone
 from django.contrib.auth.models import User
 from rest_framework import generics, permissions, status
 from rest_framework.response import Response
@@ -10,7 +12,8 @@ from .serializers import (
     RegisterSerializer,
     LoginSerializer,
     CustomTokenObtainPairSerializer,
-    CustomTokenVerifySerializer
+    CustomTokenVerifySerializer,
+    CustomTokenRefreshSerializer
 )
 
 logger = logging.getLogger(__name__)
@@ -31,44 +34,8 @@ class CustomTokenVerifyView(TokenVerifyView):
 
 
 class CustomTokenRefreshView(TokenRefreshView):
-    def post(self, request, *args, **kwargs):
-        refresh_token = request.COOKIES.get('refresh_token')
+    serializer_class = CustomTokenRefreshSerializer
 
-        if not refresh_token:
-            return Response({"error": "Refresh token is missing"}, status=status.HTTP_401_UNAUTHORIZED)
-
-        serializer = self.get_serializer(data={"refresh": refresh_token})
-        serializer.is_valid(raise_exception=True)
-
-        # Generate a new access token and a new refresh token
-        validated_data = serializer.validated_data
-        new_access_token = validated_data.get("access")
-        new_refresh_token = str(RefreshToken.for_user(serializer.user))  # Generate a new refresh token
-
-        # Blacklist the old refresh token (optional, for added security)
-        try:
-            old_refresh_token = RefreshToken(refresh_token)
-            old_refresh_token.blacklist()
-        except Exception as e:
-            return Response({"error": f"token already blacklisted: {e}"}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Set the new tokens in cookies
-        response = Response({"access": new_access_token}, status=status.HTTP_200_OK)
-        response.set_cookie(
-            key="access_token",
-            value=new_access_token,
-            httponly=True,
-            secure=False,
-            samesite="Lax",
-        )
-        response.set_cookie(
-            key="refresh_token",
-            value=new_refresh_token,
-            httponly=True,
-            secure=False,
-            samesite="Lax",
-        )
-        return response
 
 class RegisterView(generics.CreateAPIView):
     # These variables are used by the parent class 'generics.CreateAPIView'
@@ -87,10 +54,8 @@ class RegisterView(generics.CreateAPIView):
         refresh = CustomTokenObtainPairSerializer.get_token(user)  # Generates JWT tokens
         access_token = str(refresh.access_token)
         response = Response({
-            "user": {
-                "user_id": user.id,
-                "username": user.username,
-            },
+            "user_id": user.id,
+            "username": user.username,
             "message": "Created new user"
         }, status=status.HTTP_201_CREATED)
         response.set_cookie(
@@ -122,10 +87,8 @@ class LoginView(generics.GenericAPIView):
         access_token = str(refresh.access_token)
 
         response = Response({
-            'user': {
-                'user_id': user.id,
-                'username': user.username,
-            },
+            'user_id': user.id,
+            'username': user.username,
             'message': 'User logged in'
         }, status=status.HTTP_200_OK)
 
@@ -171,6 +134,7 @@ class LogoutView(APIView):
 
             response = Response({"message": "Successfully logged out."}, status=status.HTTP_200_OK)
             response.delete_cookie("refresh_token")
+            response.delete_cookie("access_token")
             return response
 
         except Exception as e:

@@ -246,7 +246,7 @@ class AuthDialog extends HTMLElement {
 		}).then((data) => {
 			console.log(data);
 			this.close();
-			// scheduleTokenRefresh();
+			handleLoginResponse(data);
 		}).catch(err => console.log(err));
 	}
 

@@ -4,6 +4,8 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, Toke
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
 from rest_framework_simplejwt.tokens import UntypedToken
+from rest_framework_simplejwt.serializers import TokenRefreshSerializer
+from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -14,6 +16,17 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token['user_id'] = user.id
         return token
 
+
+class CustomTokenRefreshSerializer(TokenRefreshSerializer):
+    def validate(self, attrs):
+        data = super().validate(attrs)
+        refresh = RefreshToken(attrs["refresh"])
+        user = self.context['request'].user
+        access = refresh.access_token
+        access['username'] = user.username
+        access['user_id'] = user.id
+        data["access"] = str(access)
+        return data
 
 class CustomTokenVerifySerializer(TokenVerifySerializer):
     def validate(self, attrs):
