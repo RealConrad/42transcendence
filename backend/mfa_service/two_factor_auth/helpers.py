@@ -1,34 +1,19 @@
-import jwt
+import io
 import pyotp
 import qrcode
-import io
-from django.conf import settings
-from django.contrib.auth.models import User
 from django.http import HttpResponse
 from .models import UserProfile
 from qrcode.image.styledpil import StyledPilImage
 from qrcode.image.styles.moduledrawers.pil import RoundedModuleDrawer
 
-def decode_jwt_and_get_user_data(token):
-    try:
-        payload = jwt.decode(token, settings.JWT_SECRET_KEY, algorithms=['HS256'])
-        username = payload.get('username')
-        user_id = payload.get('user_id')
-        user, created = User.objects.get_or_create(id=user_id, username=username)
-        return user, created
-    except jwt.ExpiredSignatureError:
-        raise ValueError("JWT token has expired")
-    except jwt.InvalidTokenError:
-        raise ValueError("JWT token is invalid")
-
-    pass
-
+def generate_otp_secret():
+    return pyotp.random_base32()
 
 def create_otp_secret_for_user(user):
     user_profile, created = UserProfile.objects.get_or_create(user=user)
 
     if created or not user_profile.otp_secret:
-        otp_secret = pyotp.random_base32()
+        otp_secret = generate_otp_secret()
         user_profile.otp_secret = otp_secret
         user_profile.save()
     else:
@@ -38,14 +23,27 @@ def create_otp_secret_for_user(user):
     pass
 
 def generate_qr_code(otp_secret, user):
-    totp = pyotp.TOTP(otp_secret)
-    otpauth_url = totp.provisioning_uri(name=user.username, issuer_name='two_factor_auth')
+    totp = pyotp.TOTP(
+        otp_secret,
+        digits=6,
+        interval=30,
+    )
 
-    qr = qrcode.QRCode(error_correction=qrcode.constants.ERROR_CORRECT_H)
+    otpauth_url = totp.provisioning_uri(
+        name=user.username,
+        issuer_name='transcendence_mfa_service',
+    )
+
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_H,
+        box_size=10,
+        border=4,
+    )
     qr.add_data(otpauth_url)
-
+    qr.make(fit=True)
     # qr = qrcode.make(otpauth_url)
-
+    # qrcode.make.make_image()
     qr_img = qr.make_image(
         image_factory=StyledPilImage,
         module_drawer=RoundedModuleDrawer(),
