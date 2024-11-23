@@ -35,5 +35,5 @@ class MatchHistoryView(ListAPIView):
     serializer_class = MatchSerializer
 
     def get_queryset(self):
-        user_id = self.request.user_id
+        user_id = self.request.user.id
         return Match.objects.filter(user_id=user_id)
