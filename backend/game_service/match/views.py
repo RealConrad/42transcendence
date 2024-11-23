@@ -31,7 +31,7 @@ class SaveMatchView(CreateAPIView):
         update_user_match_stats(match.user_id, won, token)
 
 class MatchHistoryView(ListAPIView):
-    permission_classes = [IsAuthenticatedViaAuthService]
+    permission_classes = []
     serializer_class = MatchSerializer
 
     def get_queryset(self):
