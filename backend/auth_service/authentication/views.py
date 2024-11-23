@@ -31,21 +31,14 @@ class RegisterView(generics.CreateAPIView):
                     "detail": "User registered successfully",
                     "username": user.username,
                     "user_id": user.id,
+                    "access_token": access_token
                 }, status=status.HTTP_201_CREATED)
 
-                # Set tokens in cookies
-                response.set_cookie(
-                    key='access_token',
-                    value=access_token,
-                    httponly=True,
-                    secure=False,  # Set to True in production
-                    samesite='Lax',
-                )
                 response.set_cookie(
                     key='refresh_token',
                     value=refresh_token,
                     httponly=True,
-                    secure=False,  # Set to True in production
+                    secure=False,
                     samesite='Lax',
                 )
                 return response
@@ -74,25 +67,19 @@ class LoginView(generics.GenericAPIView):
                 access_token = tokens.get('access_token')
                 refresh_token = tokens.get('refresh_token')
 
+                print(f"Setting refresh token cookie: {refresh_token}")
                 response = Response({
                     "detail": "User logged in successfully",
                     "username": user.username,
                     "user_id": user.id,
+                    "access_token": access_token
                 }, status=status.HTTP_200_OK)
 
-                # Set tokens in cookies
-                response.set_cookie(
-                    key='access_token',
-                    value=access_token,
-                    httponly=True,
-                    secure=False,  # Set to True in production
-                    samesite='Lax',
-                )
                 response.set_cookie(
                     key='refresh_token',
                     value=refresh_token,
                     httponly=True,
-                    secure=False,  # Set to True in production
+                    secure=False,
                     samesite='Lax',
                 )
                 return response

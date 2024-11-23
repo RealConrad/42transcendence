@@ -29,7 +29,7 @@ DEBUG = os.getenv('DEBUG', 'True') == 'True'
 CSRF_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SAMESITE = 'Lax'
 
-ALLOWED_HOSTS = ['authservice', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['gameservice', 'localhost', '127.0.0.1']
 
 CORS_ORIGIN_WHITELIST = [
     "http://localhost",
@@ -62,7 +62,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'game_service.middleware.SetCookieMiddleware',
 ]
 
 ROOT_URLCONF = 'game_service.urls'
@@ -146,4 +145,32 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'game_service.authentication.CustomJWTAuthentication',
     ),
+}
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'level': 'INFO',  # Suppress DEBUG messages
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        # 'django.server': {
+        #     'handlers': ['console'],
+        #     'level': 'INFO',
+        #     'propagate': False,
+        # },
+        # 'oauth': {
+        #     'handlers': ['console'],
+        #     'level': 'INFO',  # Suppress DEBUG messages from channels_redis
+        #     'propagate': False,
+        # },
+        'match': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    },
 }

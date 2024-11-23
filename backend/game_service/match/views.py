@@ -1,4 +1,5 @@
 from multiprocessing.context import AuthenticationError
+from rest_framework import serializers
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import BasePermission
@@ -6,29 +7,26 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from match.models import Match
 from match.serializers import MatchSerializer
-from match.utils import verify_token_with_auth_service, update_user_match_stats
+import logging
 
-
-class IsAuthenticatedViaAuthService(BasePermission):
-    def has_permission(self, request, view):
-        token = request.headers.get("Authorization", "").split("Bearer ")[1]
-        if not token:
-            raise AuthenticationError("No token provided")
-        user_data = verify_token_with_auth_service(token)
-        request.user_id = user_data.get('user_id')
-        if not request.user_id:
-            raise AuthenticationError("No user_id found in token")
-        return True
+logger = logging.getLogger(__name__)
 
 class SaveMatchView(CreateAPIView):
     serializer_class = MatchSerializer
-    permission_classes = [IsAuthenticatedViaAuthService]
+    permission_classes = [IsAuthenticated]
 
     def perform_create(self, serializer):
-        match = serializer.save(user_id=self.request.user_id)
-        token = self.request.headers.get("Authorization", "").split("Bearer ")[-1]
-        won = match.winner == match.player1_username
-        update_user_match_stats(match.user_id, won, token)
+        try:
+            user_id = self.request.user.id
+            logger.debug(f"Authenticated user ID: {user_id}")
+            logger.debug(f"Request data: {self.request.data}")
+            serializer.save(user_id=user_id)
+        except serializers.ValidationError as e:
+            logger.error(f"Serializer Validation Error: {e.detail}")
+            raise
+        except Exception as e:
+            logger.error(f"Unexpected Error: {e}")
+            raise
 
 class MatchHistoryView(ListAPIView):
     permission_classes = [IsAuthenticated]

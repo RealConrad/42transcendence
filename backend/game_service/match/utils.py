@@ -4,20 +4,6 @@ import requests
 from rest_framework.exceptions import AuthenticationFailed
 from django.conf import settings
 
-def verify_token_with_auth_service(token):
-    try:
-        response = requests.post(
-            f"{settings.AUTH_SERVICE_URL}/api/auth/token/verify/",
-            json={"token": token},
-            timeout=5
-        )
-        if response.status_code == 200:
-            return response.json()
-        else:
-            raise AuthenticationFailed("Invalid token")
-    except Exception as e:
-        raise AuthenticationFailed("Token verification failed: " + str(e))
-
 def update_user_match_stats(user_id, won=True, token=None):
     try:
         headers = {}

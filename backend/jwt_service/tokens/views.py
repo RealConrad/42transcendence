@@ -41,7 +41,7 @@ class RefreshTokenView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        refresh_token = request.data.get('refresh_token')
+        refresh_token = request.COOKIES.get('refresh_token')
         if not refresh_token:
             return Response({'detail': 'Refresh token is required'}, status=400)
 
@@ -55,9 +55,16 @@ class RefreshTokenView(APIView):
             new_refresh['user_id'] = user_id
             new_access_token = new_refresh.access_token
             new_access_token['user_id'] = user_id
-            return Response({
+            response = Response({
                 'access_token': str(new_access_token),
-                'refresh_token': str(new_refresh),
             }, status=status.HTTP_200_OK)
+            response.set_cookie(
+                key='refresh_token',
+                value=new_refresh,
+                httponly=True,
+                secure=False,
+                samesite='Lax'
+            )
+            return response
         except TokenError:
             return Response({'detail': 'Invalid or expired refresh token'}, status=status.HTTP_401_UNAUTHORIZED)
