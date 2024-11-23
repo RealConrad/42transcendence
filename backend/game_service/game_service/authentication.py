@@ -18,18 +18,22 @@ class CustomJWTAuthentication(BaseAuthentication):
         user_id = self._validate_access_token(access_token)
         if user_id:
             # Token is valid
-            return SimpleNamespace(id=user_id), None
+            return SimpleNamespace(id=user_id, is_authenticated=True), None
         else:
             # Try to refresh the access token
             if refresh_token:
-                new_access_token = self._refresh_access_token(refresh_token)
+                new_access_token, new_refresh_token = self._refresh_access_token(refresh_token)
                 if new_access_token:
-                    # Update the access_token in cookies via middleware
-                    request.new_access_token = new_access_token
+                    # Update tokens in cookies via middleware
+                    print("Setting new tokens:")
+                    print(f"Access: {new_access_token}")
+                    print(f"Refrsh: {new_refresh_token}")
+                    request._request.new_access_token = new_access_token
+                    request._request.new_refresh_token = new_refresh_token
                     # Retry validation with the new access token
                     user_id = self._validate_access_token(new_access_token)
                     if user_id:
-                        return SimpleNamespace(id=user_id), None
+                        return SimpleNamespace(id=user_id, is_authenticated=True), None
             # If unable to validate or refresh, raise an error
             raise AuthenticationFailed('Invalid or expired tokens')
 
@@ -55,8 +59,10 @@ class CustomJWTAuthentication(BaseAuthentication):
             )
             if jwt_response.status_code == 200:
                 data = jwt_response.json()
-                return data.get('access_token')
+                new_access_token = data.get('access_token')
+                new_refresh_token = data.get('refresh_token')
+                return new_access_token, new_refresh_token
             else:
-                return None
+                return None, None
         except requests.RequestException:
             raise AuthenticationFailed('JWT service is unavailable')

@@ -1,9 +1,9 @@
 from multiprocessing.context import AuthenticationError
-
 from rest_framework.generics import CreateAPIView, ListAPIView
 from rest_framework.response import Response
 from rest_framework.permissions import BasePermission
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
 from match.models import Match
 from match.serializers import MatchSerializer
 from match.utils import verify_token_with_auth_service, update_user_match_stats
@@ -31,7 +31,7 @@ class SaveMatchView(CreateAPIView):
         update_user_match_stats(match.user_id, won, token)
 
 class MatchHistoryView(ListAPIView):
-    permission_classes = []
+    permission_classes = [IsAuthenticated]
     serializer_class = MatchSerializer
 
     def get_queryset(self):
