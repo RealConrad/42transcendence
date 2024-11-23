@@ -91,9 +91,9 @@ export default class Game {
     checkWinCondition() {
         if (this.player1.score === this.maxScore || this.player2.score === this.maxScore) {
             this.isGameOver = true;
-            this.displayWinMessage()
+            // this.displayWinMessage()
             // TODO: after auth service refactor implement this
-            // this.saveMatch();
+            this.saveMatch();
         }
     }
 
@@ -118,20 +118,27 @@ export default class Game {
     }
 
     saveMatch() {
+        console.log("token: ", window.accessToken);
         fetch('http://127.0.0.1:8001/api/game/save-match/', {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${window.accessToken}`
             },
             credentials: 'include',
             body: JSON.stringify({
-                "player1_username": this.player1,
-                "player2_username": this.player2,
+                "player1_username": this.player1.username,
+                "player2_username": this.player2.username,
                 "player1_score": this.player1.score,
                 "player2_score": this.player2.score,
             })
         }).then((response) => {
-            //something here later hehe
+            if (response.ok) {
+                console.log("Successfully saved game")
+                return response.json();
+            } else {
+                console.error("Unable to save match");
+            }
         })
     }
 

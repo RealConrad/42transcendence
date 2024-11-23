@@ -219,6 +219,7 @@ class AuthDialog extends HTMLElement {
 			}
 		}).then((data) => {
 			console.log(data);
+			window.accessToken = data.access_token;
 			this.close();
 		}).catch(err => console.log(err));
 	}
@@ -239,14 +240,15 @@ class AuthDialog extends HTMLElement {
 				return response.json();
 			} else {
 				return response.json().then((err) => {
+					console.error("Response not 200");
 					throw new Error(JSON.stringify(err));
-
 				})
 			}
 		}).then((data) => {
+			console.log("LOGGED IN!");
 			console.log(data);
+			window.accessToken = data.access_token;
 			this.close();
-			// scheduleTokenRefresh();
 		}).catch(err => console.log(err));
 	}
 
