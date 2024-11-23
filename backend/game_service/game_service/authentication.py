@@ -6,7 +6,6 @@ from rest_framework.authentication import BaseAuthentication
 
 JWT_SERVICE_URL = 'http://localhost:8002/api/token'
 
-
 class CustomJWTAuthentication(BaseAuthentication):
     def authenticate(self, request):
         access_token = request.COOKIES.get('access_token')
@@ -18,16 +17,15 @@ class CustomJWTAuthentication(BaseAuthentication):
         user_id = self._validate_access_token(access_token)
         if user_id:
             # Token is valid
+            print("Access token is valid")
             return SimpleNamespace(id=user_id, is_authenticated=True), None
         else:
             # Try to refresh the access token
+            print("Trying to refresh token...")
             if refresh_token:
                 new_access_token, new_refresh_token = self._refresh_access_token(refresh_token)
                 if new_access_token:
                     # Update tokens in cookies via middleware
-                    print("Setting new tokens:")
-                    print(f"Access: {new_access_token}")
-                    print(f"Refrsh: {new_refresh_token}")
                     request._request.new_access_token = new_access_token
                     request._request.new_refresh_token = new_refresh_token
                     # Retry validation with the new access token
