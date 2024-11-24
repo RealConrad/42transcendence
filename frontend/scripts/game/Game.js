@@ -1,4 +1,12 @@
-import {PADDLE_HEIGHT, PADDLE_SPEED, PADDLE_WIDTH, MAX_SCORE, CANVAS_HEIGHT, CANVAS_WIDTH} from "../utils/constants.js";
+import {
+    PADDLE_HEIGHT,
+    PADDLE_SPEED,
+    PADDLE_WIDTH,
+    MAX_SCORE,
+    CANVAS_HEIGHT,
+    CANVAS_WIDTH,
+    BASE_GAME_API_URL
+} from "../utils/constants.js";
 import Paddle from "./models/Paddle.js";
 import Player from "./models/Player.js";
 import Ball from "./models/Ball.js";
@@ -124,7 +132,7 @@ export default class Game {
             "player1_score": this.player1.score,
             "player2_score": this.player2.score,
         }
-        const response = await apiCall('http://127.0.0.1:8001/api/game/save-match/', {
+        const response = await apiCall(`${BASE_GAME_API_URL}/save-match/`, {
             method: 'POST',
             headers: {
                 "Content-Type": "application/json",
