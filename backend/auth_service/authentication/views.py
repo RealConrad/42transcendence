@@ -67,7 +67,6 @@ class LoginView(generics.GenericAPIView):
                 access_token = tokens.get('access_token')
                 refresh_token = tokens.get('refresh_token')
 
-                print(f"Setting refresh token cookie: {refresh_token}")
                 response = Response({
                     "detail": "User logged in successfully",
                     "username": user.username,

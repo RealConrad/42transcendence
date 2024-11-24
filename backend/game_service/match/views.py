@@ -18,11 +18,8 @@ class SaveMatchView(CreateAPIView):
     def perform_create(self, serializer):
         try:
             user_id = self.request.user.id
-            logger.debug(f"Authenticated user ID: {user_id}")
-            logger.debug(f"Request data: {self.request.data}")
             serializer.save(user_id=user_id)
         except serializers.ValidationError as e:
-            logger.error(f"Serializer Validation Error: {e.detail}")
             raise
         except Exception as e:
             logger.error(f"Unexpected Error: {e}")
