@@ -1,3 +1,4 @@
+import {CANVAS_HEIGHT, CANVAS_WIDTH} from "../../utils/constants.js";
 import Renderable from "./Renderable.js";
 
 export default class Ball extends Renderable {
@@ -28,8 +29,7 @@ export default class Ball extends Renderable {
     reset() {
         this.x = this.initialX;
         this.y = this.initialY;
-        // TODO: Change these values to something more interesting
-        this.speedX = 5;
-        this.speedY = 5;
+        this.speedX = 5 * (Math.random() > 0.5 ? 1 : -1);
+        this.speedY = 5 * (Math.random() > 0.5 ? 1 : -1);
     }
 }
