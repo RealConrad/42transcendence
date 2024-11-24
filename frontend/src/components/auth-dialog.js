@@ -219,7 +219,7 @@ class AuthDialog extends HTMLElement {
 			}
 		}).then((data) => {
 			console.log(data);
-			window.accessToken = data.access_token;
+			accessToken = data.access_token;
 			this.close();
 		}).catch(err => console.log(err));
 	}
@@ -246,8 +246,7 @@ class AuthDialog extends HTMLElement {
 			}
 		}).then((data) => {
 			console.log("LOGGED IN!");
-			console.log(data);
-			window.accessToken = data.access_token;
+			accessToken = data.access_token;
 			this.close();
 		}).catch(err => console.log(err));
 	}

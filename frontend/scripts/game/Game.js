@@ -9,7 +9,7 @@ import AIController from "./controllers/AIController.js";
 import InputManager from "./managers/InputManager.js";
 import UIManager from "./managers/UIManager.js";
 import eventEmitter from "./EventEmitter.js";
-
+import { apiCall} from "../main.js";
 
 export default class Game {
     constructor(canvas, vsAI = true) {
@@ -117,29 +117,27 @@ export default class Game {
         document.getElementById("player2Score").innerHTML = this.player2.score;
     }
 
-    saveMatch() {
-        console.log("token: ", window.accessToken);
-        fetch('http://127.0.0.1:8001/api/game/save-match/', {
-            method: "POST",
+    async saveMatch() {
+        const payload = {
+            "player1_username": this.player1.username,
+            "player2_username": this.player2.username,
+            "player1_score": this.player1.score,
+            "player2_score": this.player2.score,
+        }
+        const response = await apiCall('http://127.0.0.1:8001/api/game/save-match/', {
+            method: 'POST',
             headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${window.accessToken}`
             },
             credentials: 'include',
-            body: JSON.stringify({
-                "player1_username": this.player1.username,
-                "player2_username": this.player2.username,
-                "player1_score": this.player1.score,
-                "player2_score": this.player2.score,
-            })
-        }).then((response) => {
-            if (response.ok) {
-                console.log("Successfully saved game")
-                return response.json();
-            } else {
-                console.error("Unable to save match");
-            }
-        })
+            body: JSON.stringify(payload)
+        });
+        if (response.ok) {
+            await response.json();
+            console.log("Saved match");
+        } else {
+            console.error("Failed to save match")
+        }
     }
 
     displayWinMessage() {
