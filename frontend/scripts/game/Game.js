@@ -37,7 +37,7 @@ export default class Game {
         this.uiManager = new UIManager();
         this.inputManager = new InputManager()
 
-        this.ball = new Ball(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 10, 5, 5);
+        this.ball = new Ball(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 5, 5, 5);
 
         this.Battleground = new Battleground();
         
