@@ -19,8 +19,8 @@
     <button id="open-modal-button">Open Modal</button>
     <auth-dialog id="auth-dialog"></auth-dialog>
 </body>
-<script src="scripts/main.js"></script>
-<script src="src/components/auth-dialog.js"></script>
+<script type="module" src="scripts/main.js"></script>
+<script type="module" src="src/components/auth-dialog.js"></script>
 <script>
 
     const openModalButton = document.getElementById("open-modal-button");
@@ -34,35 +34,5 @@
         const authDialog = document.querySelector('auth-dialog');
         authDialog.dispatchEvent(new Event('open-dialog'));
     });
-
-
-
-
-
-
-
-
-
-
-  // fetch("http://127.0.0.1:8000/api/auth/login/", {
-  //     method: "POST",
-  //     headers: {
-  //         "Content-Type": "application/json"
-  //     },
-  //     body: JSON.stringify({
-  //         "username": "conrad6",
-  //         "email": "conrad@example.com",
-  //         "password": "password123"
-  //   })
-  // }).then((response) => {
-  //     if (response.ok) {
-  //           return response.json();
-  //     } else {
-  //         throw new Error("Something wrong with api");
-  //     }
-  // }).then((data) => {
-  //     console.log(data);
-  // }).catch(err => console.log(err));
-
 </script>
 </html>
