@@ -1,60 +1,70 @@
-const scheduleTokenRefresh = (expiresAt) => {
-    const expiryTime = new Date(expiresAt).getTime();
-    const currentTime = Date.now();
-    const delay = expiryTime - currentTime - 60 * 1000; // Refresh 1 minute before expiry
+let accessToken = null;
 
-    if (delay <= 0) {
-        console.warn("Token already expired. Refreshing immediately...");
-        refreshAccessToken(); // Refresh immediately if the token is already expired
-        return;
-    }
+export const setAccessToken = (token) => {
+    accessToken = token;
+}
 
-    console.log(`Scheduling token refresh in ${delay / 1000} seconds`);
-    setTimeout(() => {
-        refreshAccessToken();
-    }, delay);
-};
+export const getAccessToken = () => accessToken;
 
-const handleLoginResponse = (data) => {
-    // Save the expiration time in localStorage
-    localStorage.setItem("token_exp", data.token_exp);
-
-    // Schedule the token refresh
-    scheduleTokenRefresh(data.token_exp);
-};
-
-const refreshAccessToken = async () => {
-    try {
-        const response = await fetch("http://127.0.0.1:8000/api/auth/token/refresh/", {
+const refreshTokens = async () => {
+    await fetch('http://127.0.0.1:8002/api/token/refresh/', {
             method: "POST",
-            credentials: "include", // Include cookies
-        });
+            credentials: 'include',
+        }).then((response) => {
+            if (response.ok) {
+               return response.json();
+            } else {
+                // TODO: logout user
+                console.error("Unable to refresh tokens. logging out")
+            }
+    }).then((data) => {
+        setAccessToken(data.access_token);
+        console.log("Tokens refreshed");
+    }).catch((error) => {
+        console.error("Unable to refresh tokens: ", error);
+    });
+}
 
-        if (!response.ok) {
-            throw new Error("Failed to refresh token");
+window.onload = async () => {
+    console.log("Page refreshed, trying to get new tokens....");
+    if (!accessToken) {
+        try {
+            await refreshTokens();
+        } catch (error) {
+            console.error("Unable to refresh tokens on page load: ", error);
         }
-
-        const data = await response.json();
-        console.log("Token refreshed successfully:", data);
-
-        // Update the expiration time in localStorage
-        localStorage.setItem("token_exp", data.expires_at);
-
-        // Schedule the next refresh
-        scheduleTokenRefresh(data.expires_at);
-        return true;
-    } catch (error) {
-        console.error("Error refreshing access token:", error);
-        return false;
-    }
-};
-
-document.addEventListener("DOMContentLoaded", () => {
-    const tokenExp = localStorage.getItem("token_exp");
-    if (tokenExp) {
-        console.log("Found token expiration in localStorage:", tokenExp);
-        scheduleTokenRefresh(tokenExp);
     } else {
-        console.warn("No token expiration found. User may need to log in.");
+        console.log("Already have access token");
     }
-});
+}
+
+/**
+ * Handles API calls the server. The caller should convert to json and handle appropriately
+ * @param url The URL of the API
+ * @param options Any additional headers/payload can be added here
+ * @returns {Promise<Response>} The response from the server
+ */
+export const apiCall = async (url, options = {}) => {
+    if (!accessToken) {
+        await refreshTokens();
+    }
+
+    options.headers = {
+        ...options.headers,
+        Authorization: `Bearer ${getAccessToken()}`,
+    };
+    const response = await fetch(url, options);
+
+    if (response.status === 401) {
+        console.warn("Access token expired, refreshing...");
+        await refreshTokens()
+        options.headers.Authorization = `Bearer ${getAccessToken()}`;
+        return fetch(url, options);
+    }
+    if (!response.ok) {
+        const error = await response.json();
+        console.error(`API Error: ${response.status}`, error);
+        throw new Error(error.error || "API call failed");
+    }
+    return response
+}

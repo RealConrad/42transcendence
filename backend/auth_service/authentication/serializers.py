@@ -1,70 +1,33 @@
-from rest_framework import serializers
-from django.contrib.auth.models import User
-from rest_framework_simplejwt.serializers import TokenObtainPairSerializer, TokenVerifySerializer
+from .models import CustomUser
 from django.contrib.auth import authenticate
-from rest_framework_simplejwt.exceptions import InvalidToken, TokenError
-from rest_framework_simplejwt.tokens import UntypedToken
-from rest_framework_simplejwt.serializers import TokenRefreshSerializer
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework import serializers
+from django.contrib.auth import get_user_model
 
-
-class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
-    @classmethod
-    def get_token(cls, user):
-        token = super().get_token(user)
-        token['username'] = user.username
-        token['user_id'] = user.id
-        return token
-
-
-class CustomTokenRefreshSerializer(TokenRefreshSerializer):
-    def validate(self, attrs):
-        data = super().validate(attrs)
-        refresh = RefreshToken(attrs["refresh"])
-        user = self.context['request'].user
-        access = refresh.access_token
-        access['username'] = user.username
-        access['user_id'] = user.id
-        data["access"] = str(access)
-        return data
-
-class CustomTokenVerifySerializer(TokenVerifySerializer):
-    def validate(self, attrs):
-        data = super().validate(attrs)
-
-        try:
-            token = UntypedToken(attrs['token'])
-            data['username'] = token['username']
-            data['user_id'] = token['user_id']
-        except TokenError as e:
-            raise InvalidToken(e.args[0])
-        except KeyError:
-            raise serializers.ValidationError("Token does not contain required fields")
-        return data
-
+User = get_user_model()
 
 class RegisterSerializer(serializers.ModelSerializer):
-    # Metaclass specifies which model to use and which fields to include in the serialized output
-    class Meta:
-        model = User
-        fields = ('username', 'password')
-        extra_kwargs = {'password': {'write_only': True}}
+    password = serializers.CharField(write_only=True)
 
-    # Create a new user
+    class Meta:
+        model = CustomUser
+        fields = ('username', 'password')
+
     def create(self, validated_data):
-        user = User.objects.create_user(
+        user = CustomUser.objects.create_user(
             username=validated_data['username'],
             password=validated_data['password']
         )
         return user
-
 
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
 
     def validate(self, data):
-        user = authenticate(username=data['username'], password=data['password'])
+        user = authenticate(
+            username=data.get('username'),
+            password=data.get('password')
+        )
         if user and user.is_active:
-            return user
+            return {'user': user}
         raise serializers.ValidationError("Invalid credentials")

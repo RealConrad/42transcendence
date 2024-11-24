@@ -1,3 +1,6 @@
+import {setAccessToken} from "../../scripts/main.js";
+
+
 class AuthDialog extends HTMLElement {
 	constructor() {
 		super();
@@ -219,6 +222,7 @@ class AuthDialog extends HTMLElement {
 			}
 		}).then((data) => {
 			console.log(data);
+			setAccessToken(data.access_token);
 			this.close();
 		}).catch(err => console.log(err));
 	}
@@ -239,17 +243,16 @@ class AuthDialog extends HTMLElement {
 				return response.json();
 			} else {
 				return response.json().then((err) => {
+					console.error("Response not 200");
 					throw new Error(JSON.stringify(err));
-
 				})
 			}
 		}).then((data) => {
-			console.log(data);
+			console.log("LOGGED IN!");
+			setAccessToken(data.access_token);
 			this.close();
-			handleLoginResponse(data);
-		}).catch(err => console.log(err));
+		}).catch(err => console.error(err));
 	}
-
 
 	connectedCallback() {
 		this.render();
