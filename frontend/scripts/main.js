@@ -1,4 +1,10 @@
-let accessToken;
+let accessToken = null;
+
+export const setAccessToken = (token) => {
+    accessToken = token;
+}
+
+export const getAccessToken = () => accessToken;
 
 const refreshTokens = async () => {
     await fetch('http://127.0.0.1:8002/api/token/refresh/', {
@@ -12,7 +18,7 @@ const refreshTokens = async () => {
                 console.error("Unable to refresh tokens. logging out")
             }
     }).then((data) => {
-        accessToken = data.access_token;
+        setAccessToken(data.access_token);
         console.log("Tokens refreshed");
     }).catch((error) => {
         console.error("Unable to refresh tokens: ", error);
@@ -45,14 +51,14 @@ export const apiCall = async (url, options = {}) => {
 
     options.headers = {
         ...options.headers,
-        Authorization: `Bearer ${accessToken}`,
+        Authorization: `Bearer ${getAccessToken()}`,
     };
     const response = await fetch(url, options);
 
     if (response.status === 401) {
         console.warn("Access token expired, refreshing...");
         await refreshTokens()
-        options.headers.Authorization = `Bearer ${accessToken}`;
+        options.headers.Authorization = `Bearer ${getAccessToken()}`;
         return fetch(url, options);
     }
     if (!response.ok) {
