@@ -5,11 +5,16 @@ networks:
 
 
 services:
-  auth_db:
+  # AUTH SERVICE
+  authdb:
     image: postgres:13
-    container_name: auth_db
+    container_name: authdb
+    environment:
+      POSTGRES_DB: ${AUTH_POSTGRES_DB}
+      POSTGRES_USER: ${AUTH_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${AUTH_POSTGRES_PASSWORD}
     env_file:
-      - .env.auth
+      - .env
     ports:
       - "5432:5432"
     volumes:
@@ -24,36 +29,71 @@ services:
     ports:
       - "8000:8000"
     env_file:
-      - .env.auth
+      - .env
     depends_on:
-      - auth_db
+      - authdb
     networks:
       - transcendence
 
-#  game_db:
-#    image: postgres:13
-#    container_name: game_db
-#    env_file:
-#      - .env.game
-#    ports:
-#      - "5433:5432"
-#    volumes:
-#      - game_postgres_data:/var/lib/postgresql/data
-#    networks:
-#      - transcendence
-#
-#  gameservice:
-#    build: ./backend/game_service
-#    container_name: gameservice
-#    image: gameservice
-#    ports:
-#      - "8001:8001"
-#    env_file:
-#      - .env.game
-#    depends_on:
-#      - game_db
-#    networks:
-#      - transcendence
+  # GAME SERVICE
+  gamedb:
+    image: postgres:13
+    container_name: gamedb
+    environment:
+      POSTGRES_DB: ${GAME_POSTGRES_DB}
+      POSTGRES_USER: ${GAME_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${GAME_POSTGRES_PASSWORD}
+    env_file:
+      - .env
+    ports:
+      - "5433:5432"
+    volumes:
+      - game_postgres_data:/var/lib/postgresql/data
+    networks:
+      - transcendence
+
+  gameservice:
+    build: ./backend/game_service
+    container_name: gameservice
+    image: gameservice
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env
+    depends_on:
+      - gamedb
+    networks:
+      - transcendence
+
+  # JWT SERVICE
+  jwtdb:
+    image: postgres:13
+    container_name: jwtdb
+    environment:
+      POSTGRES_DB: ${JWT_POSTGRES_DB}
+      POSTGRES_USER: ${JWT_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${JWT_POSTGRES_PASSWORD}
+    env_file:
+      - .env
+    ports:
+      - "5434:5432"
+    volumes:
+      - jwt_postgres_data:/var/lib/postgresql/data
+    networks:
+      - transcendence
+
+  jwtservice:
+    build: ./backend/jwt_service
+    container_name: jwtservice
+    image: jwtservice
+    ports:
+      - "8002:8002"
+    env_file:
+      - .env
+    depends_on:
+      - jwtdb
+    networks:
+      - transcendence
 
   nginx:
     image: nginx:latest
@@ -70,4 +110,8 @@ services:
 
 volumes:
   auth_postgres_data:
+    name: transcendence_auth_postgres_data
   game_postgres_data:
+    name: transcendence_game_postgres_data
+  jwt_postgres_data:
+    name: transcendence_jwt_postgres_data
