@@ -5,7 +5,7 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.authentication import BaseAuthentication
 
 
-JWT_SERVICE_URL = "http://127.0.0.1:8002/api/token/verify/"
+JWT_SERVICE_URL = "http://jwtservice:8002/api/token/verify/"
 
 class CustomJWTAuthentication(BaseAuthentication):
     def authenticate(self, request):
@@ -14,7 +14,7 @@ class CustomJWTAuthentication(BaseAuthentication):
         if not auth_header or not auth_header.startswith("Bearer "):
             raise AuthenticationFailed("Authorization header is missing or invalid")
 
-        token = auth_header.split(" ")[1]  # Extract the token from the header
+        token = auth_header.split(" ")[1] # Extract the token from the header
         print(f"TOKEN: {token}")
         try:
             jwt_response = requests.post(

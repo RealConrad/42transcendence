@@ -5,7 +5,7 @@ from rest_framework.permissions import AllowAny
 from django.conf import settings
 from .serializers import RegisterSerializer, LoginSerializer
 
-JWT_SERVICE_URL = 'http://localhost:8002/api/token/generate-tokens/'
+JWT_SERVICE_URL = 'http://jwtservice:8002/api/token/generate-tokens/'
 
 class RegisterView(generics.CreateAPIView):
     permission_classes = [AllowAny]
