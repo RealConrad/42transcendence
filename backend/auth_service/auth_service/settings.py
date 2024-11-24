@@ -22,10 +22,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-65y*@c-z%_383ikv85s1lu_(hadx&tr88_%d1k_qpuolavj!#1'
+SECRET_KEY = os.getenv('AUTH_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = ['authservice', 'localhost', '127.0.0.1']
 
@@ -94,21 +94,15 @@ REST_FRAMEWORK = {
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# TODO: Change this to not be hardcoded:
-# DATABASES = {
-#     "default": {
-#         "ENGINE": "django.db.backends.postgresql",
-#         "NAME": os.getenv('POSTGRES_DB'),
-#         "USER": os.getenv('POSTGRES_USER'),
-#         "PASSWORD": os.getenv('POSTGRES_PASSWORD'),
-#         "HOST": os.getenv('DB_HOST'),
-#         "PORT": os.getenv('DB_PORT'),
-#     }
-# }
+
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": "sqllite3"
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": os.getenv('AUTH_POSTGRES_DB'),
+        "USER": os.getenv('AUTH_POSTGRES_USER'),
+        "PASSWORD": os.getenv('AUTH_POSTGRES_PASSWORD'),
+        "HOST": os.getenv('AUTH_DB_HOST'),
+        "PORT": os.getenv('AUTH_DB_PORT'),
     }
 }
 

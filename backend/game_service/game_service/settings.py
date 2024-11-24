@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-xvslza7%7esulvlv!i_9s=)))_opa6h9pp(w9vh8%5zkukg81&'
+SECRET_KEY = os.getenv('GAME_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
@@ -91,11 +91,11 @@ WSGI_APPLICATION = 'game_service.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv('POSTGRES_DB'),
-        "USER": os.getenv('POSTGRES_USER'),
-        "PASSWORD": os.getenv('POSTGRES_PASSWORD'),
-        "HOST": os.getenv('DB_HOST'),
-        "PORT": os.getenv('DB_PORT'),
+        "NAME": os.getenv('GAME_POSTGRES_DB'),
+        "USER": os.getenv('GAME_POSTGRES_USER'),
+        "PASSWORD": os.getenv('GAME_POSTGRES_PASSWORD'),
+        "HOST": os.getenv('GAME_DB_HOST'),
+        "PORT": os.getenv('GAME_DB_PORT'),
     }
 }
 
@@ -152,21 +152,11 @@ LOGGING = {
     'disable_existing_loggers': False,
     'handlers': {
         'console': {
-            'level': 'INFO',  # Suppress DEBUG messages
+            'level': 'INFO',
             'class': 'logging.StreamHandler',
         },
     },
     'loggers': {
-        # 'django.server': {
-        #     'handlers': ['console'],
-        #     'level': 'INFO',
-        #     'propagate': False,
-        # },
-        # 'oauth': {
-        #     'handlers': ['console'],
-        #     'level': 'INFO',  # Suppress DEBUG messages from channels_redis
-        #     'propagate': False,
-        # },
         'match': {
             'handlers': ['console'],
             'level': 'INFO',
