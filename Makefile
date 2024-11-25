@@ -7,6 +7,9 @@ all: up
 down:
 	$(DOCKER_COMPOSE) down
 
+clean_volume:
+    $(DOCKER_COMPOSE) down -v
+
 start:
 	$(DOCKER_COMPOSE) start
 
@@ -24,7 +27,7 @@ clean: down
 	docker network prune -f
 	docker image prune -f
 
-fclean: clean
+fclean: clean clean_volume
 	docker system prune -a -f
 
 re: fclean all
