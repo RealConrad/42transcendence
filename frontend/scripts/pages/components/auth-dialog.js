@@ -1,5 +1,5 @@
-import {setAccessToken} from "./api/api.js";
-import {BASE_AUTH_API_URL, FORM_ERROR_MESSAGES} from "./utils/constants.js";
+import {setAccessToken} from "../../api/api.js";
+import {BASE_AUTH_API_URL, FORM_ERROR_MESSAGES} from "../../utils/constants.js";
 
 
 class AuthDialog extends HTMLElement {
@@ -8,10 +8,9 @@ class AuthDialog extends HTMLElement {
 		this.attachShadow({ mode: 'open' });
 	}
 
-	async html() {
-		await Promise.resolve(); // TODO: Change this so that we wait for the actual HTML
+	html() {
 		return `
-			<link rel="stylesheet" href="../styles/auth-dialog.css">
+			<link rel="stylesheet" href="../../../styles/auth-dialog.css">
 			<div class="overlay" id="overlay">
 				<div class="dialog">
 					<div class="login" id="sign-in-view">
@@ -111,7 +110,7 @@ class AuthDialog extends HTMLElement {
 	}
 
 	async render() {
-		this.shadowRoot.innerHTML = await this.html();
+		this.shadowRoot.innerHTML = this.html();
 
 		this.shadowRoot.getElementById("toggle-register").addEventListener("click", (e) => {
 			e.preventDefault();
@@ -202,6 +201,10 @@ class AuthDialog extends HTMLElement {
 		});
 	}
 
+	attatchEventListeners() {
+
+	}
+
 	register(username, password) {
 		fetch(`${BASE_AUTH_API_URL}/register/`, {
 			method: "POST",
@@ -257,6 +260,7 @@ class AuthDialog extends HTMLElement {
 
 	connectedCallback() {
 		this.render();
+		this.attatchEventListeners()
 	}
 }
 
