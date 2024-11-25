@@ -82,11 +82,11 @@ WSGI_APPLICATION = 'mfa_service.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv("POSTGRES_DB"),
-        'USER': os.getenv("POSTGRES_USER"),
-        'PASSWORD': os.getenv("POSTGRES_PASSWORD"),
-        'HOST': os.getenv("POSTGRES_HOST"),
-        'PORT': os.getenv("POSTGRES_PORT")
+        'NAME': os.getenv("MFA_POSTGRES_DB"),
+        'USER': os.getenv("MFA_POSTGRES_USER"),
+        'PASSWORD': os.getenv("MFA_POSTGRES_PASSWORD"),
+        'HOST': os.getenv("MFA_POSTGRES_HOST"),
+        'PORT': os.getenv("MFA_POSTGRES_PORT")
     }
 }
 
