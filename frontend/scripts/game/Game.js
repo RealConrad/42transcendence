@@ -17,7 +17,7 @@ import AIController from "./controllers/AIController.js";
 import InputManager from "./managers/InputManager.js";
 import UIManager from "./managers/UIManager.js";
 import eventEmitter from "./EventEmitter.js";
-import { apiCall} from "../main.js";
+import { apiCall} from "../api/api.js";
 
 export default class Game {
     constructor(canvas, vsAI = true) {
