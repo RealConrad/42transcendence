@@ -14,8 +14,8 @@
     /*--color-dark: #343a40;*/
 
     /* Text Colors */
-    /*--text-color: #333333;*/
-    /*--text-light: #ffffff;*/
+    --text-color: #333333;
+    --text-light: #ffffff;
 
     /* Background Colors */
     --background-login: #FFCB13;
