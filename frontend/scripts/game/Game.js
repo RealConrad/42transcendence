@@ -1,4 +1,12 @@
-import {PADDLE_HEIGHT, PADDLE_SPEED, PADDLE_WIDTH, MAX_SCORE, CANVAS_HEIGHT, CANVAS_WIDTH} from "../utils/constants.js";
+import {
+    PADDLE_HEIGHT,
+    PADDLE_SPEED,
+    PADDLE_WIDTH,
+    MAX_SCORE,
+    CANVAS_HEIGHT,
+    CANVAS_WIDTH,
+    BASE_GAME_API_URL
+} from "../utils/constants.js";
 import Paddle from "./models/Paddle.js";
 import Player from "./models/Player.js";
 import Ball from "./models/Ball.js";
@@ -9,7 +17,7 @@ import AIController from "./controllers/AIController.js";
 import InputManager from "./managers/InputManager.js";
 import UIManager from "./managers/UIManager.js";
 import eventEmitter from "./EventEmitter.js";
-
+import { apiCall} from "../main.js";
 
 export default class Game {
     constructor(canvas, vsAI = true) {
@@ -91,9 +99,9 @@ export default class Game {
     checkWinCondition() {
         if (this.player1.score === this.maxScore || this.player2.score === this.maxScore) {
             this.isGameOver = true;
-            this.displayWinMessage()
+            // this.displayWinMessage()
             // TODO: after auth service refactor implement this
-            // this.saveMatch();
+            this.saveMatch();
         }
     }
 
@@ -117,22 +125,27 @@ export default class Game {
         document.getElementById("player2Score").innerHTML = this.player2.score;
     }
 
-    saveMatch() {
-        fetch('http://127.0.0.1:8001/api/game/save-match/', {
-            method: "POST",
+    async saveMatch() {
+        const payload = {
+            "player1_username": this.player1.username,
+            "player2_username": this.player2.username,
+            "player1_score": this.player1.score,
+            "player2_score": this.player2.score,
+        }
+        const response = await apiCall(`${BASE_GAME_API_URL}/save-match/`, {
+            method: 'POST',
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
             },
             credentials: 'include',
-            body: JSON.stringify({
-                "player1_username": this.player1,
-                "player2_username": this.player2,
-                "player1_score": this.player1.score,
-                "player2_score": this.player2.score,
-            })
-        }).then((response) => {
-            //something here later hehe
-        })
+            body: JSON.stringify(payload)
+        });
+        if (response.ok) {
+            await response.json();
+            console.log("Saved match");
+        } else {
+            console.error("Failed to save match")
+        }
     }
 
     displayWinMessage() {

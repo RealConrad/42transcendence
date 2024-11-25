@@ -1,3 +1,7 @@
+import {setAccessToken} from "./api/api.js";
+import {BASE_AUTH_API_URL, FORM_ERROR_MESSAGES} from "./utils/constants.js";
+
+
 class AuthDialog extends HTMLElement {
 	constructor() {
 		super();
@@ -5,9 +9,9 @@ class AuthDialog extends HTMLElement {
 	}
 
 	async html() {
-		await Promise.resolve(); // wait a short duraiton
+		await Promise.resolve(); // TODO: Change this so that we wait for the actual HTML
 		return `
-			<link rel="stylesheet" href="../../styles/auth-dialog.css">
+			<link rel="stylesheet" href="../styles/auth-dialog.css">
 			<div class="overlay" id="overlay">
 				<div class="dialog">
 					<div class="login" id="sign-in-view">
@@ -134,20 +138,20 @@ class AuthDialog extends HTMLElement {
 			let isValid = true;
 
 			if (!username) {
-				this.showError("signin-username", "Username is required.");
+				this.showError("signin-username", FORM_ERROR_MESSAGES.usernameRequired);
 				isValid = false;
 			} else if (!this.isValidInput(username)) {
-				this.showError("signin-username", "Invalid characters in username.");
+				this.showError("signin-username", FORM_ERROR_MESSAGES.invalidUsername);
 				isValid = false;
 			} else {
 				this.hideError("signin-username");
 			}
 
 			if (!password) {
-				this.showError("signin-password", "Password is required.");
+				this.showError("signin-password", FORM_ERROR_MESSAGES.passwordRequired);
 				isValid = false;
 			} else if (!this.isValidInput(password)) {
-				this.showError("signin-password", "Invalid characters in password.");
+				this.showError("signin-password", FORM_ERROR_MESSAGES.invalidPassword);
 				isValid = false;
 			} else {
 				this.hideError("signin-password");
@@ -166,27 +170,27 @@ class AuthDialog extends HTMLElement {
 			let isValid = true;
 
 			if (!username) {
-				this.showError("register-username", "Username is required.");
+				this.showError("register-username", FORM_ERROR_MESSAGES.usernameRequired);
 				isValid = false;
 			} else if (!this.isValidInput(username)) {
-				this.showError("register-username", "Invalid characters in username.");
+				this.showError("register-username", FORM_ERROR_MESSAGES.invalidUsername);
 				isValid = false;
 			} else {
 				this.hideError("register-username");
 			}
 
 			if (!password) {
-				this.showError("register-password", "Password is required.");
+				this.showError("register-password", FORM_ERROR_MESSAGES.passwordRequired);
 				isValid = false;
 			} else if (!this.isValidInput(password)) {
-				this.showError("register-password", "Invalid characters in password.");
+				this.showError("register-password", FORM_ERROR_MESSAGES.invalidPassword);
 				isValid = false;
 			} else {
 				this.hideError("register-password");
 			}
 
 			if (password !== confirmPassword) {
-				this.showError("register-confirm-password", "Passwords do not match.");
+				this.showError("register-confirm-password", FORM_ERROR_MESSAGES.passwordsDoNotMatch);
 				isValid = false;
 			} else {
 				this.hideError("register-confirm-password");
@@ -199,7 +203,7 @@ class AuthDialog extends HTMLElement {
 	}
 
 	register(username, password) {
-		fetch("http://127.0.0.1:8000/api/auth/register/", {
+		fetch(`${BASE_AUTH_API_URL}/register/`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json"
@@ -219,12 +223,13 @@ class AuthDialog extends HTMLElement {
 			}
 		}).then((data) => {
 			console.log(data);
+			setAccessToken(data.access_token);
 			this.close();
 		}).catch(err => console.log(err));
 	}
 
 	login(username, password) {
-		fetch("http://127.0.0.1:8000/api/auth/login/", {
+		fetch(`${BASE_AUTH_API_URL}/login/`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json"
@@ -239,17 +244,16 @@ class AuthDialog extends HTMLElement {
 				return response.json();
 			} else {
 				return response.json().then((err) => {
+					console.error("Response not 200");
 					throw new Error(JSON.stringify(err));
-
 				})
 			}
 		}).then((data) => {
-			console.log(data);
+			console.log("LOGGED IN!");
+			setAccessToken(data.access_token);
 			this.close();
-			handleLoginResponse(data);
-		}).catch(err => console.log(err));
+		}).catch(err => console.error(err));
 	}
-
 
 	connectedCallback() {
 		this.render();

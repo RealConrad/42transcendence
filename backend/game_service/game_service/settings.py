@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-xvslza7%7esulvlv!i_9s=)))_opa6h9pp(w9vh8%5zkukg81&'
+SECRET_KEY = os.getenv('GAME_SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
@@ -29,7 +29,7 @@ DEBUG = os.getenv('DEBUG', 'True') == 'True'
 CSRF_COOKIE_SAMESITE = 'Lax'
 SESSION_COOKIE_SAMESITE = 'Lax'
 
-ALLOWED_HOSTS = ['authservice', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['gameservice', 'localhost', '127.0.0.1']
 
 CORS_ORIGIN_WHITELIST = [
     "http://localhost",
@@ -91,11 +91,11 @@ WSGI_APPLICATION = 'game_service.wsgi.application'
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql",
-        "NAME": os.getenv('POSTGRES_DB'),
-        "USER": os.getenv('POSTGRES_USER'),
-        "PASSWORD": os.getenv('POSTGRES_PASSWORD'),
-        "HOST": os.getenv('DB_HOST'),
-        "PORT": os.getenv('DB_PORT'),
+        "NAME": os.getenv('GAME_POSTGRES_DB'),
+        "USER": os.getenv('GAME_POSTGRES_USER'),
+        "PASSWORD": os.getenv('GAME_POSTGRES_PASSWORD'),
+        "HOST": os.getenv('GAME_DB_HOST'),
+        "PORT": os.getenv('GAME_DB_PORT'),
     }
 }
 
@@ -141,12 +141,18 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'game_service.authentication.CustomJWTAuthentication',
+    ),
+}
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'handlers': {
         'console': {
-            'level': 'INFO',  # Suppress DEBUG messages
+            'level': 'INFO',
             'class': 'logging.StreamHandler',
         },
     },
