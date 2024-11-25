@@ -13,6 +13,7 @@
   --highlight-color: rgb(255, 255, 255);
   --color: rgb(172, 172, 172);
   --lowlight-color: rgb(100, 100, 100, 0.7);
+  --animation-delay-delay: 1;
 }
 
 html, body {
@@ -21,7 +22,6 @@ html, body {
   margin: 0;
   padding: 0;
   background-color: var(--background-color);
-  font-family: 'Press Start 2P';
   display: flex;
   flex-direction: column;
   justify-content: center;

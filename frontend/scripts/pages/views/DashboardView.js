@@ -119,7 +119,6 @@ export class DashboardView extends HTMLElement {
     updateRightMenuContent(container, menuTag) {
         if (menuTag) {
             container.innerHTML = "";
-
             const menuComponent = document.createElement(menuTag);
             container.appendChild(menuComponent);
         }
