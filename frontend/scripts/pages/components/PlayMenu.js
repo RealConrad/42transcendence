@@ -1,0 +1,26 @@
+export class PlayMenu extends HTMLElement {
+    constructor() {
+        super();
+        this.attachShadow({mode: 'open'})
+    }
+
+    connectedCallback() {
+        this.render();
+    }
+
+    render() {
+        this.shadowRoot.innerHTML = this.html();
+    }
+
+    html() {
+        return `
+            <link rel="stylesheet" href="../../../styles/style.css">
+            <div class="menu-option"><button class>vs P2</button><span class="button-description">we will find you some human opponent</span></div>
+            <div class="menu-option"><button class>vs AI</button><span class="button-description">don’t worry, its not chatGPT</span></div>
+            <div class="menu-option"><button class>local</button><span class="button-description">one keyboard? just dont elbow each other</span></div>
+            <div class="menu-option"><button class>invite</button><span class="button-description">challenge friend in a private game</span></div>
+        `
+    }
+}
+
+customElements.define('play-menu', PlayMenu);
