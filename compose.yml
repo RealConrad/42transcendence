@@ -21,7 +21,7 @@ services:
     networks:
       - transcendence
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      test: [ "CMD-SHELL", "pg_isready -U admin -d ${AUTH_POSTGRES_DB}" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -30,20 +30,19 @@ services:
     build: ./backend/auth_service
     container_name: authservice
     image: authservice
-    ports:
-      - "8000:8000"
+    restart: always
     env_file:
       - .env
     depends_on:
-      auth_db:
+      authdb:
         condition: service_healthy
     networks:
       - transcendence
 
 # MFA SERVICE
-  mfa_db:
+  mfadb:
     image: postgres:13
-    container_name: mfa_db
+    container_name: mfadb
     restart: always
     environment:
       POSTGRES_DB: ${MFA_POSTGRES_DB}
@@ -58,20 +57,18 @@ services:
     networks:
       - transcendence
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      test: [ "CMD-SHELL", "pg_isready -U admin -d ${MFA_POSTGRES_DB}" ]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  mfa-service:
+  mfaservice:
     build: ./backend/mfa_service
-    container_name: mfa-service
-    image: mfa-service
+    container_name: mfaservice
+    image: mfaservice
     restart: always
-    ports:
-      - "8001:8001"
     depends_on:
-      mfa_db:
+      mfadb:
         condition: service_healthy
     env_file:
       - .env
@@ -94,17 +91,22 @@ services:
       - jwt_postgres_data:/var/lib/postgresql/data
     networks:
       - transcendence
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d ${JWT_POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   jwtservice:
     build: ./backend/jwt_service
     container_name: jwtservice
     image: jwtservice
-    ports:
-      - "8002:8002"
+    restart: always
     env_file:
       - .env
     depends_on:
-      - jwtdb
+      jwtdb:
+        condition: service_healthy
     networks:
       - transcendence
 
@@ -119,22 +121,27 @@ services:
     env_file:
       - .env
     ports:
-      - "5433:5432"
+      - "5435:5432"
     volumes:
       - game_postgres_data:/var/lib/postgresql/data
     networks:
       - transcendence
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d ${GAME_POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   gameservice:
     build: ./backend/game_service
     container_name: gameservice
     image: gameservice
-    ports:
-      - "8001:8001"
+    restart: always
     env_file:
       - .env
     depends_on:
-      - gamedb
+      gamedb:
+        condition: service_healthy
     networks:
       - transcendence
 
