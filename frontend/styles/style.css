@@ -1,8 +1,7 @@
 /* Main CSS configurations */
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
-
-
+@import "./cursor.css";
 
 :root {
   --top-bottom-height: 10vh;
@@ -10,6 +9,9 @@
   --game-width: calc(var(--game-height) * 16 / 9);
   --paddle-width: calc(var(--game-width) / 128);
   --paddle-height: calc(var(--game-height) / 10);
+  --background-yellow: #FFCB13;
+  --text-color: #333333;
+  --text-light: #ffffff;
   --font-size: 3vh; 
   --background-color: black;
   --highlight-color: rgb(255, 255, 255);
@@ -30,6 +32,15 @@ html, body {
   align-items: center;
   overflow: hidden;
   font-family: 'Press Start 2P', 'sans-serif';
+}
+
+button {
+  border: none;
+  all: unset;
+}
+
+button:focus {
+  outline: none;
 }
 
 header {
@@ -133,7 +144,6 @@ right-menu .menu-option button {
   }
 }
 
-
 .menu-option:hover button {
   color: #fff; /* Sets text color to white on hover */
   animation: flickerGlow 1s infinite;
@@ -155,65 +165,25 @@ right-menu .menu-option button {
   text-align: right;
 }
 
-/* Shaking effect */
-@keyframes shake {
-  0%, 100% { transform: translate(calc(var(--paddle-width) * -0.4), calc(var(--paddle-width) * -0.4)); }
-  10%, 50%, 90% { transform: translate(calc(var(--paddle-width) * -0.8), calc(var(--paddle-width) * -0.4)); }
-  20%, 60% { transform: translate(0px, calc(var(--paddle-width) * -0.4)); }
-  30%, 70%, 90% { transform: translate(calc(var(--paddle-width) * -0.4), calc(var(--paddle-width) * -0.8)); }
-  20%, 40%, 80% { transform: translate(calc(var(--paddle-width) * -0.4), 0px); }
+auth-dialog {
+	display: none;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+    z-index: 100;
 }
 
-@keyframes after-shake {
-  90%, 10% { transform: translate(calc(var(--paddle-width) * -0.4), calc(var(--paddle-width) * -0.4)); }
-  0%, 40%, 100% { transform: translate(calc(var(--paddle-width) * -0.8), calc(var(--paddle-width) * -0.4)); }
-  10%, 50% { transform: translate(0px, calc(var(--paddle-width) * -0.4)); }
-  20%, 60%, 80% { transform: translate(calc(var(--paddle-width) * -0.4), calc(var(--paddle-width) * -0.8)); }
-  10%, 30%, 70% { transform: translate(calc(var(--paddle-width) * -0.4), 0px); }
-}
-
-.after-image-shake {
-  animation: shake 0.6s infinite;
-}
-.after-image-after-shake {
-  animation: after-shake 0.4s infinite;
-}
-
-.cursor-after-image {
+.orange-button {
   position: absolute;
-  width: calc(var(--paddle-width) * 1.2); 
-  height: calc(var(--paddle-width) * 1.2); 
-  background-color: rgba(255, 255, 255, 0.2);
-  pointer-events: none;
-}
-
-.cursor-after-image.enlarged {
-  width: calc(var(--paddle-width) * 1.8);
-  height: calc(var(--paddle-width) * 1.8);
-}
-
-.cursor-after-image.yellow {
-  background-color: rgba(255, 230, 0, 0.445);
-}
-
-.cursor-after-image.red {
-  background-color: rgba(255, 38, 0, 0.404);
-}
-
-.cursor-after-image.blue {
-  background-color: rgba(0, 81, 255, 0.445);
-}
-
-.cursor-after-image.green {
-  background-color: rgba(30, 255, 0, 0.274);
-}
-
-.cursor-after-image.purple {
-  background-color: rgba(99, 1, 112, 0.277);
-}
-
-.cursor-after-image.pink {
-  background-color: rgba(255, 0, 221, 0.277);
+  right: 100px;
+  top: 30px;
+  background: var(--background-yellow);
+  color: black;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 20px;
 }
 
 /* Media queries */
