@@ -3,6 +3,9 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from django.conf import settings
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK
+
+from .models import CustomUser
 from .serializers import RegisterSerializer, LoginSerializer
 
 JWT_SERVICE_URL = 'http://jwtservice:8002/api/token/generate-tokens/'
@@ -71,7 +74,8 @@ class LoginView(generics.GenericAPIView):
                     "detail": "User logged in successfully",
                     "username": user.username,
                     "user_id": user.id,
-                    "access_token": access_token
+                    "access_token": access_token,
+                    "mfa_enable_flag": user.mfa_enabled,
                 }, status=status.HTTP_200_OK)
 
                 response.set_cookie(
@@ -87,3 +91,37 @@ class LoginView(generics.GenericAPIView):
                                 status=jwt_response.status_code)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
+class SetMFAFlagView(generics.GenericAPIView):
+    """
+    Generic view to update the MFA flag for a user
+    """
+    permission_classes = [AllowAny]
+
+    def put(self, request, *args, **kwargs):
+        user_id = request.data.get('user_id')
+        username = request.data.get('username')
+        mfa_enabled = request.data.get('mfa_enabled')
+
+        if mfa_enabled is None:
+            return Response(
+                {'detail': 'mfa_enabled flag is required'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            user = CustomUser.objects.get(id=user_id, username=username)
+        except CustomUser.DoesNotExist:
+            return Response(
+                {'detail': 'User not found'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user.mfa_enabled = mfa_enabled
+        user.save()
+
+        flag_status = "enabled" if mfa_enabled else "disabled"
+        return Response(
+            {'detail': f'MFA flag set to {flag_status}'},
+            status=status.HTTP_200_OK
+        )
