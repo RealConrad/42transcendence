@@ -27,6 +27,7 @@ html, body {
   justify-content: center;
   align-items: center;
   overflow: hidden;
+  font-family: 'Press Start 2P', 'sans-serif';
 }
 
 header {
@@ -148,6 +149,9 @@ right-menu .menu-option button {
   background-color: white;
 }
 
+.play-button {
+  text-align: right;
+}
 
 /* Shaking effect */
 @keyframes shake {
@@ -372,5 +376,4 @@ right-menu .menu-option button {
   header, footer {
     display: none; /* Hide header and footer */
   }
-
 }

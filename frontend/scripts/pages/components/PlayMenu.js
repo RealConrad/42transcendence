@@ -15,8 +15,14 @@ export class PlayMenu extends HTMLElement {
     html() {
         return `
             <link rel="stylesheet" href="../../../styles/style.css">
-            <div class="menu-option"><button class>vs AI</button><span class="button-description">don’t worry, its not chatGPT</span></div>
-            <div class="menu-option"><button class>local</button><span class="button-description">one keyboard? just dont elbow each other</span></div>
+            <div class="menu-option">
+                <button style="text-align: right">vs AI</button>
+                <span class="button-description">don’t worry, its not chatGPT</span>
+            </div>
+            <div class="menu-option">
+                <button style="text-align: right">local</button>
+                <span class="button-description">one keyboard? just dont elbow each other</span>
+            </div>
         `
     }
 }

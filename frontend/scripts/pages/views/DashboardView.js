@@ -2,12 +2,17 @@ export class DashboardView extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({ mode: "open" });
+        this.isGameRunning = false;
+        this.canvas = null;
+        this.ctx = null;
+        this.leftPaddle = null;
+        this.rightPaddle = null;
     }
 
     connectedCallback() {
         this.loadMenuComponents();
         this.render();
-        this.initializeGame();
+        this.initMenu();
     }
 
     render() {
@@ -40,47 +45,84 @@ export class DashboardView extends HTMLElement {
         import("../components/TournamentMenu.js");
     }
 
-    initializeGame() {
-        const canvas = this.shadowRoot.getElementById("gameCanvas");
-        const ctx = canvas.getContext("2d");
+    initMenu() {
+        this.canvas = this.shadowRoot.getElementById("gameCanvas");
+        this.ctx = this.canvas.getContext("2d");
 
         const updateCanvasSize = () => {
-            canvas.width = this.shadowRoot.host.offsetWidth;
-            canvas.height = this.shadowRoot.host.offsetHeight;
-            this.drawMiddleLine(ctx, canvas);
+            this.canvas.width = this.shadowRoot.host.offsetWidth;
+            this.canvas.height = this.shadowRoot.host.offsetHeight;
+            this.drawMiddleLine();
         };
 
         updateCanvasSize();
         window.addEventListener("resize", updateCanvasSize);
 
-        const leftPaddle = this.createPaddle();
-        const rightPaddle = this.createPaddle();
+        // Create paddles for display purposes
+        this.leftPaddle = this.createPaddle("left");
+        this.rightPaddle = this.createPaddle("right");
 
-        this.initializeMenuInteractions(leftPaddle, rightPaddle, canvas);
+        // Initialize paddle movement based on mouse position
+        this.initializePaddleMovement();
+        this.initializeMenuInteractions();
     }
 
-    drawMiddleLine(ctx, canvas) {
-        const paddleWidth = canvas.width / 128;
-        ctx.strokeStyle = "white";
-        ctx.lineWidth = paddleWidth;
-        ctx.setLineDash([paddleWidth, paddleWidth]);
+    drawMiddleLine() {
+        const paddleWidth = this.canvas.width / 128;
+        this.ctx.strokeStyle = "white";
+        this.ctx.lineWidth = paddleWidth;
+        this.ctx.setLineDash([paddleWidth, paddleWidth]);
 
-        ctx.beginPath();
-        ctx.moveTo(canvas.width / 2, 0);
-        ctx.lineTo(canvas.width / 2, canvas.height);
-        ctx.stroke();
+        this.ctx.beginPath();
+        this.ctx.moveTo(this.canvas.width / 2, 0);
+        this.ctx.lineTo(this.canvas.width / 2, this.canvas.height);
+        this.ctx.stroke();
 
-        ctx.setLineDash([]); // Reset line dash
+        this.ctx.setLineDash([]); // Reset line dash
     }
 
-    createPaddle() {
+    createPaddle(side) {
         const paddle = document.createElement("div");
         paddle.classList.add("paddle");
-        this.shadowRoot.appendChild(paddle);
+        paddle.style.height = `${this.canvas.height * 0.1}px`;
+        paddle.style.top = `${(this.canvas.height - paddle.offsetHeight) / 2}px`; // Center vertically
+        if (side === "left") {
+            this.shadowRoot.querySelector("left-menu").appendChild(paddle);
+            paddle.style.left = '0px';
+
+        } else if (side === "right") {
+            this.shadowRoot.querySelector("right-menu").appendChild(paddle);
+            paddle.style.right = '0px';
+        }
         return paddle;
     }
 
-    initializeMenuInteractions(leftPaddle, rightPaddle, canvas) {
+
+    initializePaddleMovement() {
+        document.addEventListener("mousemove", (e) => {
+            const canvasRect = this.canvas.getBoundingClientRect();
+            const paddleHeight = this.leftPaddle.offsetHeight;
+            const mouseY = e.clientY - canvasRect.top;
+
+            // move paddle if cursor on left menu side
+            if (e.clientX <= canvasRect.left + canvasRect.width / 2) {
+                this.leftPaddle.style.top = `${Math.max(
+                    0,
+                    Math.min(mouseY - paddleHeight / 2, this.canvas.height - paddleHeight)
+                )}px`;
+            }
+
+            // move paddle if cursor on right menu side
+            if (e.clientX >= canvasRect.left + canvasRect.width / 2) {
+                this.rightPaddle.style.top = `${Math.max(
+                    0,
+                    Math.min(mouseY - paddleHeight / 2, this.canvas.height - paddleHeight)
+                )}px`;
+            }
+        });
+    }
+
+    initializeMenuInteractions() {
         const leftMenu = this.shadowRoot.querySelector("left-menu");
         const rightMenuContainer = this.shadowRoot.getElementById("right-menu-container");
 
@@ -97,21 +139,6 @@ export class DashboardView extends HTMLElement {
             if (option) {
                 const buttonText = option.querySelector("button").textContent.trim();
                 this.updateRightMenuContent(rightMenuContainer, contentMapping[buttonText]);
-                this.stickPaddleToMenuOption(leftPaddle, option);
-            }
-        });
-
-        document.addEventListener("mousemove", (e) => {
-            const canvasRect = canvas.getBoundingClientRect();
-            const paddleHeight = canvasRect.height * 0.1;
-
-            const mouseY = e.clientY - canvasRect.top - paddleHeight / 2;
-            if (mouseY >= 0 && mouseY + paddleHeight <= canvasRect.height) {
-                if (e.clientX < window.innerWidth / 2) {
-                    leftPaddle.style.top = `${mouseY}px`;
-                } else {
-                    rightPaddle.style.top = `${mouseY}px`;
-                }
             }
         });
     }
@@ -124,9 +151,12 @@ export class DashboardView extends HTMLElement {
         }
     }
 
-    stickPaddleToMenuOption(paddle, option) {
-        const optionRect = option.getBoundingClientRect();
-        paddle.style.top = `${optionRect.top + optionRect.height / 2 - paddle.offsetHeight / 2}px`;
+    startGame() {
+        this.isGameRunning = true;
+
+        this.leftPaddle.style.display = "none";
+        this.rightPaddle.style.display = "none";
+
     }
 }
 
