@@ -19,26 +19,23 @@ export const setupGlobalCustomCursorEffects = () => {
     GlobalEventEmitter.on(EVENT_TYPES.CURSOR_MOVE, ({x, y}) => {
         cursorTrail.style.left = `${x}px`;
         cursorTrail.style.top = `${y}px`;
-
-        // Update after trail
         if (lastX !== undefined && lastY !== undefined) {
             const dx = x - lastX;
             const dy = y - lastY;
 
-            const newX = x - dx * 0.3;
-            const newY = y - dy * 0.3;
+            const newX = x - dx * 0.5;
+            const newY = y - dy * 0.5;
 
             cursorAfterTrail.style.left = `${newX}px`;
             cursorAfterTrail.style.top = `${newY}px`;
         }
-
         lastX = x;
         lastY = y;
     });
 
     // Hover events for shadowDOM
     GlobalEventEmitter.on(EVENT_TYPES.CURSOR_HOVER, ({ element}) => {
-        console.log("Element: ", element);
+        // console.log("Element: ", element);
         cursorTrail.classList.add("after-image-shake", "enlarged", "blue");
         cursorAfterTrail.classList.add("after-image-after-shake", "enlarged", "green");
     });
