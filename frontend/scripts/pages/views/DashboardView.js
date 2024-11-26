@@ -26,10 +26,22 @@ export class DashboardView extends HTMLElement {
             <main-menu>
                 <canvas id="gameCanvas"></canvas>
                 <left-menu>
-                    <div class="menu-option"><button>HowTo</button><span class="button-description">What is this?</span></div>
-                    <div class="menu-option"><button>Play</button><span class="button-description">How would you like your PONG today?</span></div>
-                    <div class="menu-option"><button>Tournament</button><span class="button-description">Will you dare?!</span></div>
-                    <div class="menu-option" style="grid-row-start: 4;"><button>About</button><span class="button-description">ft_transcendence at 42 Heilbronn</span></div>
+                    <div class="menu-option">
+                        <button>HowTo</button>
+                        <span class="button-description">What is this?</span>
+                    </div>
+                    <div class="menu-option">
+                        <button>Play</button>
+                        <span class="button-description">How would you like your PONG today?</span>
+                    </div>
+                    <div class="menu-option">
+                        <button>Tournament</button>
+                        <span class="button-description">Will you dare?!</span>
+                    </div>
+                    <div class="menu-option" style="grid-row-start: 4;">
+                        <button>About</button>
+                        <span class="button-description">ft_transcendence at 42 Heilbronn</span>
+                    </div>
                 </left-menu>
                 <right-menu>
                     <div id="right-menu-container"></div>
@@ -96,7 +108,6 @@ export class DashboardView extends HTMLElement {
         }
         return paddle;
     }
-
 
     initializePaddleMovement() {
         document.addEventListener("mousemove", (e) => {
