@@ -7,4 +7,4 @@ python manage.py migrate || echo "Migration failed!"
 
 # Start the django server
 echo "Starting django server..."
-python manage.py runserver 0.0.0.0:8001
+python manage.py runserver 0.0.0.0:8003
