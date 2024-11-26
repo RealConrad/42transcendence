@@ -26,9 +26,15 @@ export class DashboardView extends HTMLElement {
     html() {
         return `
             <link rel="stylesheet" href="../../../styles/style.css">
-            <header>PONG</header>
+            <header>
+                PONG
+                <button id="login-button" class="orange-button">
+                    LOGIN
+                </button>
+            </header>
             <main-menu>
                 <canvas id="gameCanvas"></canvas>
+                <auth-dialog id="auth-dialog"></auth-dialog>
                 <left-menu>
                     <div class="menu-option">
                         <button>HowTo</button>
@@ -55,6 +61,7 @@ export class DashboardView extends HTMLElement {
     }
 
     loadMenuComponents() {
+        import("../components/auth-dialog.js");
         import("../components/HowToMenu.js");
         import("../components/AboutMenu.js");
         import("../components/PlayMenu.js");
@@ -71,6 +78,14 @@ export class DashboardView extends HTMLElement {
                 GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_UNHOVER, { element: option} )
             });
         });
+
+        // Component based listeners
+        const loginButton = this.shadowRoot.getElementById("login-button");
+        const authDialogPopup = this.shadowRoot.getElementById("auth-dialog");
+        loginButton.addEventListener("click", () => {
+            authDialogPopup.open();
+        })
+        console.log("Login button ", loginButton);
     }
 
     initMenu() {
