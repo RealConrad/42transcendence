@@ -38,8 +38,6 @@ CORS_ORIGIN_WHITELIST = [
 
 CORS_ALLOW_CREDENTIALS = True
 
-AUTH_SERVICE_URL = "http://authservice:8000"
-
 # Application definition
 
 INSTALLED_APPS = [
