@@ -10,6 +10,7 @@ import {
 import Paddle from "./models/Paddle.js";
 import Player from "./models/Player.js";
 import Ball from "./models/Ball.js";
+import Battleground from "./models/Battleground.js";
 import HumanController from "./controllers/HumanController.js";
 import RenderManager from "./managers/RenderManager.js";
 import CollisionManager from "./managers/CollisionManager.js";
@@ -17,7 +18,7 @@ import AIController from "./controllers/AIController.js";
 import InputManager from "./managers/InputManager.js";
 import UIManager from "./managers/UIManager.js";
 import eventEmitter from "./EventEmitter.js";
-import { apiCall} from "../main.js";
+import { apiCall} from "../api/api.js";
 
 export default class Game {
     constructor(canvas, vsAI = true) {
@@ -36,11 +37,13 @@ export default class Game {
         this.uiManager = new UIManager();
         this.inputManager = new InputManager()
 
-        this.ball = new Ball(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 10, 5, 5);
+        this.ball = new Ball(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 5, 5, 5);
 
+        this.Battleground = new Battleground();
+        
         // Setup player models and controllers
         const playerPaddle = new Paddle(
-            10,
+            0,
             CANVAS_HEIGHT / 2,
             PADDLE_WIDTH,
             PADDLE_HEIGHT,
@@ -60,9 +63,10 @@ export default class Game {
             'Player 1',
             playerPaddle,
             new HumanController(playerPaddle, 'w', 's', this.inputManager)
+            // new AIController(playerPaddle, this.ball, 4)
         );
         this.player2 = vsAI
-            ? new Player('AI', player2Paddle, new AIController(player2Paddle, this.ball))
+            ? new Player('AI', player2Paddle, new AIController(player2Paddle, this.ball, 3)) // 3rd parameter is the difficulty level of the AI. 1 is super dumb, 5 is tough, 10 is darksouls
             : new Player(
                 'Player 2',
                 player2Paddle,
@@ -70,6 +74,7 @@ export default class Game {
             );
 
         // Register renderable objects
+        this.renderManager.addRenderable(this.Battleground);
         this.renderManager.addRenderable(this.ball);
         this.renderManager.addRenderable(this.player1.paddle);
         this.renderManager.addRenderable(this.player2.paddle);
@@ -117,7 +122,10 @@ export default class Game {
     }
 
     resetGameState() {
-        this.renderManager.resetObjects();
+        // this.ball.celebrate(this.ctx);
+        setTimeout(() => {
+            this.renderManager.resetObjects();
+        }, 1000);
     }
 
     updatePlayerScore() {
