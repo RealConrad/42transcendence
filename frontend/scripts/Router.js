@@ -1,5 +1,6 @@
 import {getAccessToken} from "./api/api.js";
 import "./pages/views/DashboardView.js";
+import {setupGlobalCustomCursorEffects} from "./utils/CursorEffects.js";
 
 export const Router = {
     routes: {
@@ -56,7 +57,7 @@ export const Router = {
     },
 
     isAuthenticated: () => {
-        return !!getAccessToken()
+        return !!getAccessToken();
     }
 }
 
