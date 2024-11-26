@@ -1,4 +1,3 @@
-import {setupHoverListeners} from "../../utils/HoverListners.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
 import {EVENT_TYPES} from "../../utils/constants.js";
 
@@ -67,11 +66,11 @@ export class DashboardView extends HTMLElement {
         menuOptions.forEach((option) => {
             option.addEventListener("mouseover", () => {
                 GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_HOVER, { element: option })
-            })
+            });
             option.addEventListener("mouseout", () => {
                 GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_UNHOVER, { element: option} )
-            })
-        })
+            });
+        });
     }
 
     initMenu() {
@@ -87,11 +86,9 @@ export class DashboardView extends HTMLElement {
         updateCanvasSize();
         window.addEventListener("resize", updateCanvasSize);
 
-        // Create paddles for display purposes
         this.leftPaddle = this.createPaddle("left");
         this.rightPaddle = this.createPaddle("right");
 
-        // Initialize paddle movement based on mouse position
         this.initializePaddleMovement();
         this.initializeMenuInteractions();
     }
