@@ -1,3 +1,6 @@
+import GlobalEventEmitter from "../../utils/EventEmitter.js";
+import {EVENT_TYPES} from "../../utils/constants.js";
+
 export class PlayMenu extends HTMLElement {
     constructor() {
         super();
@@ -10,6 +13,7 @@ export class PlayMenu extends HTMLElement {
 
     render() {
         this.shadowRoot.innerHTML = this.html();
+        this.setupEventListeners();
     }
 
     html() {
@@ -24,6 +28,18 @@ export class PlayMenu extends HTMLElement {
                 <span class="button-description">one keyboard? just dont elbow each other</span>
             </div>
         `
+    }
+
+    setupEventListeners() {
+        const gameplayOptions = this.shadowRoot.querySelectorAll(".menu-option");
+        gameplayOptions.forEach((option) => {
+            option.addEventListener("mouseover", () => {
+                GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_HOVER, { element: option });
+            });
+            option.addEventListener("mouseout", () => {
+                GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_UNHOVER, { element: option});
+            });
+        });
     }
 }
 
