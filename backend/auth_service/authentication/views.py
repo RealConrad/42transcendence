@@ -19,7 +19,7 @@ class RegisterView(generics.CreateAPIView):
             # Request tokens from JWT service
             jwt_response = requests.post(
                 JWT_SERVICE_URL,
-                json={'user_id': user.id}
+                json={'user_id': user.id, 'username': user.username}
             )
 
             if jwt_response.status_code == 200:
@@ -59,7 +59,7 @@ class LoginView(generics.GenericAPIView):
             # Request tokens from JWT service
             jwt_response = requests.post(
                 JWT_SERVICE_URL,
-                json={'user_id': user.id}
+                json={'user_id': user.id, 'username': user.username}
             )
 
             if jwt_response.status_code == 200:
