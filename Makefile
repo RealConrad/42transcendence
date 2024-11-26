@@ -8,7 +8,7 @@ down:
 	$(DOCKER_COMPOSE) down
 
 clean_volume:
-    $(DOCKER_COMPOSE) down -v
+	$(DOCKER_COMPOSE) down -v
 
 start:
 	$(DOCKER_COMPOSE) start
