@@ -25,7 +25,7 @@ export default class Paddle extends Renderable {
     }
 
     draw(ctx) {
-        ctx.fillStyle = 'red';
+        ctx.fillStyle = "white";
         ctx.fillRect(this.x, this.y, this.width, this.height);
     }
 

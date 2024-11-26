@@ -22,6 +22,10 @@ export default class PowerUp extends Renderable {
         throw new Error("removePowerUpEffect must be implemented in sub class");
     }
 
+    collectPowerUp(game, player) {
+        throw new Error("collectPowerUp must be implemented in sub class");
+    }
+ 
     reset(ctx) {
         // TODO: Reset all powerups
     }
