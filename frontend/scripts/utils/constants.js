@@ -15,5 +15,11 @@ export const FORM_ERROR_MESSAGES = {
     passwordsDoNotMatch: "Passwords do not match",
 }
 
+export const EVENT_TYPES = {
+    CURSOR_MOVE: "cursor.move",
+    CURSOR_HOVER: "cursor.hover",
+    CURSOR_UNHOVER: "cursor.unhover",
+}
+
 export const BASE_AUTH_API_URL = "http://127.0.0.1:8000/api/auth"
 export const BASE_GAME_API_URL = "http://127.0.0.1:8001/api/game"

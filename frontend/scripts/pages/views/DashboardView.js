@@ -1,3 +1,7 @@
+import {setupHoverListeners} from "../../utils/HoverListners.js";
+import GlobalEventEmitter from "../../utils/EventEmitter.js";
+import {EVENT_TYPES} from "../../utils/constants.js";
+
 export class DashboardView extends HTMLElement {
     constructor() {
         super();
@@ -17,6 +21,7 @@ export class DashboardView extends HTMLElement {
 
     render() {
         this.shadowRoot.innerHTML = this.html();
+        this.setupEventListeners();
     }
 
     html() {
@@ -55,6 +60,18 @@ export class DashboardView extends HTMLElement {
         import("../components/AboutMenu.js");
         import("../components/PlayMenu.js");
         import("../components/TournamentMenu.js");
+    }
+
+    setupEventListeners() {
+        const menuOptions = this.shadowRoot.querySelectorAll(".menu-option");
+        menuOptions.forEach((option) => {
+            option.addEventListener("mouseover", () => {
+                GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_HOVER, { element: option })
+            })
+            option.addEventListener("mouseout", () => {
+                GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_UNHOVER, { element: option} )
+            })
+        })
     }
 
     initMenu() {
