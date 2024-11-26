@@ -9,14 +9,19 @@ class JWTAuthentication(authentication.BaseAuthentication):
     Custom JWT Authentication class to authenticate user via header Bearer token
     """
     def authenticate(self, request):
-        access_token = request.COOKIES.get('access_token')
-        if not access_token:
-            raise exceptions.AuthenticationFailed("access token is missing")
+        auth_header = request.headers.get('Authorization')
+        if not auth_header:
+            raise exceptions.AuthenticationFailed("Authorization header is missing")
 
-        auth_service_url = "http://authservice:8000/api/auth/token/verify/"
+        if not auth_header.startswith('Bearer '):
+            raise exceptions.AuthenticationFailed("Invalid token header")
+
+        access_token = auth_header.split(" ")[1]
+
+        auth_service_url = "http://jwtservice:8002/api/token/verify/"
 
         try:
-            response = requests.post(auth_service_url, json={"token": access_token})
+            response = requests.post(auth_service_url, json={'token': access_token})
             if response.status_code == 200:
                 token_data = response.json()
                 username = token_data.get("username")
