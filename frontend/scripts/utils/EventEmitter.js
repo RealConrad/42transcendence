@@ -1,12 +1,3 @@
-// export const emitCustomEvent = (element, eventName, detail) => {
-//     const event = new CustomEvent(eventName, {
-//         bubbles: true,
-//         composed: true,
-//         detail,
-//     });
-//     element.dispatchEvent(event);
-// }
-
 class EventEmitter {
     constructor() {
         this.events = {};
