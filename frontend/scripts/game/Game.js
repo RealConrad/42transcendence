@@ -66,7 +66,7 @@ export default class Game {
             // new AIController(playerPaddle, this.ball, 4)
         );
         this.player2 = vsAI
-            ? new Player('AI', player2Paddle, new AIController(player2Paddle, this.ball, 3)) // 3rd parameter is the difficulty level of the AI. 1 is super dumb, 5 is tough, 10 is darksouls
+            ? new Player('AI', player2Paddle, new AIController(player2Paddle, this.ball, 1)) // 3rd parameter is the difficulty level of the AI. 1 is super dumb, 5 is tough, 10 is darksouls
             : new Player(
                 'Player 2',
                 player2Paddle,

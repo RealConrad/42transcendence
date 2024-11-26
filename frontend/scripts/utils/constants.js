@@ -19,6 +19,7 @@ export const EVENT_TYPES = {
     CURSOR_MOVE: "cursor.move",
     CURSOR_HOVER: "cursor.hover",
     CURSOR_UNHOVER: "cursor.unhover",
+    START_MATCH: "start.match",
 }
 
 export const BASE_AUTH_API_URL = "http://127.0.0.1:8000/api/auth"
