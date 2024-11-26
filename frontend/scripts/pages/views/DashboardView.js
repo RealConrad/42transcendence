@@ -73,8 +73,13 @@ export class DashboardView extends HTMLElement {
         const authDialogPopup = this.shadowRoot.getElementById("auth-dialog");
         loginButton.addEventListener("click", () => {
             authDialogPopup.open();
-        })
-        console.log("Login button ", loginButton);
+        });
+        loginButton.addEventListener("mouseover", () => {
+            GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_HOVER, { element: loginButton});
+        });
+        loginButton.addEventListener("mouseout", () => {
+            GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_UNHOVER, { element: loginButton});
+        });
     }
 
     initMenu() {
