@@ -35,7 +35,6 @@ export const setupGlobalCustomCursorEffects = () => {
 
     // Hover events for shadowDOM
     GlobalEventEmitter.on(EVENT_TYPES.CURSOR_HOVER, ({ element}) => {
-        // console.log("Element: ", element);
         cursorTrail.classList.add("after-image-shake", "enlarged", "blue");
         cursorAfterTrail.classList.add("after-image-after-shake", "enlarged", "green");
     });

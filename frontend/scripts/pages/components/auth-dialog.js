@@ -1,5 +1,6 @@
 import {setAccessToken} from "../../api/api.js";
-import {BASE_AUTH_API_URL, FORM_ERROR_MESSAGES} from "../../utils/constants.js";
+import {BASE_AUTH_API_URL, EVENT_TYPES, FORM_ERROR_MESSAGES} from "../../utils/constants.js";
+import GlobalEventEmitter from "../../utils/EventEmitter.js";
 
 
 class AuthDialog extends HTMLElement {
@@ -109,7 +110,7 @@ class AuthDialog extends HTMLElement {
 		}
 	}
 
-	async render() {
+	render() {
 		this.shadowRoot.innerHTML = this.html();
 
 		this.shadowRoot.getElementById("toggle-register").addEventListener("click", (e) => {
@@ -129,6 +130,7 @@ class AuthDialog extends HTMLElement {
 				this.close();
 			}
 		});
+		this.attachEventListeners();
 
 		this.shadowRoot.querySelector("#sign-in-view .sign-in-button").addEventListener("click", (e) => {
 			e.preventDefault();
@@ -201,8 +203,18 @@ class AuthDialog extends HTMLElement {
 		});
 	}
 
-	attatchEventListeners() {
+	attachEventListeners() {
+		const buttons = this.shadowRoot.querySelectorAll("button");
 
+		buttons.forEach((button) => {
+			button.addEventListener("mouseover", () => {
+				GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_HOVER, { element: button });
+			});
+
+			button.addEventListener("mouseout", () => {
+				GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_UNHOVER, { element: button });
+			});
+		});
 	}
 
 	register(username, password) {
@@ -260,7 +272,7 @@ class AuthDialog extends HTMLElement {
 
 	connectedCallback() {
 		this.render();
-		this.attatchEventListeners()
+		this.attachEventListeners()
 	}
 }
 
