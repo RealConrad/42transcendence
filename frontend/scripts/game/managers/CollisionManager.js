@@ -9,7 +9,7 @@ export default class CollisionManager {
         const ball = this.game.ball;
         if (ball.y - ball.radius < 0 || ball.y + ball.radius > CANVAS_HEIGHT) {
             ball.speedY *= -1;
-            if (ball.speedX > 0) {ball.speedX += 1} else {ball.speedX -= 1}
+            ball.speedX = ball.speedX > 0 ? ball.speedX + 1 : ball.speedX - 1;
         }
     }
 

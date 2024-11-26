@@ -1,14 +1,10 @@
 body {
-    /* background: gray; */
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
     margin: 0;
     flex-direction: column;
-}
-canvas {
-    border: 0px solid white;
 }
 
 h1 {
@@ -28,7 +24,7 @@ h1 {
     position: absolute;
     width: 80vh;
     height: 80vh;
-    /* background: rgba(0, 0, 0, 1); */
+    background: rgba(0, 0, 0, 1);
     color: white;
     display: flex;
     flex-direction: column;
