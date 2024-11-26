@@ -69,17 +69,6 @@ export class DashboardView extends HTMLElement {
     }
 
     setupEventListeners() {
-        const menuOptions = this.shadowRoot.querySelectorAll(".menu-option");
-        menuOptions.forEach((option) => {
-            option.addEventListener("mouseover", () => {
-                GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_HOVER, { element: option })
-            });
-            option.addEventListener("mouseout", () => {
-                GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_UNHOVER, { element: option} )
-            });
-        });
-
-        // Component based listeners
         const loginButton = this.shadowRoot.getElementById("login-button");
         const authDialogPopup = this.shadowRoot.getElementById("auth-dialog");
         loginButton.addEventListener("click", () => {
