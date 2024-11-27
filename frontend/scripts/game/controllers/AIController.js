@@ -1,9 +1,9 @@
-import { CANVAS_WIDTH, CANVAS_HEIGHT } from "../../utils/constants.js";
 import Controller from "./Controller.js";
 
 export default class AIController extends Controller{
-    constructor(paddle, ball, difficulty) {
+    constructor(paddle, ball, difficulty, canvas) {
         super(paddle);
+        this.canvas = canvas
         this.ball = ball;
         this.lastSnapshot = {
             x: this.ball.x,
@@ -36,12 +36,12 @@ export default class AIController extends Controller{
         difficulty = Math.max(1, difficulty) * 20;
 
         let steps = 0;
-        while (predictedX > this.ball.radius && predictedX < CANVAS_WIDTH - this.ball.radius && steps < difficulty) {
+        while (predictedX > this.ball.radius && predictedX < this.canvas.width - this.ball.radius && steps < difficulty) {
             predictedX += predictedSpeedX;
             predictedY += predictedSpeedY;
             steps++;
 
-            if (predictedY <= this.ball.radius || predictedY >= CANVAS_HEIGHT - this.ball.radius) {
+            if (predictedY <= this.ball.radius || predictedY >= this.canvas.height - this.ball.radius) {
                 predictedSpeedY = -predictedSpeedY;
             }
         }
@@ -55,9 +55,9 @@ export default class AIController extends Controller{
 
     implementStrategy(predictedY) {
         const paddleCenter = this.paddle.y + this.paddle.height / 2;
-        const gameCenter = CANVAS_HEIGHT / 2;
-        const gameTop = gameCenter + CANVAS_HEIGHT / 4;
-        const gameBottom = gameCenter - CANVAS_HEIGHT / 4;
+        const gameCenter = this.canvas.height / 2;
+        const gameTop = gameCenter + this.canvas.height / 4;
+        const gameBottom = gameCenter - this.canvas.height / 4;
 
         if (this.paddle.y > gameTop) {
             predictedY -= this.paddle.height / 3;

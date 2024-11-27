@@ -1,5 +1,5 @@
-export const CANVAS_WIDTH = 1280;
-export const CANVAS_HEIGHT = 720;
+// export const CANVAS_WIDTH = 1280;
+// export const this.canvas.height = 720;
 
 export const PADDLE_SPEED = 10;
 export const PADDLE_HEIGHT = 100;

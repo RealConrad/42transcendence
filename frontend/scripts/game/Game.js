@@ -3,8 +3,6 @@ import {
     PADDLE_SPEED,
     PADDLE_WIDTH,
     MAX_SCORE,
-    CANVAS_HEIGHT,
-    CANVAS_WIDTH,
     BASE_GAME_API_URL
 } from "../utils/constants.js";
 import Paddle from "./models/Paddle.js";
@@ -37,22 +35,22 @@ export default class Game {
         this.uiManager = new UIManager();
         this.inputManager = new InputManager()
 
-        this.ball = new Ball(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 5, 5, 5);
+        this.ball = new Ball(this.canvas.width / 2, this.canvas.height / 2, 5, 5, 5);
 
-        this.Battleground = new Battleground();
+        this.Battleground = new Battleground(this.canvas);
         
         // Setup player models and controllers
         const playerPaddle = new Paddle(
             0,
-            CANVAS_HEIGHT / 2,
+            this.canvas.height / 2,
             PADDLE_WIDTH,
             PADDLE_HEIGHT,
             PADDLE_SPEED,
             this.canvas
         )
         const player2Paddle = new Paddle(
-            CANVAS_WIDTH - 10,
-            CANVAS_HEIGHT / 2,
+            this.canvas.width - 10,
+            this.canvas.height / 2,
             PADDLE_WIDTH,
             PADDLE_HEIGHT,
             PADDLE_SPEED,
@@ -66,7 +64,7 @@ export default class Game {
             // new AIController(playerPaddle, this.ball, 4)
         );
         this.player2 = vsAI
-            ? new Player('AI', player2Paddle, new AIController(player2Paddle, this.ball, 1)) // 3rd parameter is the difficulty level of the AI. 1 is super dumb, 5 is tough, 10 is darksouls
+            ? new Player('AI', player2Paddle, new AIController(player2Paddle, this.ball, 1, this.canvas)) // 3rd parameter is the difficulty level of the AI. 1 is super dumb, 5 is tough, 10 is darksouls
             : new Player(
                 'Player 2',
                 player2Paddle,

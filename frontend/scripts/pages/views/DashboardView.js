@@ -230,6 +230,7 @@ export class DashboardView extends HTMLElement {
         this.shadowRoot.querySelector("header").style.display = "none";
         this.shadowRoot.querySelector("left-menu").style.display = "none";
         this.shadowRoot.querySelector("right-menu").style.display = "none";
+        this.ctx.setLineDash([]);
         // this.canvas.style.display = "none";
     }
 
