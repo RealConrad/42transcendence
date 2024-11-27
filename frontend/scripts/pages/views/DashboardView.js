@@ -1,5 +1,6 @@
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
 import {EVENT_TYPES} from "../../utils/constants.js";
+import Game from "../../game/Game.js";
 
 export class DashboardView extends HTMLElement {
     constructor() {
@@ -35,6 +36,7 @@ export class DashboardView extends HTMLElement {
             <main-menu>
                 <canvas id="gameCanvas"></canvas>
                 <auth-dialog id="auth-dialog"></auth-dialog>
+                <game-setup-dialog id="game-setup-dialog"></game-setup-dialog>
                 <left-menu>
                     <div class="menu-option">
                         <button>HowTo</button>
@@ -61,6 +63,7 @@ export class DashboardView extends HTMLElement {
     }
 
     loadMenuComponents() {
+        import ("../components/GameSetupDialog.js");
         import("../components/auth-dialog.js");
         import("../components/HowToMenu.js");
         import("../components/AboutMenu.js");
@@ -80,6 +83,27 @@ export class DashboardView extends HTMLElement {
         loginButton.addEventListener("mouseout", () => {
             GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_UNHOVER, { element: loginButton});
         });
+
+        GlobalEventEmitter.on(EVENT_TYPES.MATCH_VS_AI, () => {
+            console.log("VS AI");
+            this.openGameSetupDialog("vs AI");
+        });
+        GlobalEventEmitter.on(EVENT_TYPES.MATCH_LOCAL, () => {
+            console.log("LOCAL");
+            this.openGameSetupDialog("local");
+        });
+        GlobalEventEmitter.on(EVENT_TYPES.START_MATCH, ({ player1Name, player2Name, matchType}) => {
+            this.startGame(player1Name, player2Name, matchType !== "local");
+        });
+        GlobalEventEmitter.on(EVENT_TYPES.QUIT_MATCH, () => {
+            this.endGame();
+        });
+    }
+
+    openGameSetupDialog(matchType) {
+        const gameSetupDialog = this.shadowRoot.getElementById("game-setup-dialog");
+        gameSetupDialog.setMatchType(matchType);
+        gameSetupDialog.open();
     }
 
     initMenu() {
@@ -185,12 +209,37 @@ export class DashboardView extends HTMLElement {
         }
     }
 
-    startGame() {
+    startGame(player1Name, player2Name, vsAI) {
+        this.hideAllDashboardUI();
         this.isGameRunning = true;
+        console.log(`STARTING MATCH: ${player1Name} vs ${player2Name}`);
 
+        const game = new Game(this.canvas, vsAI);
+        game.start();
+    }
+
+    endGame() {
+        this.isGameRunning = false;
+        this.showAllDashboardUI();
+        console.log("Match ended, dashboard UI Restored");
+    }
+
+    hideAllDashboardUI() {
         this.leftPaddle.style.display = "none";
         this.rightPaddle.style.display = "none";
+        this.shadowRoot.querySelector("header").style.display = "none";
+        this.shadowRoot.querySelector("left-menu").style.display = "none";
+        this.shadowRoot.querySelector("right-menu").style.display = "none";
+        // this.canvas.style.display = "none";
+    }
 
+    showAllDashboardUI() {
+        this.leftPaddle.style.display = "block";
+        this.rightPaddle.style.display = "block";
+        this.shadowRoot.querySelector("header").style.display = "block";
+        this.shadowRoot.querySelector("left-menu").style.display = "grid";
+        this.shadowRoot.querySelector("right-menu").style.display = "block";
+        // this.canvas.style.display = "block";
     }
 }
 

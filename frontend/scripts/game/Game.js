@@ -129,8 +129,8 @@ export default class Game {
     }
 
     updatePlayerScore() {
-        document.getElementById("player1Score").innerHTML = this.player1.score;
-        document.getElementById("player2Score").innerHTML = this.player2.score;
+        // document.getElementById("player1Score").innerHTML = this.player1.score;
+        // document.getElementById("player2Score").innerHTML = this.player2.score;
     }
 
     async saveMatch() {

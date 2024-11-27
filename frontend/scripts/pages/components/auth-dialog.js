@@ -11,7 +11,7 @@ class AuthDialog extends HTMLElement {
 
 	html() {
 		return `
-			<link rel="stylesheet" href="../../../styles/auth-dialog.css">
+			<link rel="stylesheet" href="../../../styles/dialog.css">
 			<div class="overlay" id="overlay">
 				<div class="dialog">
 					<div class="login" id="sign-in-view">

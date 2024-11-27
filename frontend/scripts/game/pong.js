@@ -21,7 +21,6 @@ const resizeCanvas = () => {
     canvas.style.height = `${newHeight}px`;
 }
 
-window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
 const game = new Game(canvas, true);
