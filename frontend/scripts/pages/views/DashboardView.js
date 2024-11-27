@@ -17,6 +17,7 @@ export class DashboardView extends HTMLElement {
         this.loadMenuComponents();
         this.render();
         this.initMenu();
+        this.showAllDashboardUI();
     }
 
     render() {
@@ -28,7 +29,11 @@ export class DashboardView extends HTMLElement {
         return `
             <link rel="stylesheet" href="../../../styles/style.css">
             <header>
-                PONG
+                <div class="header-top">
+                    <span id="player1-display" class="player1_score">Player 1 - 0</span>
+                    <div class="title">PONG</div>
+                    <span id="player2-display" class="player2_score">Player 2 - 0</span>
+                </div>
                 <button id="login-button" class="orange-button">
                     LOGIN
                 </button>
@@ -98,6 +103,9 @@ export class DashboardView extends HTMLElement {
         GlobalEventEmitter.on(EVENT_TYPES.QUIT_MATCH, () => {
             this.endGame();
         });
+        GlobalEventEmitter.on(EVENT_TYPES.UPDATE_SCORE, ({ player1Name, player2Name, player1Score, player2Score }) => {
+            this.updateScores(player1Name, player2Name, player1Score, player2Score);
+        })
     }
 
     openGameSetupDialog(matchType) {
@@ -213,9 +221,18 @@ export class DashboardView extends HTMLElement {
         this.hideAllDashboardUI();
         this.isGameRunning = true;
         console.log(`STARTING MATCH: ${player1Name} vs ${player2Name}`);
-
-        const game = new Game(this.canvas, vsAI);
+        // update initial scores
+        this.updateScores(player1Name, player2Name, 0, 0);
+        const game = new Game(this.canvas, vsAI, player1Name, player2Name);
         game.start();
+    }
+
+    updateScores(player1Name, player2Name, player1Score, player2Score) {
+        const player1Display = this.shadowRoot.getElementById("player1-display");
+        const player2Display = this.shadowRoot.getElementById("player2-display");
+
+        player1Display.textContent = `${player1Name} - ${player1Score}`;
+        player2Display.textContent = `${player2Name} - ${player2Score}`;
     }
 
     endGame() {
@@ -227,20 +244,20 @@ export class DashboardView extends HTMLElement {
     hideAllDashboardUI() {
         this.leftPaddle.style.display = "none";
         this.rightPaddle.style.display = "none";
-        this.shadowRoot.querySelector("header").style.display = "none";
         this.shadowRoot.querySelector("left-menu").style.display = "none";
         this.shadowRoot.querySelector("right-menu").style.display = "none";
         this.ctx.setLineDash([]);
-        // this.canvas.style.display = "none";
+        this.shadowRoot.querySelector(".player1_score").style.display = "block";
+        this.shadowRoot.querySelector(".player2_score").style.display = "block";
     }
 
     showAllDashboardUI() {
         this.leftPaddle.style.display = "block";
         this.rightPaddle.style.display = "block";
-        this.shadowRoot.querySelector("header").style.display = "block";
         this.shadowRoot.querySelector("left-menu").style.display = "grid";
         this.shadowRoot.querySelector("right-menu").style.display = "block";
-        // this.canvas.style.display = "block";
+        this.shadowRoot.querySelector(".player1_score").style.display = "none";
+        this.shadowRoot.querySelector(".player2_score").style.display = "none";
     }
 }
 

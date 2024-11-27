@@ -47,10 +47,44 @@ header {
   font-size: calc(5vh);
   color: var(--highlight-color);
   display: flex;
-  justify-content: center;
+  flex-direction: column; /* Allows vertical stacking of elements */
   align-items: center;
+  justify-content: center;
   text-align: center;
   width: 100%;
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between; /* Positions scores on the edges */
+  align-items: center;
+  width: 100%; /* Ensures it spans the entire width */
+  padding: 0 1rem; /* Adds spacing on left and right */
+  position: relative; /* To ensure alignment within header */
+}
+
+.title {
+  text-align: center;
+  flex: 2; /* Ensures it has more space */
+}
+
+.scores {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  font-size: 1.2rem;
+}
+
+.player1_score {
+  font-size: 1.5rem;
+  flex: 1;
+  text-align: left;
+}
+
+.player2_score {
+  font-size: 1.5rem;
+  flex: 1;
+  text-align: right;
 }
 
 footer {
