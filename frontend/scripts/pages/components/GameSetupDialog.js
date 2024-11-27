@@ -84,8 +84,8 @@ export class GameSetupDialog extends HTMLElement {
 
             if (player1Name && player2Name) {
                 console.log(`${player1Name} vs ${player2Name}`);
-                const type = this.matchType;
-                GlobalEventEmitter.emit(EVENT_TYPES.START_MATCH, { player1Name, player2Name, type });
+                const matchType = this.matchType;
+                GlobalEventEmitter.emit(EVENT_TYPES.START_MATCH, { player1Name, player2Name, matchType });
                 this.close();
             } else {
                 alert("Enter all player names");
