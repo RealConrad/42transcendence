@@ -1,18 +1,14 @@
 import pyotp
 import requests
-from rest_framework.status import HTTP_400_BAD_REQUEST
-
 from .helpers import (
     create_otp_secret_for_user,
     generate_qr_code,
     send_qr_code_response
 )
-# from .models import UserProfile
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-# from django.http import HttpResponse, Http404, HttpResponseBadRequest
 from .permissions import IsOwnerAndNotDelete
 
 
