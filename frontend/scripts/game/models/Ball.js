@@ -1,4 +1,3 @@
-import { CANVAS_HEIGHT, CANVAS_WIDTH } from "../../utils/constants.js";
 import Renderable from "./Renderable.js";
 
 export default class Ball extends Renderable {
@@ -20,9 +19,6 @@ export default class Ball extends Renderable {
         if (this.trail.length > 20) { 
             this.trail.shift();
         }
-
-        // if (this.x + this.speedX < 0 || this.x + this.speedX > CANVAS_WIDTH) 
-        //     this.celebrate(this.ctx);
         this.x += this.speedX;
         this.y += this.speedY;
     }

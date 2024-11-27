@@ -1,0 +1,123 @@
+.how-to-container {
+  display: grid;
+  grid-template-rows: 1fr 2fr 2fr; /* Allocate space: 20% for description, 40% each for powers and controls */
+  grid-template-columns: 1fr; /* One column layout */
+  color: #fff; /* Ensure text is white */
+  grid-row: 1 / -1;
+  grid-column: 1 / -1;
+  height: 100%; /* Ensure it fills the parent container */
+}
+
+.description-container {
+  text-align: center;
+  grid-row: 1; /* Place in the first row */
+  grid-column: 1; /* Only one column to consider */
+}
+
+#power-title {
+  color: #ffffff;
+  font-size: calc(var(--font-size) * 0.8);
+}
+
+#description {
+  color: #ffffff;
+  font-size: calc(var(--font-size) * 0.6);
+  font-family: Inter;
+}
+
+.atk-def-container {
+  font-size: calc(var(--font-size) * 0.8);
+  display: flex;
+  justify-content: center;
+  padding-left: 30%;
+  padding-right: 30%;
+  padding-bottom: 5%;
+  grid-row: 2; /* Place in the second row */
+  grid-column: 1;
+}
+
+
+.atk-powers, .def-powers {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-grow: 1;
+  justify-content: space-around;
+}
+
+.controls {
+  grid-row: 3; /* Place in the third row */
+  grid-column: 1;
+  display: flex;
+  justify-content: center;
+}
+
+/* power */
+
+.power {
+  width: calc(var(--paddle-width) * 3.0);
+  z-index: 10;
+  height: calc(var(--paddle-width) * 3.0);
+  background-color: rgba(255, 255, 255, 0.4);
+  color: black;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  font-size: calc(var(--paddle-width) * 1.4); /* Adjust size as needed for a single character */
+
+}
+
+.after-image, .after-shake, .after-after-shake {
+  z-index: 5;
+  width: calc(var(--paddle-width) * 3.8);
+  height: calc(var(--paddle-width) * 3.8);
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.2);
+  animation: shake 1.5s infinite;
+  animation-delay: var(--animation-delay-delay);
+}
+
+.after-shake {
+  height: calc(var(--paddle-width) * 4.0);
+  animation-delay: calc(var(--animation-delay-delay) + 0.5s);
+}
+
+.after-after-shake {
+  width: calc(var(--paddle-width) * 4.0);
+  animation-delay: calc(var(--animation-delay-delay) + 1.0s);
+}
+
+.power-text{
+  z-index: 20;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* padding-top: 3px; */
+  font-size: calc(var(--paddle-width) * 1.8);
+  font-weight: bold;
+  color: black;
+}
+
+/* Keyframes for shaking effects */
+@keyframes shake {
+  0%, 100% { transform: translate(-2px, 2px); }
+  10%, 90% { transform: translate(2px, -2px); }
+  20%, 80% { transform: translate(2px, 2px); }
+  30%, 70% { transform: translate(-2px, -2px); }
+  40%, 60% { transform: translate(2px, -2px); }
+  50% { transform: translate(-2px, 2px); }
+}
+
+.power:hover .after-image {
+  background-color: rgba(0, 255, 0, 0.3); /* Change to green on hover */
+}
+
+.power:hover .after-shake {
+  background-color: rgba(255, 0, 0, 0.3); /* Change to orange on hover */
+}
+
+.power:hover .after-after-shake {
+  background-color: rgba(0, 0, 255, 0.3); /* Keep blue on hover */
+}

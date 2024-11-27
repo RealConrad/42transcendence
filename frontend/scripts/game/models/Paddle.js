@@ -1,5 +1,4 @@
 import Renderable from "./Renderable.js";
-import {CANVAS_HEIGHT} from "../../utils/constants.js";
 
 export default class Paddle extends Renderable {
     constructor(x, y, width, height, speed, canvas) {
@@ -20,8 +19,8 @@ export default class Paddle extends Renderable {
         if (this.y < 0) {
             this.y = 0;
         }
-        else if (this.y + this.height > CANVAS_HEIGHT)
-            this.y = CANVAS_HEIGHT - this.height;
+        else if (this.y + this.height > this.canvas.height)
+            this.y = this.canvas.height - this.height;
     }
 
     draw(ctx) {

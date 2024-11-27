@@ -1,10 +1,8 @@
 import Game from "./Game.js";
-import {CANVAS_HEIGHT, CANVAS_WIDTH} from "../utils/constants.js";
-
 const canvas = document.getElementById('pongCanvas');
 
 canvas.width = CANVAS_WIDTH;
-canvas.height = CANVAS_HEIGHT;
+canvas.height = this.canvas.height;
 
 const resizeCanvas = () => {
     const aspectRatio = 16 / 9;
@@ -21,7 +19,6 @@ const resizeCanvas = () => {
     canvas.style.height = `${newHeight}px`;
 }
 
-window.addEventListener('resize', resizeCanvas);
 resizeCanvas();
 
 const game = new Game(canvas, true);

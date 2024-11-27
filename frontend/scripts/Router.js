@@ -1,11 +1,23 @@
 import {getAccessToken} from "./api/api.js";
+import "./pages/views/DashboardView.js";
+import {setupGlobalCustomCursorEffects} from "./utils/CursorEffects.js";
 
 export const Router = {
     routes: {
-        "/": {view: "<h1>home page</h1>", protected: false},
-        "/about": {view: "<h1>about page</h1>", protected: false},
-        "/profile": {view: "<h1>profile page</h1>", protected: true},
-        "/404": {view: "<h1>404 page</h1>", protected: false},
+        "/": {
+            view: () => {
+                return document.createElement('dashboard-view');
+            },
+            protected: false
+        },
+        "/404": {
+            view: () => {
+                const errorPage = document.createElement('error-404');
+                errorPage.innerHTML = `<h1>404 - error</h1>`;
+                return errorPage;
+            },
+            protected: false
+        }
     },
     init: () => {
         document.querySelectorAll('a').forEach(element => {
@@ -33,7 +45,11 @@ export const Router = {
             history.pushState(path, null, path);
         }
         try {
-            document.getElementById("content").innerHTML = route.view;
+            const container = document.getElementById("content");
+            container.innerHTML = ""; // Clear existing content
+
+            const viewComponent = route.view();
+            container.appendChild(viewComponent);
         } catch (error) {
             console.error(`Error loading ${path}:`, error);
             Router.navigateTo("/404", false);
@@ -41,7 +57,7 @@ export const Router = {
     },
 
     isAuthenticated: () => {
-        return !!getAccessToken()
+        return !!getAccessToken();
     }
 }
 
