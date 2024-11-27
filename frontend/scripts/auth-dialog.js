@@ -11,7 +11,7 @@ class AuthDialog extends HTMLElement {
 	async html() {
 		await Promise.resolve(); // TODO: Change this so that we wait for the actual HTML
 		return `
-			<link rel="stylesheet" href="../styles/auth-dialog.css">
+			<link rel="stylesheet" href="../styles/auth-dialog.css" xmlns="http://www.w3.org/1999/html">
 			<div class="overlay" id="overlay">
 				<div class="dialog">
 					<div class="login" id="sign-in-view">
@@ -76,6 +76,27 @@ class AuthDialog extends HTMLElement {
 							</div>
 						</div>
 					</div>
+					<div class="otp" id="otp-view" style="display: none">
+						<div class="heading">Enter Verification Code</div>
+						<div class="flex-container">
+							<div class="group">
+								<div class="otp-input-container">
+									<input type="text" maxlength="1" class="otp-box" id="otp-1"/>
+									<input type="text" maxlength="1" class="otp-box" id="otp-2"/>
+									<input type="text" maxlength="1" class="otp-box" id="otp-3"/>
+									<input type="text" maxlength="1" class="otp-box" id="otp-4"/>
+									<input type="text" maxlength="1" class="otp-box" id="otp-5"/>
+									<input type="text" maxlength="1" class="otp-box" id="otp-6"/>
+								</div>
+								<div class="error-message" id="otp-error"></div>
+							</div>
+						</div>
+						<div class="flex-container margin-top">
+							<div class="group">
+								<button class="sign-in-button" onclick="console.log('Verify button clicked')">Verify</button>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 		`;
@@ -112,6 +133,10 @@ class AuthDialog extends HTMLElement {
 
 	async render() {
 		this.shadowRoot.innerHTML = await this.html();
+
+		this.shadowRoot.getElementById("sign-in-view").style.display = "none"
+		this.shadowRoot.getElementById("register-view").style.display = "none"
+		this.shadowRoot.getElementById("otp-view").style.display = "block"
 
 		this.shadowRoot.getElementById("toggle-register").addEventListener("click", (e) => {
 			e.preventDefault();
@@ -199,6 +224,31 @@ class AuthDialog extends HTMLElement {
 			if (isValid) {
 				this.register(username, password);
 			}
+		});
+
+		const optBoxes = this.shadowRoot.querySelectorAll(".otp-box");
+
+		optBoxes.forEach((box, index) => {
+			box.addEventListener("input", (e) => {
+				const value = e.target.value;
+		// 		if (!/^\d$/.test(value)) {
+        //     e.target.value = ""; // Clear invalid input
+        // }
+				if (value.length === 1) {
+					if (index < optBoxes.length - 1) {
+						optBoxes[index + 1].focus();
+					}
+				} else if (value.length === 0 && index > 0) {
+					optBoxes[index - 1].focus();
+				}
+			});
+
+			// Backspace to go back to previous box
+			box.addEventListener("keydown", (e) => {
+				if (e.key === "Backspace" && !e.target.value && index > 0) {
+					optBoxes[index - 1].focus();
+				}
+			});
 		});
 	}
 
