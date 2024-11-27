@@ -1,6 +1,4 @@
 import Game from "./Game.js";
-import {this.canvas.height, CANVAS_WIDTH} from "../utils/constants.js";
-
 const canvas = document.getElementById('pongCanvas');
 
 canvas.width = CANVAS_WIDTH;
