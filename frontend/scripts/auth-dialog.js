@@ -294,30 +294,6 @@ class AuthDialog extends HTMLElement {
 		});
 	}
 
-	enable2FA() {
-		apiCall(`${BASE_MFA_API_URL}/enable/`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-		})
-			.then((response) => {
-				if(!response.ok) {
-					throw new Error("Failed to fetch QR code for enabling 2FA");
-				}
-				return response.blob()
-			}) .then((blob) => {
-				const qrCodeURL = URL.createObjectURL(blob);
-				const qrCodeElement = this.shadowRoot.getElementById("qr-code");
-				qrCodeElement.src = qrCodeURL;
-
-				this.shadowRoot.getElementById("sign-in-view").style.display = "none";
-				this.shadowRoot.getElementById("enable-2fa-view").style.display = "block";
-		}) .catch((error) => {
-			console.error("Error enabling 2FA:", error);
-		})
-	}
-
 	register(username, password) {
 		fetch(`${BASE_AUTH_API_URL}/register/`, {
 			method: "POST",
@@ -376,7 +352,47 @@ class AuthDialog extends HTMLElement {
 		}).catch(err => console.error(err));
 	}
 
-	verifyOtpCode(otpCode) {
+	enable2FA() {
+		apiCall(`${BASE_MFA_API_URL}/enable/`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+		})
+			.then((response) => {
+				if(!response.ok) {
+					throw new Error("Failed to fetch QR code for enabling 2FA");
+				}
+				return response.blob()
+			}) .then((blob) => {
+				const qrCodeURL = URL.createObjectURL(blob);
+				const qrCodeElement = this.shadowRoot.getElementById("qr-code");
+				qrCodeElement.src = qrCodeURL;
+
+				this.shadowRoot.getElementById("sign-in-view").style.display = "none";
+				this.shadowRoot.getElementById("enable-2fa-view").style.display = "block";
+		}) .catch((error) => {
+			console.error("Error enabling 2FA:", error);
+		})
+	}
+
+	disable2FA() {
+		apiCall(`${BASE_MFA_API_URL}/disable/`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+		})
+			.then((response) => response.json())
+			.then((data) => {
+				console.log("2FA disabled successfully!", data);
+				this.close();
+			}) .catch((error) => {
+				console.error("Failed to disable 2FA");
+		})
+	}
+
+	verify2FA(otpCode) {
 		apiCall(`${BASE_MFA_API_URL}/verify/`, {
 			method: "POST",
 			headers: {
@@ -404,7 +420,7 @@ class AuthDialog extends HTMLElement {
 		});
 
 		if (otpCode.length === 6) {
-			this.verifyOtpCode(otpCode);
+			this.verify2FA(otpCode);
 		} else {
 			console.error("Invalid OTP: Must be 6 digits");
 			const errorMessage = this.shadowRoot.querySelector(".error-message");
