@@ -1,4 +1,4 @@
-import {getAccessToken, setAccessToken} from "./api/api.js";
+import {getAccessToken, setAccessToken, apiCall} from "./api/api.js";
 import {BASE_AUTH_API_URL, BASE_MFA_API_URL, FORM_ERROR_MESSAGES} from "./utils/constants.js";
 
 
@@ -316,36 +316,23 @@ class AuthDialog extends HTMLElement {
 	}
 
 	verifyOtpCode(otpCode) {
-		const accessToken = getAccessToken();
-		if (!accessToken) {
-			console.error("Access token is missing");
-			return;
-		}
-
-		fetch(`${BASE_MFA_API_URL}/verify/`, {
+		apiCall(`${BASE_MFA_API_URL}/verify/`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
-				"Authorization": `Bearer ${accessToken}`,
 			},
 			body: JSON.stringify({
 				otp_code: otpCode,
 			}),
-		}) .then((response) => {
-			if (response.ok) {
-				return response.json();
-			} else {
-				return response.json().then((err) => {
-					console.error("OTP Verification failed:", err);
-					throw new Error(JSON.stringify(err));
-				});
-			}
-		}) .then((data) => {
-			console.log("OTP Verified Successfully!", data);
-			this.close();
+		})
+			.then((response) => response.json())
+			.then((data) => {
+				console.log("OTP Verified Successfully!", data);
+				this.close();
 		}) .catch((error) => {
 			console.error("Error during OTP Verification:", error);
-			const errorMessage = this.shadowRoot.getElementById("otp-error");
+			this.showError("otp", "Invalid OTP. Please try again.");
+			const errorMessage = this.shadowRoot.querySelector(".error-message");
 			if (errorMessage) {
 				errorMessage.textContent = "OTP verification failed. Please try again.";
 			}
@@ -357,15 +344,13 @@ class AuthDialog extends HTMLElement {
 		let otpCode = "";
 		otpBoxes.forEach((box) => {
 			otpCode	+= box.value;
-			console.log("otp:", otpCode);
 		});
-		console.log("Collected OTP:", otpCode);
 
 		if (otpCode.length === 6) {
 			this.verifyOtpCode(otpCode);
 		} else {
 			console.error("Invalid OTP: Must be 6 digits");
-			const errorMessage = this.shadowRoot.getElementById("otp-error");
+			const errorMessage = this.shadowRoot.querySelector(".error-message");
 			if (errorMessage) {
 				errorMessage.textContent = "Invalid OTP. Please enter all 6 digits.";
 			}
