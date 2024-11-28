@@ -1,5 +1,5 @@
-import {setAccessToken} from "../../api/api.js";
-import {BASE_AUTH_API_URL, EVENT_TYPES, FORM_ERROR_MESSAGES} from "../../utils/constants.js";
+import {setAccessToken, apiCall} from "../../api/api.js";
+import {BASE_AUTH_API_URL, BASE_MFA_API_URL, EVENT_TYPES, FORM_ERROR_MESSAGES} from "../../utils/constants.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
 
 
@@ -73,6 +73,53 @@ class AuthDialog extends HTMLElement {
 									Already have an account?
 									<a href="#" id="toggle-signin">Sign In.</a>
 								</div>
+							</div>
+						</div>
+					</div>
+					<div class="otp" id="otp-view" style="display: none">
+						<div class="heading">Enter Verification Code</div>
+						<div class="flex-container">
+							<div class="group">
+								<div class="otp-input-container">
+									<input type="text" maxlength="1" class="otp-box" id="otp-1"/>
+									<input type="text" maxlength="1" class="otp-box" id="otp-2"/>
+									<input type="text" maxlength="1" class="otp-box" id="otp-3"/>
+									<input type="text" maxlength="1" class="otp-box" id="otp-4"/>
+									<input type="text" maxlength="1" class="otp-box" id="otp-5"/>
+									<input type="text" maxlength="1" class="otp-box" id="otp-6"/>
+								</div>
+								<div class="error-message" id="otp-error"></div>
+							</div>
+						</div>
+						<div class="flex-container margin-top">
+							<div class="group">
+								<button class="sign-in-button">Verify</button>
+							</div>
+						</div>
+					</div>
+					<div class="enable-2fa" id="enable-2fa-view" style="display: none">
+						<div class="heading">Enable Two-Factor Authentication</div>
+						<div class="flex-container">
+							<div class="group">
+								<img id="qr-code" alt="QR Code" />
+							</div>
+						</div>
+						<div class="flex-container">
+							<div class="group">
+								<div class="otp-input-container">
+									<input type="text" maxlength="1" class="otp-box" id="otp-1"/>
+									<input type="text" maxlength="1" class="otp-box" id="otp-2"/>
+									<input type="text" maxlength="1" class="otp-box" id="otp-3"/>
+									<input type="text" maxlength="1" class="otp-box" id="otp-4"/>
+									<input type="text" maxlength="1" class="otp-box" id="otp-5"/>
+									<input type="text" maxlength="1" class="otp-box" id="otp-6"/>
+								</div>
+								<div class="error-message" id="otp-error"></div>
+							</div>
+						</div>
+						<div class="flex-container margin-top">
+							<div class="group">
+								<button class="sign-in-button">Verify</button>
 							</div>
 						</div>
 					</div>
@@ -201,6 +248,47 @@ class AuthDialog extends HTMLElement {
 				this.register(username, password);
 			}
 		});
+
+		this.shadowRoot.getElementById("otp-view").querySelector(".sign-in-button").addEventListener("click", (e) => {
+			e.preventDefault();
+			this.handleOtpVerification();
+		});
+
+		//TODO: Change sign in view and auth button query to enable 2fa button
+		this.shadowRoot.getElementById("sign-in-view").querySelector(".auth-button").addEventListener("click", (e) => {
+			e.preventDefault();
+			this.enable2FA();
+		});
+
+		this.shadowRoot.getElementById("enable-2fa-view").querySelector(".sign-in-button").addEventListener("click", (e) => {
+			e.preventDefault();
+			this.handleOtpVerification();
+		});
+
+		const optBoxes = this.shadowRoot.querySelectorAll(".otp-box");
+
+		optBoxes.forEach((box, index) => {
+			box.addEventListener("input", (e) => {
+				const value = e.target.value;
+				if (!/^\d$/.test(value)) {
+            		e.target.value = ""; // Clear invalid input
+        		}
+				if (value.length === 1) {
+					if (index < optBoxes.length - 1) {
+						optBoxes[index + 1].focus();
+					}
+				} else if (value.length === 0 && index > 0) {
+					optBoxes[index - 1].focus();
+				}
+			});
+
+			// Backspace to go back to previous box
+			box.addEventListener("keydown", (e) => {
+				if (e.key === "Backspace" && !e.target.value && index > 0) {
+					optBoxes[index - 1].focus();
+				}
+			});
+		});
 	}
 
 	attachEventListeners() {
@@ -266,8 +354,91 @@ class AuthDialog extends HTMLElement {
 		}).then((data) => {
 			console.log("LOGGED IN!");
 			setAccessToken(data.access_token);
-			this.close();
+			if (data.mfa_enable_flag) {
+				this.shadowRoot.getElementById("sign-in-view").style.display = "none"
+				this.shadowRoot.getElementById("otp-view").style.display = "block";
+			} else {
+				this.close();
+			}
 		}).catch(err => console.error(err));
+	}
+
+	enable2FA() {
+		apiCall(`${BASE_MFA_API_URL}/enable/`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+		})
+			.then((response) => {
+				if(!response.ok) {
+					throw new Error("Failed to fetch QR code for enabling 2FA");
+				}
+				return response.blob()
+			}) .then((blob) => {
+				const qrCodeURL = URL.createObjectURL(blob);
+				const qrCodeElement = this.shadowRoot.getElementById("qr-code");
+				qrCodeElement.src = qrCodeURL;
+
+				this.shadowRoot.getElementById("sign-in-view").style.display = "none";
+				this.shadowRoot.getElementById("enable-2fa-view").style.display = "block";
+		}) .catch((error) => {
+			console.error("Error enabling 2FA:", error);
+		})
+	}
+
+	disable2FA() {
+		apiCall(`${BASE_MFA_API_URL}/disable/`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+		})
+			.then((response) => response.json())
+			.then((data) => {
+				console.log("2FA disabled successfully!", data);
+				this.close();
+			}) .catch((error) => {
+				console.error("Failed to disable 2FA");
+		})
+	}
+
+	verify2FA(otpCode) {
+		apiCall(`${BASE_MFA_API_URL}/verify/`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify({
+				otp_code: otpCode,
+			}),
+		})
+			.then((response) => response.json())
+			.then((data) => {
+				console.log("OTP Verified Successfully!", data);
+				this.close();
+		}) .catch((error) => {
+			console.error("Error during OTP Verification:", error);
+			this.showError("otp", "Invalid OTP. Please try again.");
+		});
+	}
+
+	handleOtpVerification() {
+		const otpBoxes = this.shadowRoot.querySelectorAll(".otp-box");
+		let otpCode = "";
+		otpBoxes.forEach((box) => {
+			otpCode	+= box.value;
+		});
+
+		if (otpCode.length === 6) {
+			this.verify2FA(otpCode);
+		} else {
+			console.error("Invalid OTP: Must be 6 digits");
+			const errorMessage = this.shadowRoot.querySelector(".error-message");
+			if (errorMessage) {
+				errorMessage.textContent = "Invalid OTP. Please enter all 6 digits.";
+			}
+		}
 	}
 
 	connectedCallback() {
