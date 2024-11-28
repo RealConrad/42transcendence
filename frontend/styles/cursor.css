@@ -1,0 +1,63 @@
+@keyframes shake {
+  0%, 100% { transform: translate(calc(var(--paddle-width) * -0.4), calc(var(--paddle-width) * -0.4)); }
+  10%, 50%, 90% { transform: translate(calc(var(--paddle-width) * -0.8), calc(var(--paddle-width) * -0.4)); }
+  20%, 60% { transform: translate(0px, calc(var(--paddle-width) * -0.4)); }
+  30%, 70%, 90% { transform: translate(calc(var(--paddle-width) * -0.4), calc(var(--paddle-width) * -0.8)); }
+  20%, 40%, 80% { transform: translate(calc(var(--paddle-width) * -0.4), 0px); }
+}
+
+@keyframes after-shake {
+  90%, 10% { transform: translate(calc(var(--paddle-width) * -0.4), calc(var(--paddle-width) * -0.4)); }
+  0%, 40%, 100% { transform: translate(calc(var(--paddle-width) * -0.8), calc(var(--paddle-width) * -0.4)); }
+  10%, 50% { transform: translate(0px, calc(var(--paddle-width) * -0.4)); }
+  20%, 60%, 80% { transform: translate(calc(var(--paddle-width) * -0.4), calc(var(--paddle-width) * -0.8)); }
+  10%, 30%, 70% { transform: translate(calc(var(--paddle-width) * -0.4), 0px); }
+}
+
+.after-image-shake {
+  animation: shake 0.6s infinite;
+  z-index: 1000;
+}
+.after-image-after-shake {
+  animation: after-shake 0.4s infinite;
+  z-index: 1000;
+}
+
+.cursor-after-image {
+  position: absolute;
+  width: calc(var(--paddle-width) * 1.2);
+  height: calc(var(--paddle-width) * 1.2);
+  background-color: rgba(255, 255, 255, 0.2);
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.cursor-after-image.enlarged {
+  width: calc(var(--paddle-width) * 1.8);
+  height: calc(var(--paddle-width) * 1.8);
+  z-index: 1000;
+}
+
+.cursor-after-image.yellow {
+  background-color: rgba(255, 230, 0, 0.445);
+}
+
+.cursor-after-image.red {
+  background-color: rgba(255, 38, 0, 0.404);
+}
+
+.cursor-after-image.blue {
+  background-color: rgba(0, 81, 255, 0.445);
+}
+
+.cursor-after-image.green {
+  background-color: rgba(30, 255, 0, 0.274);
+}
+
+.cursor-after-image.purple {
+  background-color: rgba(99, 1, 112, 0.277);
+}
+
+.cursor-after-image.pink {
+  background-color: rgba(255, 0, 221, 0.277);
+}

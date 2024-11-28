@@ -57,7 +57,7 @@ export const apiCall = async (url, options = {}) => {
 
     if (response.status === 401 || response.status === 403) {
         console.warn("Access token expired, refreshing...");
-        await refreshTokens()
+        await refreshTokens();
         options.headers.Authorization = `Bearer ${getAccessToken()}`;
         return fetch(url, options);
     }
@@ -66,6 +66,6 @@ export const apiCall = async (url, options = {}) => {
         console.error(`API Error: ${response.status}`, error);
         throw new Error(error.error || "API call failed");
     }
-    return response
+    return response;
 }
 
