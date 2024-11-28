@@ -97,6 +97,32 @@ class AuthDialog extends HTMLElement {
 							</div>
 						</div>
 					</div>
+					<div class="enable-2fa" id="enable-2fa-view" style="display: none">
+						<div class="heading">Enable Two-Factor Authentication</div>
+						<div class="flex-container">
+							<div class="group">
+								<img id="qr-code" alt="QR Code" />
+							</div>
+						</div>
+						<div class="flex-container">
+							<div class="group">
+								<div class="otp-input-container">
+									<input type="text" maxlength="1" class="otp-box" id="otp-1"/>
+									<input type="text" maxlength="1" class="otp-box" id="otp-2"/>
+									<input type="text" maxlength="1" class="otp-box" id="otp-3"/>
+									<input type="text" maxlength="1" class="otp-box" id="otp-4"/>
+									<input type="text" maxlength="1" class="otp-box" id="otp-5"/>
+									<input type="text" maxlength="1" class="otp-box" id="otp-6"/>
+								</div>
+								<div class="error-message" id="otp-error"></div>
+							</div>
+						</div>
+						<div class="flex-container margin-top">
+							<div class="group">
+								<button class="sign-in-button">Verify</button>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 		`;
@@ -231,6 +257,17 @@ class AuthDialog extends HTMLElement {
 			this.handleOtpVerification();
 		});
 
+		//TODO: Change sign in view and auth button query to enable 2fa button
+		this.shadowRoot.getElementById("sign-in-view").querySelector(".auth-button").addEventListener("click", (e) => {
+			e.preventDefault();
+			this.enable2FA();
+		});
+
+		this.shadowRoot.getElementById("enable-2fa-view").querySelector(".sign-in-button").addEventListener("click", (e) => {
+			e.preventDefault();
+			this.handleOtpVerification();
+		});
+
 		const optBoxes = this.shadowRoot.querySelectorAll(".otp-box");
 
 		optBoxes.forEach((box, index) => {
@@ -255,6 +292,30 @@ class AuthDialog extends HTMLElement {
 				}
 			});
 		});
+	}
+
+	enable2FA() {
+		apiCall(`${BASE_MFA_API_URL}/enable/`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json"
+			},
+		})
+			.then((response) => {
+				if(!response.ok) {
+					throw new Error("Failed to fetch QR code for enabling 2FA");
+				}
+				return response.blob()
+			}) .then((blob) => {
+				const qrCodeURL = URL.createObjectURL(blob);
+				const qrCodeElement = this.shadowRoot.getElementById("qr-code");
+				qrCodeElement.src = qrCodeURL;
+
+				this.shadowRoot.getElementById("sign-in-view").style.display = "none";
+				this.shadowRoot.getElementById("enable-2fa-view").style.display = "block";
+		}) .catch((error) => {
+			console.error("Error enabling 2FA:", error);
+		})
 	}
 
 	register(username, password) {
@@ -332,10 +393,6 @@ class AuthDialog extends HTMLElement {
 		}) .catch((error) => {
 			console.error("Error during OTP Verification:", error);
 			this.showError("otp", "Invalid OTP. Please try again.");
-			const errorMessage = this.shadowRoot.querySelector(".error-message");
-			if (errorMessage) {
-				errorMessage.textContent = "OTP verification failed. Please try again.";
-			}
 		});
 	}
 
