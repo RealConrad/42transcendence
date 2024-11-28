@@ -27,9 +27,7 @@
     }
 
     .text-ring {
-      position: absolute;
-      height: 500px;
-      width: 500px;
+      position: relative;
       font-weight: bold;
       font-family: monospace;
       text-transform: uppercase;
@@ -54,29 +52,50 @@
         rotate(calc(var(--inner-angle) * var(--index)))
         translateY(var(--radius));
     }
+    .circle-container {
+        width: 500px;
+        height: 500px;
+        display: grid;
+        align-content: center;
+    }
+    .name-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        position: absolute; /* Ensure it's within the .circle-container */
+        top: 50%; /* Center vertically */
+        left: 50%; /* Center horizontally */
+        transform: translate(-50%, -50%); /* Correct offset from top and left */
+        text-align: center;
+    }
   </style>
 </head>
 <body>
-  <section>
-    <span class="text-ring outer-ring"></span>
-    <span class="text-ring inner-ring"></span>
-      <div>
-
-      </div>
-  </section>
+    <div class="circle-container">
+        <span class="text-ring outer-ring"></span>
+        <span class="text-ring inner-ring"></span>
+        <div class="name-container">
+            <div>cwenz</div>
+            <div>kglebows</div>
+            <div>hkumbhan</div>
+            <div>vivi</div>
+            <div>petru</div>
+        </div>
+    </div>
   <script>
     const outerRing = document.querySelector('.outer-ring');
     const innerRing = document.querySelector('.inner-ring');
 
     const outerRingOptions = {
         text: 'Backend • Authentication • Frontend • Game • ',
-        size: 1.5,
+        size: 2,
         spacing: 1.5,
     };
 
     const innerRingOptions = {
         text: 'UI/UX        NGINX         2FA         AI         API         ',
-        size: 1,
+        size: 1.5,
         spacing: 1,
     };
 
