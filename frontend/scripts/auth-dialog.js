@@ -1,5 +1,5 @@
-import {setAccessToken} from "./api/api.js";
-import {BASE_AUTH_API_URL, FORM_ERROR_MESSAGES} from "./utils/constants.js";
+import {getAccessToken, setAccessToken} from "./api/api.js";
+import {BASE_AUTH_API_URL, BASE_MFA_API_URL, FORM_ERROR_MESSAGES} from "./utils/constants.js";
 
 
 class AuthDialog extends HTMLElement {
@@ -93,7 +93,7 @@ class AuthDialog extends HTMLElement {
 						</div>
 						<div class="flex-container margin-top">
 							<div class="group">
-								<button class="sign-in-button" onclick="console.log('Verify button clicked')">Verify</button>
+								<button class="sign-in-button">Verify</button>
 							</div>
 						</div>
 					</div>
@@ -134,9 +134,9 @@ class AuthDialog extends HTMLElement {
 	async render() {
 		this.shadowRoot.innerHTML = await this.html();
 
-		this.shadowRoot.getElementById("sign-in-view").style.display = "none"
-		this.shadowRoot.getElementById("register-view").style.display = "none"
-		this.shadowRoot.getElementById("otp-view").style.display = "block"
+		// this.shadowRoot.getElementById("sign-in-view").style.display = "none"
+		// this.shadowRoot.getElementById("register-view").style.display = "none"
+		// this.shadowRoot.getElementById("otp-view").style.display = "block"
 
 		this.shadowRoot.getElementById("toggle-register").addEventListener("click", (e) => {
 			e.preventDefault();
@@ -226,14 +226,19 @@ class AuthDialog extends HTMLElement {
 			}
 		});
 
+		this.shadowRoot.getElementById("otp-view").querySelector(".sign-in-button").addEventListener("click", (e) => {
+			e.preventDefault();
+			this.handleOtpVerification();
+		});
+
 		const optBoxes = this.shadowRoot.querySelectorAll(".otp-box");
 
 		optBoxes.forEach((box, index) => {
 			box.addEventListener("input", (e) => {
 				const value = e.target.value;
-		// 		if (!/^\d$/.test(value)) {
-        //     e.target.value = ""; // Clear invalid input
-        // }
+				if (!/^\d$/.test(value)) {
+            		e.target.value = ""; // Clear invalid input
+        		}
 				if (value.length === 1) {
 					if (index < optBoxes.length - 1) {
 						optBoxes[index + 1].focus();
@@ -301,8 +306,70 @@ class AuthDialog extends HTMLElement {
 		}).then((data) => {
 			console.log("LOGGED IN!");
 			setAccessToken(data.access_token);
-			this.close();
+			if (data.mfa_enable_flag) {
+				this.shadowRoot.getElementById("sign-in-view").style.display = "none"
+				this.shadowRoot.getElementById("otp-view").style.display = "block";
+			} else {
+				this.close();
+			}
 		}).catch(err => console.error(err));
+	}
+
+	verifyOtpCode(otpCode) {
+		const accessToken = getAccessToken();
+		if (!accessToken) {
+			console.error("Access token is missing");
+			return;
+		}
+
+		fetch(`${BASE_MFA_API_URL}/verify/`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				"Authorization": `Bearer ${accessToken}`,
+			},
+			body: JSON.stringify({
+				otp_code: otpCode,
+			}),
+		}) .then((response) => {
+			if (response.ok) {
+				return response.json();
+			} else {
+				return response.json().then((err) => {
+					console.error("OTP Verification failed:", err);
+					throw new Error(JSON.stringify(err));
+				});
+			}
+		}) .then((data) => {
+			console.log("OTP Verified Successfully!", data);
+			this.close();
+		}) .catch((error) => {
+			console.error("Error during OTP Verification:", error);
+			const errorMessage = this.shadowRoot.getElementById("otp-error");
+			if (errorMessage) {
+				errorMessage.textContent = "OTP verification failed. Please try again.";
+			}
+		});
+	}
+
+	handleOtpVerification() {
+		const otpBoxes = this.shadowRoot.querySelectorAll(".otp-box");
+		let otpCode = "";
+		otpBoxes.forEach((box) => {
+			otpCode	+= box.value;
+			console.log("otp:", otpCode);
+		});
+		console.log("Collected OTP:", otpCode);
+
+		if (otpCode.length === 6) {
+			this.verifyOtpCode(otpCode);
+		} else {
+			console.error("Invalid OTP: Must be 6 digits");
+			const errorMessage = this.shadowRoot.getElementById("otp-error");
+			if (errorMessage) {
+				errorMessage.textContent = "Invalid OTP. Please enter all 6 digits.";
+			}
+		}
 	}
 
 	connectedCallback() {
