@@ -23,7 +23,7 @@ class Enable2FAView(APIView):
     def post(self, request):
         user = request.user
         user_profile = user.userprofile
-        if user_profile.otp_secret:
+        if user_profile.mfa_enabled:
             return Response(
                 {'detail': '2FA is already enabled.'}
             )
@@ -31,30 +31,7 @@ class Enable2FAView(APIView):
         qr_code = generate_qr_code(otp_secret, user)
         response = send_qr_code_response(qr_code)
 
-        user_id = user.id
-        username = user.username
-        mfa_enabled = True
-
-        update_mfa_url = "http://authservice:8000/api/auth/setmfaflag/"
-
-        try:
-            api_response = requests.put(update_mfa_url, json={
-                'user_id': user_id,
-                'username': username,
-                'mfa_enabled': mfa_enabled
-            })
-            if api_response.status_code != 200:
-                return Response(
-                    {"detail": "Failed to update MFA flag."},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-            return response
-        except Exception as e:
-            return Response(
-                {'detail': str(e)},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+        return response
 
 
 class Verify2FAView(APIView):
@@ -70,7 +47,8 @@ class Verify2FAView(APIView):
             )
 
         try:
-            otp_secret = user.userprofile.otp_secret # extract otp secret
+            user_profile = user.userprofile
+            otp_secret = user_profile.otp_secret # extract otp secret
             if not otp_secret:
                 return Response(
                     {"detail": "2FA is not enabled."},
@@ -79,6 +57,27 @@ class Verify2FAView(APIView):
 
             totp = pyotp.TOTP(otp_secret)
             if totp.verify(otp_code):
+                if not user_profile.mfa_enabled:
+                    user_profile.mfa_enabled = True
+                    user_profile.save()
+
+                    update_mfa_url = "http://authservice:8000/api/auth/setmfaflag/"
+                    try:
+                        api_response = requests.put(update_mfa_url, json={
+                            'user_id': user.id,
+                            'username': user.username,
+                            'mfa_enabled': True
+                        })
+                        if api_response.status_code != 200:
+                            return Response(
+                                {"detail": "Failed to update MFA flag."},
+                                status=status.HTTP_400_BAD_REQUEST
+                            )
+                    except Exception as e:
+                        return Response(
+                            {'detail': str(e)},
+                            status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                        )
                 return Response(
                     {"message": "2FA verification successful"},
                     status=status.HTTP_200_OK
