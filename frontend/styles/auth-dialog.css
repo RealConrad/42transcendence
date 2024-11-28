@@ -154,3 +154,12 @@ input {
 	border: 1px solid #ccc;
 	border-radius: 5px;
 }
+
+#qr-code {
+	width: 200px;
+	height: 200px;
+	border-radius: 15px;
+	border: 2px solid #000;
+	margin: 20px auto;
+	object-fit: contain;
+}
