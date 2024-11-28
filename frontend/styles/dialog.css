@@ -128,6 +128,11 @@ input {
     width: 100%;
 }
 
+.otp {
+	text-align: center;
+	width: 100%;
+}
+
 .error-message {
     color: red;
     font-size: 0.9rem;
@@ -137,3 +142,26 @@ input {
     visibility: hidden; /* Hidden by default, made visible when an error occurs */
 }
 
+.otp-input-container {
+	display: flex;
+	justify-content: center;
+	gap: 10px;
+}
+
+.otp-box {
+	width: 40px;
+	height: 40px;
+	text-align: center;
+	font-size: 18px;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+}
+
+#qr-code {
+	width: 200px;
+	height: 200px;
+	border-radius: 15px;
+	border: 2px solid #000;
+	margin: 20px auto;
+	object-fit: contain;
+}

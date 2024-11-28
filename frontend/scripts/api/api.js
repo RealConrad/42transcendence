@@ -55,7 +55,7 @@ export const apiCall = async (url, options = {}) => {
     };
     const response = await fetch(url, options);
 
-    if (response.status === 401) {
+    if (response.status === 401 || response.status === 403) {
         console.warn("Access token expired, refreshing...");
         await refreshTokens();
         options.headers.Authorization = `Bearer ${getAccessToken()}`;

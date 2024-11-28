@@ -10,14 +10,17 @@ class GenerateTokensView(APIView):
 
     def post(self, request):
         user_id = request.data.get('user_id')
-        if not user_id:
+        username = request.data.get('username')
+        if not user_id and username:
             return Response({'detail': 'Unable to create tokens'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Generate tokens
         refresh = RefreshToken()
         refresh['user_id'] = user_id
+        refresh['username'] = username
         access_token = refresh.access_token
         access_token['user_id'] = user_id
+        access_token['username'] = username
         return Response({
             'access_token': str(access_token),
             'refresh_token': str(refresh),
@@ -33,7 +36,12 @@ class VerifyTokenView(APIView):
         try:
             access_token = AccessToken(token)
             user_id = access_token['user_id']
-            return Response({'valid': True, 'user_id': user_id}, status=status.HTTP_200_OK)
+            username = access_token['username']
+            return Response({
+                'valid': True,
+                'user_id': user_id,
+                'username': username
+            }, status=status.HTTP_200_OK)
         except TokenError:
             return Response({'valid': False, 'detail': 'Invalid or expired token'}, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -48,13 +56,16 @@ class RefreshTokenView(APIView):
         try:
             refresh = RefreshToken(refresh_token)
             user_id = refresh['user_id']
+            username = refresh['username']
             refresh.blacklist()
 
             # Create a new refresh token
             new_refresh = RefreshToken()
             new_refresh['user_id'] = user_id
+            new_refresh['username'] = username
             new_access_token = new_refresh.access_token
             new_access_token['user_id'] = user_id
+            new_access_token['username'] = username
             response = Response({
                 'access_token': str(new_access_token),
             }, status=status.HTTP_200_OK)

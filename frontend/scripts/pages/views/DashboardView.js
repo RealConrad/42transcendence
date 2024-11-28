@@ -51,11 +51,7 @@ export class DashboardView extends HTMLElement {
                         <button>Play</button>
                         <span class="button-description">How would you like your PONG today?</span>
                     </div>
-                    <div class="menu-option">
-                        <button>Tournament</button>
-                        <span class="button-description">Will you dare?!</span>
-                    </div>
-                    <div class="menu-option" style="grid-row-start: 4;">
+                    <div class="menu-option" style="grid-row-start: 3;">
                         <button>About</button>
                         <span class="button-description">ft_transcendence at 42 Heilbronn</span>
                     </div>
@@ -69,11 +65,10 @@ export class DashboardView extends HTMLElement {
 
     loadMenuComponents() {
         import ("../components/GameSetupDialog.js");
-        import("../components/auth-dialog.js");
+        import("../components/AuthDialog.js");
         import("../components/HowToMenu.js");
         import("../components/AboutMenu.js");
         import("../components/PlayMenu.js");
-        import("../components/TournamentMenu.js");
     }
 
     setupEventListeners() {
