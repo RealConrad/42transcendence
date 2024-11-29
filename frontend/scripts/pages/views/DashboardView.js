@@ -1,6 +1,7 @@
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
 import {EVENT_TYPES} from "../../utils/constants.js";
 import Game from "../../game/Game.js";
+import Tournament from "../../game/Tournament.js";
 
 export class DashboardView extends HTMLElement {
     constructor() {
@@ -164,6 +165,19 @@ export class DashboardView extends HTMLElement {
 
         this.initializePaddleMovement();
         this.initializeMenuInteractions();
+
+        // this.test();
+    }
+
+    test() {
+        const players = [
+            { name: "Conrad", isAI: false },
+            { name: "John_Doe_AI", isAI: true },
+            { name: "Jane", isAI: false },
+            { name: "AI_Bot", isAI: true },
+        ];
+        const tournament = new Tournament(players, this.canvas);
+        tournament.start()
     }
 
     drawMiddleLine() {
