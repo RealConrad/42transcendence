@@ -51,7 +51,11 @@ export class DashboardView extends HTMLElement {
                         <button>Play</button>
                         <span class="button-description">How would you like your PONG today?</span>
                     </div>
-                    <div class="menu-option" style="grid-row-start: 3;">
+                    <div class="menu-option">
+                        <button>Account</button>
+                        <span class="button-description">Who are you anyway?</span>
+                    </div>
+                    <div class="menu-option" style="grid-row-start: 4;">
                         <button>About</button>
                         <span class="button-description">ft_transcendence at 42 Heilbronn</span>
                     </div>
@@ -191,7 +195,7 @@ export class DashboardView extends HTMLElement {
         const contentMapping = {
             "HowTo": "how-to-menu",
             "Play": "play-menu",
-            "Tournament": "tournament-menu",
+            "Account": "account-menu",
             "About": "about-menu",
         };
 
