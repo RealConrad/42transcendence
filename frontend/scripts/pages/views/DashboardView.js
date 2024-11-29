@@ -42,6 +42,7 @@ export class DashboardView extends HTMLElement {
                 <canvas id="gameCanvas"></canvas>
                 <auth-dialog id="auth-dialog"></auth-dialog>
                 <game-setup-dialog id="game-setup-dialog"></game-setup-dialog>
+                <tournament-setup-dialog id="tournament-setup-dialog"></tournament-setup-dialog>
                 <left-menu>
                     <div class="menu-option">
                         <button>HowTo</button>
@@ -80,7 +81,8 @@ export class DashboardView extends HTMLElement {
     }
 
     loadMenuComponents() {
-        import ("../components/GameSetupDialog.js");
+        import("../components/GameSetupDialog.js");
+        import("../components/TournamentSetupDialog.js");
         import("../components/AuthDialog.js");
         import("../components/HowToMenu.js");
         import("../components/PlayMenu.js");
@@ -102,6 +104,7 @@ export class DashboardView extends HTMLElement {
             GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_UNHOVER, { element: loginButton});
         });
 
+        // Emit
         contributor.addEventListener("mouseover", () => {
             GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_HOVER, { element: contributor});
         });
@@ -109,6 +112,7 @@ export class DashboardView extends HTMLElement {
             GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_UNHOVER, { element: contributor});
         });
 
+        // Listen for
         GlobalEventEmitter.on(EVENT_TYPES.MATCH_VS_AI, () => {
             console.log("VS AI");
             this.openGameSetupDialog("vs AI");
@@ -117,9 +121,17 @@ export class DashboardView extends HTMLElement {
             console.log("LOCAL");
             this.openGameSetupDialog("local");
         });
+        GlobalEventEmitter.on(EVENT_TYPES.MATCH_TOURNAMENT, () => {
+            console.log("TOURNAMENT");
+            const tournamentSetupDialog = this.shadowRoot.getElementById("tournament-setup-dialog");
+            tournamentSetupDialog.open();
+        });
         GlobalEventEmitter.on(EVENT_TYPES.START_MATCH, ({ player1Name, player2Name, matchType}) => {
             this.startGame(player1Name, player2Name, matchType !== "local");
         });
+        GlobalEventEmitter.on(EVENT_TYPES.START_TOURNAMENT, ({ players: players}) => {
+            this.startTournament(players);
+        })
         GlobalEventEmitter.on(EVENT_TYPES.QUIT_MATCH, () => {
             this.endGame();
         });
@@ -249,6 +261,10 @@ export class DashboardView extends HTMLElement {
         this.updateScores(player1Name, player2Name, 0, 0);
         const game = new Game(this.canvas, vsAI, player1Name, player2Name);
         game.start();
+    }
+
+    startTournament(players) {
+        console.log("Players in dashboard:", players);
     }
 
     updateScores(player1Name, player2Name, player1Score, player2Score) {
