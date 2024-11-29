@@ -4,6 +4,10 @@ export const setAccessToken = (token) => {
     accessToken = token;
 }
 
+export const getUserName = () => {
+    return localStorage.getItem("username");
+}
+
 export const getAccessToken = () => accessToken;
 
 const refreshTokens = async () => {

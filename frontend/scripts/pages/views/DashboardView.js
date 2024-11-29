@@ -71,8 +71,9 @@ export class DashboardView extends HTMLElement {
         import ("../components/GameSetupDialog.js");
         import("../components/AuthDialog.js");
         import("../components/HowToMenu.js");
-        import("../components/AboutMenu.js");
         import("../components/PlayMenu.js");
+        import("../components/AccountMenu.js");
+        import("../components/AboutMenu.js");
     }
 
     setupEventListeners() {
