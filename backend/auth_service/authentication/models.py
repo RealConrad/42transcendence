@@ -5,6 +5,7 @@ class CustomUser(AbstractUser):
     mfa_enabled = models.BooleanField(default=False)
     total_matches_won = models.IntegerField(default=0)
     total_matches_lost = models.IntegerField(default=0)
+    profile_picture = models.ImageField(upload_to='', null=True, blank=True)
 
     def __str__(self):
         return self.username
