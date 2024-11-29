@@ -30,22 +30,19 @@ export const validateInput = (input) => {
 }
 
 const refreshTokens = async () => {
-    await fetch('http://127.0.0.1:8002/api/token/refresh/', {
-            method: "POST",
-            credentials: 'include',
-        }).then((response) => {
-            if (response.ok) {
-               return response.json();
-            } else {
-                // TODO: logout user
-                console.error("Unable to refresh tokens. logging out")
-            }
-    }).then((data) => {
+    try {
+        const response = fetch('http://127.0.0.1:8002/api/token/refresh/', {
+                method: "POST",
+                credentials: 'include',
+        })
+        if (!response.ok) {
+            return new Error("Token refresh failed");
+        }
+        const data = await response.json();
         setAccessToken(data.access_token);
-        console.log("Tokens refreshed");
-    }).catch((error) => {
-        console.error("Unable to refresh tokens: ", error);
-    });
+    } catch (error) {
+        console.log("Failed to refresh tokens, ", error);
+    }
 }
 
 window.onload = async () => {
