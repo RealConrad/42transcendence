@@ -166,3 +166,30 @@ class SaveProfilePicture(generics.GenericAPIView):
             'detail': "Profile picture uploaded successfully",
              'profile_picture': profile_picture_url
         }, status=status.HTTP_200_OK )
+
+
+class GetUserData(generics.GenericAPIView):
+    """
+    Generic View to retrieve user data
+    """
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+
+        profile_picture_url = (
+            request.build_absolute_uri(user.profile_picture.url)
+            if user.profile_picture and hasattr(user.profile_picture, 'url')
+            else None
+        )
+
+        response = Response({
+            "detail": "User data",
+            "username": user.username,
+            "user_id": user.id,
+            "mfa_enable_flag": user.mfa_enabled,
+            "profile_picture": profile_picture_url,
+        }, status=status.HTTP_200_OK)
+
+        return response
