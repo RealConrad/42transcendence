@@ -158,14 +158,9 @@ html() {
                     .then(response => response.json())
                     .then(data => {
                         console.log("API Response: ", data);
-                        if (data.message) {
-                            console.log("Profile picture uploaded successfully!");
-                        } else {
-                            alert(`Error: ${data.detail || 'Something went wrong!'}`);
-                        }
                     })
                     .catch(error => {
-                        console.log("Error uploading profile picture:", error);
+                        console.error("Error uploading profile picture:", error);
                     })
             }
         });
