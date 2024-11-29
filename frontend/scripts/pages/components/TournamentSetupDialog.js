@@ -97,7 +97,6 @@ export class TournamentSetupDialog extends HTMLElement {
             const input = document.createElement("input");
             input.type = "text";
             input.placeholder = `Player ${playerInputs.children.length + 1}`;
-            input.required = true;
 
             const label = document.createElement("label");
             const checkbox = document.createElement("input");
@@ -151,8 +150,8 @@ export class TournamentSetupDialog extends HTMLElement {
 
             console.log(players);
             const validPlayers = players.filter(player => player.name.length > 0);
-            if (validPlayers.length < 4) {
-                alert("You need at least 4 players to start a tournament.");
+            if (validPlayers.length < 4 || validPlayers % 2 !== 0) {
+                alert("You at minimum 4 players and even number of players.");
                 return;
             }
             console.log("Starting tournament with players:", validPlayers);
