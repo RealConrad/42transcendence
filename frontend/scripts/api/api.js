@@ -31,17 +31,18 @@ export const validateInput = (input) => {
 
 const refreshTokens = async () => {
     try {
-        const response = fetch('http://127.0.0.1:8002/api/token/refresh/', {
-                method: "POST",
-                credentials: 'include',
-        })
+        const response = await fetch('http://127.0.0.1:8002/api/token/refresh/', {
+            method: "POST",
+            credentials: 'include',
+        });
         if (!response.ok) {
-            return new Error("Token refresh failed");
+            throw new Error("Token refresh failed");
         }
         const data = await response.json();
+        console.info("Refreshed tokens");
         setAccessToken(data.access_token);
     } catch (error) {
-        console.log("Failed to refresh tokens, ", error);
+        console.log("Failed to refresh tokens,", error);
     }
 }
 
