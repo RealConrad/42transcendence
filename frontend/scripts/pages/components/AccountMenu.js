@@ -42,7 +42,7 @@ export class AccountMenu extends HTMLElement {
 html() {
     return `
         <link rel="stylesheet" href="../../../styles/account.css">
-        ${this.accessToken ? 
+        ${!this.accessToken ? 
             `
                 <div class="guest-view">
                     Login first to view this page!
