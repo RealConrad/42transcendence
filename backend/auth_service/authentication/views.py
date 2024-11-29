@@ -2,13 +2,12 @@ import requests
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from django.conf import settings
-from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK
-
 from .models import CustomUser
 from .serializers import RegisterSerializer, LoginSerializer
+from .authentication import JWTAuthentication
 
 JWT_SERVICE_URL = 'http://jwtservice:8002/api/token/generate-tokens/'
+JWT_VERIFY_URL = 'http://jwtservice:8002/api/token/verify/'
 
 class RegisterView(generics.CreateAPIView):
     permission_classes = [AllowAny]
@@ -123,5 +122,34 @@ class SetMFAFlagView(generics.GenericAPIView):
         flag_status = "enabled" if mfa_enabled else "disabled"
         return Response(
             {'detail': f'MFA flag set to {flag_status}'},
+            status=status.HTTP_200_OK
+        )
+
+
+class SaveProfilePicture(generics.GenericAPIView):
+    """
+    Generic view to store user profile picture
+    """
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+
+        # Saving the file
+        uploaded_file = request.FILES.get('file')
+        if not uploaded_file:
+            return Response(
+                {'detail': "No File uploaded"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # renaming and saving the file
+        file_name = f"{user.id}_{uploaded_file.name}"
+        user.profile_picture.save(file_name, uploaded_file)
+        user.save()
+
+        return Response(
+            {'detail': "Profile picture uploaded successfully"},
             status=status.HTTP_200_OK
         )
