@@ -21,6 +21,8 @@ export const EVENT_TYPES = {
     MATCH_LOCAL: "match.local",
     QUIT_MATCH: "quit.match",
     UPDATE_SCORE: "update.score",
+    MATCH_TOURNAMENT: "match.tournament",
+    START_TOURNAMENT: "start.tournament",
 }
 
 export const BASE_AUTH_API_URL = "http://127.0.0.1:8000/api/auth"
