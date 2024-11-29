@@ -1,7 +1,9 @@
+import { USER } from "../utils/constants.js";
 let accessToken = null;
 
 export const setAccessToken = (token) => {
     accessToken = token;
+    USER.loggedIn = true;
 }
 
 export const getUserName = () => {
@@ -22,6 +24,7 @@ const refreshTokens = async () => {
                 console.error("Unable to refresh tokens. logging out")
             }
     }).then((data) => {
+        console.log(data);
         setAccessToken(data.access_token);
         console.log("Tokens refreshed");
     }).catch((error) => {

@@ -1,6 +1,8 @@
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
 import {EVENT_TYPES} from "../../utils/constants.js";
 import Game from "../../game/Game.js";
+import {getAccessToken} from "../../api/api.js";
+import { USER } from "../../utils/constants.js";
 
 export class DashboardView extends HTMLElement {
     constructor() {
@@ -19,10 +21,14 @@ export class DashboardView extends HTMLElement {
         this.initMenu();
         this.showAllDashboardUI();
     }
-
     render() {
         this.shadowRoot.innerHTML = this.html();
         this.setupEventListeners();
+    }
+
+    displayUsername() {
+        // return USER.username;
+        return 'viv'
     }
 
     html() {
@@ -34,9 +40,20 @@ export class DashboardView extends HTMLElement {
                     <div class="title">PONG</div>
                     <span id="player2-display" class="player2_score">Player 2 - 0</span>
                 </div>
-                <button id="login-button" class="orange-button">
-                    LOGIN
-                </button>
+
+            ${!USER.loggedIn ? 
+                `
+                    <button id="login-button" class="orange-button">
+                        LOGIN
+                    </button>
+                `  
+                :
+                `
+                    <button id="login-button" class="orange-button">
+                        ${this.displayUsername()}
+                    </button>
+                `
+            }
             </header>
             <main-menu>
                 <canvas id="gameCanvas"></canvas>

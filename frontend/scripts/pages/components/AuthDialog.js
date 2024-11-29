@@ -1,7 +1,7 @@
 import {setAccessToken, apiCall} from "../../api/api.js";
 import {BASE_AUTH_API_URL, BASE_MFA_API_URL, EVENT_TYPES, FORM_ERROR_MESSAGES} from "../../utils/constants.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
-
+import {USER} from '../../utils/constants.js'
 
 class AuthDialog extends HTMLElement {
 	constructor() {
@@ -354,12 +354,14 @@ class AuthDialog extends HTMLElement {
 		}).then((data) => {
 			console.log("LOGGED IN!");
 			setAccessToken(data.access_token);
+			USER.username = username;
 			if (data.mfa_enable_flag) {
 				this.shadowRoot.getElementById("sign-in-view").style.display = "none"
 				this.shadowRoot.getElementById("otp-view").style.display = "block";
 			} else {
 				this.close();
 			}
+			console.log('user logged in: ' , USER.loggedIn);
 		}).catch(err => console.error(err));
 	}
 
