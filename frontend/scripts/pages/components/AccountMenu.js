@@ -52,7 +52,7 @@ html() {
             `
                 <div class="container">
                     <div class="heading">
-                        <div class="profile-picture" id="profile-picture">
+                        <div class="profile-picture" id="profile-picture-id">
                             <img alt=""> 
                             <span class="initial"></span>
                         </div>
@@ -87,6 +87,9 @@ html() {
 
     renderPreviousMatches(matches) {
         const matchesContainer = this.shadowRoot.getElementById('previous-matches');
+        if (!matchesContainer) {
+            return;
+        }
         matchesContainer.innerHTML = matches.map(match => {
             const winnerClass = match.score1 > match.score2 ? 'winner' : 'loser';
             const loserClass = match.score1 > match.score2 ? 'loser' : 'winner';
@@ -109,7 +112,10 @@ html() {
 
 
     setupProfilePicture() {
-        const profilePicture = this.shadowRoot.getElementById("profile-picture");
+        const profilePicture = this.shadowRoot.querySelector("#profile-picture-id");
+        if (!profilePicture) {
+            return;
+        }
         const imgElement = profilePicture.querySelector("img");
         const initialElement = profilePicture.querySelector(".initial");
 
