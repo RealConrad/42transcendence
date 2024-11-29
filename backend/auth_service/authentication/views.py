@@ -69,12 +69,19 @@ class LoginView(generics.GenericAPIView):
                 access_token = tokens.get('access_token')
                 refresh_token = tokens.get('refresh_token')
 
+                profile_picture_url = (
+                    request.build_absolute_uri(user.profile_picture.url)
+                    if user.profile_picture and hasattr(user.profile_picture, 'url')
+                    else None
+                )
+
                 response = Response({
                     "detail": "User logged in successfully",
                     "username": user.username,
                     "user_id": user.id,
                     "access_token": access_token,
                     "mfa_enable_flag": user.mfa_enabled,
+                    "profile_picture": profile_picture_url,
                 }, status=status.HTTP_200_OK)
 
                 response.set_cookie(
@@ -148,6 +155,8 @@ class SaveProfilePicture(generics.GenericAPIView):
         file_name = f"{user.id}_{uploaded_file.name}"
         user.profile_picture.save(file_name, uploaded_file)
         user.save()
+
+        print(f"File should be saved at: {user.profile_picture.path}")
 
         return Response(
             {'detail': "Profile picture uploaded successfully"},
