@@ -156,9 +156,13 @@ class SaveProfilePicture(generics.GenericAPIView):
         user.profile_picture.save(file_name, uploaded_file)
         user.save()
 
-        print(f"File should be saved at: {user.profile_picture.path}")
-
-        return Response(
-            {'detail': "Profile picture uploaded successfully"},
-            status=status.HTTP_200_OK
+        profile_picture_url = (
+            request.build_absolute_uri(user.profile_picture.url)
+            if user.profile_picture and hasattr(user.profile_picture, 'url')
+            else None
         )
+
+        return Response({
+            'detail': "Profile picture uploaded successfully",
+             'profile_picture': profile_picture_url
+        }, status=status.HTTP_200_OK )
