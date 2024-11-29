@@ -1,7 +1,7 @@
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
 import {EVENT_TYPES} from "../../utils/constants.js";
 import Game from "../../game/Game.js";
-import {getAccessToken} from "../../api/api.js";
+import {apiCall, getAccessToken, getUserName} from "../../api/api.js";
 import { USER } from "../../utils/constants.js";
 
 export class DashboardView extends HTMLElement {
@@ -15,20 +15,30 @@ export class DashboardView extends HTMLElement {
         this.rightPaddle = null;
     }
 
+    checkForLogin() {
+        if (!getAccessToken())
+            USER.loggedIn = false;
+        USER.loggedIn = true;
+        // USER.username = apiCall();
+        console.log('user is logged in');
+    }
+
     connectedCallback() {
         this.loadMenuComponents();
         this.render();
         this.initMenu();
         this.showAllDashboardUI();
     }
+
     render() {
+        this.checkForLogin();
         this.shadowRoot.innerHTML = this.html();
         this.setupEventListeners();
     }
 
     displayUsername() {
-        // return USER.username;
-        return 'viv'
+        if (!USER.username) return ('Default User');
+        return USER.username;
     }
 
     html() {
