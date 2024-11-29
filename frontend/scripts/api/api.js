@@ -13,23 +13,20 @@ export const getUserName = () => {
 export const getAccessToken = () => accessToken;
 
 const refreshTokens = async () => {
-    await fetch('http://127.0.0.1:8002/api/token/refresh/', {
+    try {
+        const response = await fetch('http://127.0.0.1:8002/api/token/refresh/', {
             method: "POST",
             credentials: 'include',
-        }).then((response) => {
-            if (response.ok) {
-               return response.json();
-            } else {
-                // TODO: logout user
-                console.error("Unable to refresh tokens. logging out")
-            }
-    }).then((data) => {
-        console.log(data);
+        });
+        if (!response.ok) {
+            throw new Error("Token refresh failed");
+        }
+        const data = await response.json();
+        console.info("Refreshed tokens");
         setAccessToken(data.access_token);
-        console.log("Tokens refreshed");
-    }).catch((error) => {
-        console.error("Unable to refresh tokens: ", error);
-    });
+    } catch (error) {
+        console.log("Failed to refresh tokens,", error);
+    }
 }
 
 window.onload = async () => {
