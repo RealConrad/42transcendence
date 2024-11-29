@@ -43,6 +43,10 @@ button:focus {
   outline: none;
 }
 
+a {
+  all: unset;
+}
+
 header {
   font-size: calc(5vh);
   color: var(--highlight-color);
@@ -88,14 +92,82 @@ header {
 }
 
 footer {
-  height: var(--top-bottom-height);
-  width: 100%;
+  height: var(--top-bottom-height); /* Fixed height */
+  width: 100%; /* Full width */
   display: flex;
-  justify-content: center;
-  align-items: center;
-  color: var(--color);
-  font-size: 2.5rem;
+  justify-content: end; /* Separate label and team */
+  align-items: center; /* Vertically center content */
+  color: var(--color, #ffffff);
+  font-size: 2rem; /* Adjust font size for better visibility */
+  background-color: var(--background-color); /* Match page background */
+  padding: 0 20px; /* Add horizontal padding */
+  box-sizing: border-box; /* Include padding in width calculation */
+  position: relative;
+  overflow: hidden;
 }
+
+.footer-container {
+  display: flex;
+  justify-content: end;
+  align-items: center;
+  margin-right: 300px;
+  width: 100%;
+}
+
+.footer-label {
+  font-size: 1.5rem; /* Larger font size for "Created by" */
+  font-weight: bold;
+  color: white;
+  margin-right: 50px;
+}
+
+.team {
+  position: relative;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  font-size: 0.9rem;
+  color: gray;
+}
+
+.teammate {
+  position: absolute;
+  color: gray;
+  opacity: 0.8;
+  white-space: nowrap; /* Prevent text wrapping */
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.teammate:hover {
+  color: var(--background-yellow);
+  transform: scale(1.2);
+}
+
+.teammate1 {
+  top: -30px;
+  right: -60px;
+}
+
+.teammate2 {
+  top: -10px;
+  right: -120px;
+}
+
+.teammate3 {
+  top: 10px;
+  right: -100px;
+}
+
+.teammate4 {
+  top: -20px;
+  right: -200px;
+}
+
+.teammate5 {
+  top: 5px;
+  right: -210px;
+}
+
 
 main-menu {
   width: var(--game-width);

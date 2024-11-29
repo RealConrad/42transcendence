@@ -51,7 +51,11 @@ export class DashboardView extends HTMLElement {
                         <button>Play</button>
                         <span class="button-description">How would you like your PONG today?</span>
                     </div>
-                    <div class="menu-option" style="grid-row-start: 3;">
+                    <div class="menu-option">
+                        <button>Account</button>
+                        <span class="button-description">Who are you anyway?</span>
+                    </div>
+                    <div class="menu-option" style="grid-row-start: 4;">
                         <button>About</button>
                         <span class="button-description">ft_transcendence at 42 Heilbronn</span>
                     </div>
@@ -60,6 +64,18 @@ export class DashboardView extends HTMLElement {
                     <div id="right-menu-container"></div>
                 </right-menu>
             </main-menu>
+            <footer>
+                <div class="footer-container">
+                    <div class="footer-label">Created By</div>
+                    <div class="team">
+                        <a href="https://github.com/RealConrad/" target="_blank" class="teammate teammate1">cwenz</a>
+                        <a href="https://www.github.com/kglebows/" target="_blank" class="teammate teammate2">kglebows</a>
+                        <a href="https://www.github.com/harshkumbhani/" target="_blank" class="teammate teammate3">hkumbhan</a>
+                        <a href="https://github.com/vivilenard/" target="_blank" class="teammate teammate4">vivi</a>
+                        <a href="https://github.com/PetruCazac/" target="_blank" class="teammate teammate5">pcazac</a>
+                    </div>
+                </div>
+            </footer>
         `;
     }
 
@@ -67,13 +83,15 @@ export class DashboardView extends HTMLElement {
         import ("../components/GameSetupDialog.js");
         import("../components/AuthDialog.js");
         import("../components/HowToMenu.js");
-        import("../components/AboutMenu.js");
         import("../components/PlayMenu.js");
+        import("../components/AccountMenu.js");
+        import("../components/AboutMenu.js");
     }
 
     setupEventListeners() {
         const loginButton = this.shadowRoot.getElementById("login-button");
         const authDialogPopup = this.shadowRoot.getElementById("auth-dialog");
+        const contributor = this.shadowRoot.querySelector(".team");
         loginButton.addEventListener("click", () => {
             authDialogPopup.open();
         });
@@ -82,6 +100,13 @@ export class DashboardView extends HTMLElement {
         });
         loginButton.addEventListener("mouseout", () => {
             GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_UNHOVER, { element: loginButton});
+        });
+
+        contributor.addEventListener("mouseover", () => {
+            GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_HOVER, { element: contributor});
+        });
+        contributor.addEventListener("mouseout", () => {
+            GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_UNHOVER, { element: contributor});
         });
 
         GlobalEventEmitter.on(EVENT_TYPES.MATCH_VS_AI, () => {
@@ -162,22 +187,26 @@ export class DashboardView extends HTMLElement {
     initializePaddleMovement() {
         document.addEventListener("mousemove", (e) => {
             const canvasRect = this.canvas.getBoundingClientRect();
+            const footerHeight = this.shadowRoot.querySelector("footer").offsetHeight;
             const paddleHeight = this.leftPaddle.offsetHeight;
             const mouseY = e.clientY - canvasRect.top;
 
-            // move paddle if cursor on left menu side
+            // Calculate the max Y position to prevent paddle from overlapping the footer
+            const maxY = this.canvas.height - paddleHeight - footerHeight - 80;
+
+            // Move the left paddle if the cursor is on the left menu side
             if (e.clientX <= canvasRect.left + canvasRect.width / 2) {
                 this.leftPaddle.style.top = `${Math.max(
                     0,
-                    Math.min(mouseY - paddleHeight / 2, this.canvas.height - paddleHeight)
+                    Math.min(mouseY - paddleHeight / 2, maxY)
                 )}px`;
             }
 
-            // move paddle if cursor on right menu side
+            // Move the right paddle if the cursor is on the right menu side
             if (e.clientX >= canvasRect.left + canvasRect.width / 2) {
                 this.rightPaddle.style.top = `${Math.max(
                     0,
-                    Math.min(mouseY - paddleHeight / 2, this.canvas.height - paddleHeight)
+                    Math.min(mouseY - paddleHeight / 2, maxY)
                 )}px`;
             }
         });
@@ -191,7 +220,7 @@ export class DashboardView extends HTMLElement {
         const contentMapping = {
             "HowTo": "how-to-menu",
             "Play": "play-menu",
-            "Tournament": "tournament-menu",
+            "Account": "account-menu",
             "About": "about-menu",
         };
 
