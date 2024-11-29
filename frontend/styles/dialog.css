@@ -190,6 +190,7 @@ input {
 
 .player-inputs {
 	max-height: 500px;
+	width: 500px;
 	overflow-y: auto;
 }
 
@@ -207,4 +208,22 @@ input {
 
 .remove-player-button:hover {
     background: #e60000;
+}
+
+.ai-difficulty {
+    margin-top: 10px;
+	margin-right: 5px;
+}
+
+.ai-difficulty label {
+    font-size: 0.5rem;
+}
+
+#ai-difficulty-slider {
+    width: 100%;
+}
+
+.disclaimer {
+	font-size: 0.4rem;
+	text-align: right;
 }
