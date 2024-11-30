@@ -13,7 +13,7 @@ export class TournamentSetupDialog extends HTMLElement {
     connectedCallback() {
         this.render();
         this.setupEventListeners();
-        // this.close();
+        this.close();
     }
 
     render() {

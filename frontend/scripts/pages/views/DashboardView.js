@@ -44,6 +44,7 @@ export class DashboardView extends HTMLElement {
                 <auth-dialog id="auth-dialog"></auth-dialog>
                 <game-setup-dialog id="game-setup-dialog"></game-setup-dialog>
                 <tournament-setup-dialog id="tournament-setup-dialog"></tournament-setup-dialog>
+                <game-menu-dialog id="game-menu-dialog"></game-menu-dialog>
                 <left-menu>
                     <div class="menu-option">
                         <button>HowTo</button>
@@ -82,6 +83,7 @@ export class DashboardView extends HTMLElement {
     }
 
     loadMenuComponents() {
+        import ("../components/GameMenuDialog.js");
         import("../components/GameSetupDialog.js");
         import("../components/TournamentSetupDialog.js");
         import("../components/AuthDialog.js");
