@@ -4,6 +4,8 @@ let accessToken = null;
 export const setAccessToken = (token) => {
     accessToken = token;
     USER.loggedIn = true;
+    //change button here?
+
 }
 
 export const getUserName = () => {

@@ -15,31 +15,54 @@ export class DashboardView extends HTMLElement {
         this.rightPaddle = null;
     }
 
-    checkForLogin() {
-        if (!getAccessToken())
-            USER.loggedIn = false;
-        USER.loggedIn = true;
-        // USER.username = apiCall();
-        console.log('user is logged in');
-    }
-
+    
     connectedCallback() {
         this.loadMenuComponents();
         this.render();
         this.initMenu();
         this.showAllDashboardUI();
+        this.displayUser();
     }
-
+    
     render() {
-        this.checkForLogin();
+        console.log("rendering again");
         this.shadowRoot.innerHTML = this.html();
         this.setupEventListeners();
     }
 
-    displayUsername() {
-        if (!USER.username) return ('Default User');
-        return USER.username;
+    async displayUser(){
+        let data = await this.getUserData();
+        console.log('this is api data: ');
+        console.log(data);
+
+        //render again
+        this.loadMenuComponents();
+        this.render();
+        this.initMenu();
+        this.showAllDashboardUI();    }
+    
+    async getUserData() {
+        try {
+            const response = await apiCall('http://127.0.0.1:8000/api/auth/get_user_data/');
+            if (response.ok) {
+                const data = await response.json();
+                USER.username = data.username;
+                console.log("username is: ", USER.username);
+                return data; // Return the fetched data
+            } else {
+                const errorData = await response.json();
+                console.error("Response not 200");
+                throw new Error(JSON.stringify(errorData));
+            }
+        } catch (error) {
+            console.error("An error occurred:", error);
+            throw error; // Re-throw the error for the caller to handle
+        }
     }
+    
+    //as long as no username available display login
+    //if accesstoken available -> get username and change button style
+    //if logout: display login
 
     html() {
         return `
@@ -51,7 +74,7 @@ export class DashboardView extends HTMLElement {
                     <span id="player2-display" class="player2_score">Player 2 - 0</span>
                 </div>
 
-            ${!USER.loggedIn ? 
+            ${!USER.username ?
                 `
                     <button id="login-button" class="orange-button">
                         LOGIN
@@ -60,7 +83,7 @@ export class DashboardView extends HTMLElement {
                 :
                 `
                     <button id="login-button" class="orange-button">
-                        ${this.displayUsername()}
+                        LOL
                     </button>
                 `
             }
