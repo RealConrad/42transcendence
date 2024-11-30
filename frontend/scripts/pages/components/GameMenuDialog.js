@@ -1,13 +1,46 @@
-export class GameMenuDialog extends  HTMLElement {
+import GlobalEventEmitter from "../../utils/EventEmitter.js";
+import { EVENT_TYPES } from "../../utils/constants.js";
+
+export class GameMenuDialog extends HTMLElement {
     constructor() {
         super();
-        this.matchType = "tournament";
-        this.attachShadow({mode: 'open'});
+        this.attachShadow({ mode: "open" });
+        this.tournamentData = [];
+        this.isTournamentMatch = false;
     }
+
     connectedCallback() {
         this.render();
-        this.setupEventListeners();
-        // this.close();
+        this.registerTournamentListener();
+    }
+
+    disconnectedCallback() {
+        GlobalEventEmitter.off(EVENT_TYPES.TOURNAMENT_UPDATE, this.updateTournamentData);
+        GlobalEventEmitter.off(EVENT_TYPES.START_TOURNAMENT, this.updateMatchType);
+    }
+
+    open() {
+        this.shadowRoot.display = 'block';
+    }
+    close() {
+        this.shadowRoot.display = 'none';
+    }
+
+    registerTournamentListener() {
+        this.updateTournamentData = this.updateTournamentData.bind(this);
+
+        GlobalEventEmitter.on(EVENT_TYPES.TOURNAMENT_UPDATE, this.updateTournamentData);
+        GlobalEventEmitter.on(EVENT_TYPES.START_TOURNAMENT, this.updateMatchType);
+    }
+
+    updateTournamentData(data) {
+        this.tournamentData = data.rounds;
+        this.render();
+    }
+
+    updateMatchType({ isTournamentMatch }) {
+        this.isTournamentMatch = isTournamentMatch;
+        this.render();
     }
 
     render() {
@@ -20,54 +53,46 @@ export class GameMenuDialog extends  HTMLElement {
             <div id="overlay" class="overlay">
                 <div class="dialog">
                     <div class="heading">Game Menu</div>
-                    ${this.matchType === "tournament"
-                        ? `
-                            <div>Tournament Standings</div>
-                        `
-                        : ``
+                    ${
+                        this.isTournamentMatch
+                            ? this.renderTournamentStandings()
+                            : `<div>Paused</div>`
                     }
-                    <button id="quit-match" style="margin-bottom: 20px" class="sign-in-button">Quit</button>
-                    <button id="close-dialog-button" class="sign-in-button">Rematch</button>
-
+                    <button id="resume-game" class="sign-in-button">Resume</button>
                 </div>
             </div>
-        `
+        `;
     }
 
-    open() {
-        this.style.display = "block";
-    }
-
-    close() {
-        this.style.display = "none";
-    }
-
-    setupEventListeners() {
-        const overlay = this.shadowRoot.getElementById("overlay");
-        const closeButton = this.shadowRoot.getElementById("close-dialog-button");
-        const quitButton = this.shadowRoot.getElementById("quit-match");
-
-        if (overlay) {
-            overlay.addEventListener("click", (e) => {
-                if (e.target.id === "overlay") {
-                    this.close();
-                }
-            });
-        }
-
-        closeButton.addEventListener("click", () => {
-            this.close();
-        });
-    }
-
-    setMatchType(type) {
-        this.matchType = type;
-        this.render();
-    }
-
-    displayTournamentMatches(matches) {
-        console.log("MATCHES oN DIALOG:", matches);
+    renderTournamentStandings() {
+        return `
+            <div class="tournament-standings">
+                ${this.tournamentData
+                    .map(
+                        (round, roundIndex) => `
+                        <div class="round">
+                            <div class="round-heading">Round ${roundIndex + 1}</div>
+                            ${round
+                                .map(
+                                    (match) => `
+                                <div class="match">
+                                    <span>${match.player1.username}</span> vs 
+                                    <span>${match.player2.username}</span>
+                                    ${
+                                        match.winner
+                                            ? `<span class="winner">Winner: ${match.winner.username}</span>`
+                                            : ""
+                                    }
+                                </div>
+                            `
+                                )
+                                .join("")}
+                        </div>
+                    `
+                    )
+                    .join("")}
+            </div>
+        `;
     }
 }
-
 customElements.define("game-menu-dialog", GameMenuDialog);
