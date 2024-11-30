@@ -1,6 +1,6 @@
 import {apiCall, getAccessToken} from "../../api/api.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
-import {BASE_AUTH_API_URL, EVENT_TYPES} from "../../utils/constants.js";
+import {BASE_AUTH_API_URL, EVENT_TYPES, USER} from "../../utils/constants.js";
 
 export class AccountMenu extends HTMLElement {
     constructor() {
@@ -12,8 +12,8 @@ export class AccountMenu extends HTMLElement {
     }
     connectedCallback() {
         this.accessToken = getAccessToken();
-        this.username = "Conrad"; // TODO: get username from localstorage
-        this.imgUrl = null; // TODO: get image from localstorage
+        this.username = USER.username; // TODO: get username from localstorage
+        this.imgUrl = USER.profilePicture; // TODO: get image from localstorage
         this.render();
         this.setupProfilePicture();
         //TODO:  Dummy data, hookup to API
@@ -53,7 +53,7 @@ html() {
                 <div class="container">
                     <div class="heading">
                         <div class="profile-picture" id="profile-picture-id">
-                            <img alt=""> 
+                            <img src="${this.imgUrl}" alt=""> 
                             <span class="initial"></span>
                         </div>
                         <div>

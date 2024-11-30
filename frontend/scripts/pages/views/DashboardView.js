@@ -27,24 +27,23 @@ export class DashboardView extends HTMLElement {
     }
     
     render() {
-        console.log("rendering again");
         this.shadowRoot.innerHTML = this.html();
         this.setupEventListeners();
     }
     
     async displayUser(){
-        console.log('fetching token ...');
-        let refresh = await refreshTokens();
-        console.log('refresh: ', refresh);
+        await refreshTokens();
         this.accessToken = getAccessToken();
         if (!this.accessToken)
             return;
         let data = await this.getUserData();
         USER.username = data.username;
         USER.profilePicture = data.profile_picture;
-        console.log('pic: ' , USER.profilePicture);
+        // this.accessToken = true;
+        // USER.username = 'vlenard';
+
         if (!USER.profilePicture){
-            USER.profilePicture = await fetchDogPicture();
+            USER.backupProfilePicture = await fetchDogPicture();
         }
 
         //render again
@@ -67,13 +66,9 @@ export class DashboardView extends HTMLElement {
             }
         } catch (error) {
             console.error("An error occurred:", error);
-            throw error; // Re-throw the error for the caller to handle
+            throw error;
         }
     }
-    
-    //as long as no username available display login
-    //if accesstoken available -> get username and change button style
-    //if logout: display login
 
     html() {
         return `
@@ -102,7 +97,7 @@ export class DashboardView extends HTMLElement {
                 :
                 `
                     <button id="login-button" class="user-display">
-                        <img src=${USER.profilePicture} id="login-profile-pic">
+                        <img src="${USER.profilePicture ? `${USER.profilePicture}`: `${USER.backupProfilePicture}`}" id="login-profile-pic">
                         <div>${USER.username}</div>
                     </button>
                 `

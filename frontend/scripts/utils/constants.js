@@ -24,8 +24,9 @@ export const EVENT_TYPES = {
 }
 
 export const USER = {
-    loggedIn: false,
     username: null,
+    profilePicture: null,
+    backupProfilePicture: null,
 }
 
 export const BASE_AUTH_API_URL = "http://127.0.0.1:8000/api/auth"
