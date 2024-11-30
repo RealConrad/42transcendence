@@ -18,7 +18,7 @@ export default class Battleground extends Renderable {
         ctx.setLineDash([]);
     }
 
-    reset() {
-
+    reset(ctx) {
+        ctx.setLineDash([]);
     }
 }
