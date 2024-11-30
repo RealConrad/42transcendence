@@ -23,6 +23,10 @@ export const EVENT_TYPES = {
     UPDATE_SCORE: "update.score",
     MATCH_TOURNAMENT: "match.tournament",
     START_TOURNAMENT: "start.tournament",
+    SHOW_GAME_MENU: "show.game.menu",
+    TOGGLE_MENU: "toggle.menu",
+    TOURNAMENT_UPDATE: "tournament.update",
+    MATCH_STARTED: "match.started",
 }
 
 export const BASE_AUTH_API_URL = "http://127.0.0.1:8000/api/auth"
