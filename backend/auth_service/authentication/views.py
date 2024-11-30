@@ -29,6 +29,9 @@ class RegisterView(generics.CreateAPIView):
                 access_token = tokens.get('access_token')
                 refresh_token = tokens.get('refresh_token')
 
+                user.logged_in = True
+                user.save()
+
                 response = Response({
                     "detail": "User registered successfully",
                     "username": user.username,
@@ -75,12 +78,16 @@ class LoginView(generics.GenericAPIView):
                     else None
                 )
 
+                user.logged_in = True
+                user.save()
+
                 response = Response({
                     "detail": "User logged in successfully",
                     "username": user.username,
                     "user_id": user.id,
                     "access_token": access_token,
                     "mfa_enable_flag": user.mfa_enabled,
+                    "logged_in": user.logged_in,
                     "profile_picture": profile_picture_url,
                 }, status=status.HTTP_200_OK)
 
@@ -189,6 +196,7 @@ class GetUserData(generics.GenericAPIView):
             "username": user.username,
             "user_id": user.id,
             "mfa_enable_flag": user.mfa_enabled,
+            "logged_in": user.logged_in,
             "profile_picture": profile_picture_url,
         }, status=status.HTTP_200_OK)
 
