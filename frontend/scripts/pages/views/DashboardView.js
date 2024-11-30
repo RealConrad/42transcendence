@@ -4,6 +4,7 @@ import Game from "../../game/Game.js";
 import {apiCall, getAccessToken, getUserName, refreshTokens} from "../../api/api.js";
 import { USER } from "../../utils/constants.js";
 
+
 export class DashboardView extends HTMLElement {
     constructor() {
         super();
@@ -32,6 +33,7 @@ export class DashboardView extends HTMLElement {
     }
     
     async displayUser(){
+        console.log('fetching token ...');
         let refresh = await refreshTokens();
         console.log('refresh: ', refresh);
         this.accessToken = getAccessToken();
@@ -40,6 +42,11 @@ export class DashboardView extends HTMLElement {
         let data = await this.getUserData();
         USER.username = data.username;
         USER.profilePicture = data.profile_picture;
+        console.log('pic: ' , USER.profilePicture);
+        if (!USER.profilePicture){
+            USER.profilePicture = await fetchDogPicture();
+        }
+
         //render again
         this.loadMenuComponents();
         this.render();
@@ -71,6 +78,14 @@ export class DashboardView extends HTMLElement {
     html() {
         return `
             <link rel="stylesheet" href="../../../styles/style.css">
+            ${this.accessToken ?
+                `<style>
+                #login-button{
+                    pointer-events: none;
+                }
+                </style>
+                `:``
+            }
             <header>
                 <div class="header-top">
                     <span id="player1-display" class="player1_score">Player 1 - 0</span>
@@ -86,11 +101,9 @@ export class DashboardView extends HTMLElement {
                 `  
                 :
                 `
-                    <button id="login-button" class="orange-button">
-                        ${USER.profilePicture ?
-                        `<img src=${USER.profilePicture} id="login-profile-pic">`
-                        :``}
-                        ${USER.username}
+                    <button id="login-button" class="user-display">
+                        <img src=${USER.profilePicture} id="login-profile-pic">
+                        <div>${USER.username}</div>
                     </button>
                 `
             }
@@ -339,6 +352,28 @@ export class DashboardView extends HTMLElement {
         this.shadowRoot.querySelector("right-menu").style.display = "block";
         this.shadowRoot.querySelector(".player1_score").style.display = "none";
         this.shadowRoot.querySelector(".player2_score").style.display = "none";
+    }
+}
+
+
+const fetchDogPicture = async () => {
+    const apiURL = "https://dog.ceo/api/breeds/image/random";
+
+    try {
+        const response = await fetch(apiURL); // Wait for the fetch request
+        if (!response.ok) {
+            throw new Error("Network response was not ok");
+        }
+        
+        const data = await response.json(); // Wait for the JSON parsing
+        console.log('data: ');
+        console.log(data);
+        console.log('fetching pic: ', data.message);
+        return data.message;
+        // dogImage.src = data.message; // `message` contains the image URL
+    } catch (error) {
+        console.error("There was a problem with the fetch operation:", error);
+        return null;
     }
 }
 

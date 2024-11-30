@@ -117,41 +117,41 @@ services:
       - transcendence
 
   # GAME SERVICE
-  gamedb:
-    image: postgres:13
-    container_name: gamedb
-    environment:
-      POSTGRES_DB: ${GAME_POSTGRES_DB}
-      POSTGRES_USER: ${GAME_POSTGRES_USER}
-      POSTGRES_PASSWORD: ${GAME_POSTGRES_PASSWORD}
-    env_file:
-      - .env
-    ports:
-      - "5435:5432"
-    volumes:
-      - game_postgres_data:/var/lib/postgresql/data
-    networks:
-      - transcendence
-    healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U admin -d ${GAME_POSTGRES_DB}" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  gameservice:
-    build: ./backend/game_service
-    container_name: gameservice
-    image: gameservice
-    restart: always
-    env_file:
-      - .env
-    depends_on:
-      gamedb:
-        condition: service_healthy
-    ports:
-      - "8003:8003"
-    networks:
-      - transcendence
+#  gamedb:
+#    image: postgres:13
+#    container_name: gamedb
+#    environment:
+#      POSTGRES_DB: ${GAME_POSTGRES_DB}
+#      POSTGRES_USER: ${GAME_POSTGRES_USER}
+#      POSTGRES_PASSWORD: ${GAME_POSTGRES_PASSWORD}
+#    env_file:
+#      - .env
+#    ports:
+#      - "5435:5432"
+#    volumes:
+#      - game_postgres_data:/var/lib/postgresql/data
+#    networks:
+#      - transcendence
+#    healthcheck:
+#      test: [ "CMD-SHELL", "pg_isready -U admin -d ${GAME_POSTGRES_DB}" ]
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5
+#
+#  gameservice:
+#    build: ./backend/game_service
+#    container_name: gameservice
+#    image: gameservice
+#    restart: always
+#    env_file:
+#      - .env
+#    depends_on:
+#      gamedb:
+#        condition: service_healthy
+#    ports:
+#      - "8003:8003"
+#    networks:
+#      - transcendence
 
   nginx:
     image: nginx:latest

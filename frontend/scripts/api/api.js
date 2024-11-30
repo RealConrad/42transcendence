@@ -14,9 +14,10 @@ export const getUserName = () => {
 
 export const getAccessToken = () => accessToken;
 
-const refreshTokens = async () => {
+export const refreshTokens = async () => {
+    let response;
     try {
-        const response = await fetch('http://127.0.0.1:8002/api/token/refresh/', {
+        response = await fetch('http://127.0.0.1:8002/api/token/refresh/', {
             method: "POST",
             credentials: 'include',
         });
