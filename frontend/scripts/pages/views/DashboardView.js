@@ -34,6 +34,11 @@ export class DashboardView extends HTMLElement {
         let data = await this.getUserData();
         console.log('this is api data: ');
         console.log(data);
+        USER.loggedIn = data.logged_in;
+        USER.username = data.username;
+        USER.profilePicture = data.profile_picture;
+        console.log('user logged in: ', USER.loggedIn);
+        console.log(USER.profilePicture);
 
         //render again
         this.loadMenuComponents();
@@ -46,8 +51,6 @@ export class DashboardView extends HTMLElement {
             const response = await apiCall('http://127.0.0.1:8000/api/auth/get_user_data/');
             if (response.ok) {
                 const data = await response.json();
-                USER.username = data.username;
-                console.log("username is: ", USER.username);
                 return data; // Return the fetched data
             } else {
                 const errorData = await response.json();
@@ -74,7 +77,7 @@ export class DashboardView extends HTMLElement {
                     <span id="player2-display" class="player2_score">Player 2 - 0</span>
                 </div>
 
-            ${!USER.username ?
+            ${!USER.loggedIn ?
                 `
                     <button id="login-button" class="orange-button">
                         LOGIN
@@ -83,7 +86,10 @@ export class DashboardView extends HTMLElement {
                 :
                 `
                     <button id="login-button" class="orange-button">
-                        LOL
+                        ${USER.profilePicture ?
+                        `<img src=${USER.profilePicture} id="login-profile-pic">`
+                        :``}
+                        ${USER.username}
                     </button>
                 `
             }

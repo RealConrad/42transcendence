@@ -281,6 +281,11 @@ auth-dialog {
     z-index: 100;
 }
 
+#login-profile-pic{
+  width: 50px;
+  height: 50px;
+}
+
 .orange-button {
   position: absolute;
   right: 100px;

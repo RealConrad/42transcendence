@@ -361,7 +361,7 @@ class AuthDialog extends HTMLElement {
 			} else {
 				this.close();
 			}
-			console.log('user logged in: ' , USER.loggedIn);
+			// console.log('user logged in: ' , USER.loggedIn);
 		}).catch(err => console.error(err));
 	}
 
