@@ -6,7 +6,7 @@ export default class Tournament {
             throw new Error("Tournament must have at least 4 players");
         }
         this.canvas = canvas;
-        this.players = players; // Array of { name, isAI }
+        this.players = players; // Array of { username, isAI, aiDifficulty }
         this.currentRound = [];
         this.winners = [];
         this.matches = [];
@@ -16,8 +16,6 @@ export default class Tournament {
 
     start() {
         this.init();
-        console.log("ALL MATCHES: ", this.matches);
-        console.log("Tournament Initialized");
         this.startNextMatch();
     }
 
@@ -44,50 +42,55 @@ export default class Tournament {
         return array;
     }
 
-    startNextMatch() {
+    async startNextMatch() {
         if (this.currentMatchIndex >= this.currentRound.length) {
             console.log("All matches have been played for this round");
             this.prepareNextRound();
             return;
         }
         const match = this.currentRound[this.currentMatchIndex];
-        console.log(`Starting match: ${match.player1.name} vs ${match.player2.name}`);
-        this.playMatch(match, (winner) => {
-            console.log("Match winner: ", winner.name);
-            match.winner = winner;
-            this.winners.push(winner);
-            this.currentMatchIndex++;
-            this.startNextMatch();
-        });
+        console.log(`Starting match: ${match.player1.username} vs ${match.player2.username}`);
+        const winner = await this.playMatch(match);
+        match.winner = winner;
+        this.winners.push(winner);
+        this.currentMatchIndex++;
+        this.startNextMatch();
     }
 
-    playMatch(match, callback) {
-        if (match.player1.isAI && match.player2.isAI) {
-            console.warn("Both players are AI - skipping this match...");
-            const winner = Math.random() < 0.5 ? match.player1 : match.player2;
-            callback(winner);
-            return;
-        }
-        const game = new Game(
-            this.canvas,
-            match.player2.isAI,
-            match.player1.name,
-            match.player2.name
-        )
-        // game.start();
+    playMatch(match) {
+        return new Promise((resolve) => {
+            if (match.player1.isAI && match.player2.isAI) {
+                console.warn("Both players are AI - skipping this match...");
+                const winner = Math.random() < 0.5 ? match.player1 : match.player2;
+                resolve(winner);
+            }
+            const game = new Game(
+                this.canvas,
+                match.player1,
+                match.player2,
+                true,
+            )
 
-        // testing:
-        setTimeout(() => {
-            const winner = Math.random() < 0.5 ? match.player1 : match.player2;
-            callback(winner);
-        }, 3000);
+            const checkGameOver = () => {
+                if (game.isGameOver) {
+                    const winner = game.getWinner();
+                    resolve(winner);
+                } else {
+                    requestAnimationFrame(checkGameOver);
+                }
+            }
+            game.updatePlayerScore();
+            game.start();
+            checkGameOver();
+        })
     }
 
     prepareNextRound() {
         this.numberOfRounds++;
         if (this.winners.length === 1) {
-            console.log(`${this.winners[0].name} won the tournament!`);
+            console.log(`${this.winners[0].username} won the Tournament!`);
             console.log("COMPLETE MATCHES: ", this.matches);
+
             return;
         }
         console.log("=====Advancing to next round=====");
@@ -106,5 +109,13 @@ export default class Tournament {
         this.currentMatchIndex = 0;
         console.log("NEW ROUND: ", this.currentRound);
         this.startNextMatch();
+    }
+
+    resetTournament() {
+        this.currentRound = [];
+        this.winners = [];
+        this.matches = [];
+        this.currentMatchIndex = 0;
+        this.numberOfRounds = 0;
     }
 }

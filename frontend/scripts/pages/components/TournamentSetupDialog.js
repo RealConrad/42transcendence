@@ -69,8 +69,8 @@ export class TournamentSetupDialog extends HTMLElement {
                     <button id="close-dialog-button" class="sign-in-button">Cancel</button>
                 </div>
            </div>
-        `;
-    }
+       `;
+   }
     open() {
         this.style.display = "block";
     }
@@ -94,12 +94,12 @@ export class TournamentSetupDialog extends HTMLElement {
 
             if (!checkbox || !slider || !difficultyValue) {
                 console.warn(`Missing elements for Player ${i}. Skipping setup.`);
-                continue; // Skip setup for this player if any element is missing
+                continue;
             }
 
             checkbox.addEventListener("change", () => {
                 slider.disabled = !checkbox.checked;
-                if (!checkbox.checked) difficultyValue.textContent = "5"; // Reset difficulty if unchecked
+                if (!checkbox.checked) difficultyValue.textContent = "5";
             });
 
             slider.addEventListener("input", () => {
@@ -143,11 +143,9 @@ export class TournamentSetupDialog extends HTMLElement {
             // AI Difficulty controls
             const aiDifficultyDiv = document.createElement("div");
             aiDifficultyDiv.classList.add("ai-difficulty");
-
             const difficultyLabel = document.createElement("label");
             difficultyLabel.htmlFor = `ai-difficulty-slider-${playerIndex}`;
             difficultyLabel.innerHTML = `Difficulty: <span id="difficulty-value-${playerIndex}">5</span>`;
-
             const slider = document.createElement("input");
             slider.type = "range";
             slider.classList.add("ai-difficulty-slider");
@@ -187,7 +185,7 @@ export class TournamentSetupDialog extends HTMLElement {
                 if (!checkbox.checked) {
                     const difficultyValue = this.shadowRoot.getElementById(`difficulty-value-${playerIndex}`);
                     if (difficultyValue) {
-                        difficultyValue.textContent = "5"; // Reset difficulty if disabled
+                        difficultyValue.textContent = "5";
                     }
                 }
             });
@@ -203,45 +201,49 @@ export class TournamentSetupDialog extends HTMLElement {
         let hasErrors = false;
         let errorMsg = "Error creating tournament. Check player names";
         startTournamentButton.addEventListener("click", () => {
-        const players = Array.from(playerInputs.children).map((playerDiv, index) => {
-            const input = playerDiv.querySelector('input[type="text"]');
-            const checkbox = playerDiv.querySelector('input[type="checkbox"]');
-            const slider = playerDiv.querySelector('input[type="range"]');
+            const players = Array.from(playerInputs.children).map((playerDiv, index) => {
+                const input = playerDiv.querySelector('input[type="text"]');
+                const checkbox = playerDiv.querySelector('input[type="checkbox"]');
+                const slider = playerDiv.querySelector('input[type="range"]');
 
-            try {
-                if (index === 0) {
-                    input.value = this.username; // Automatically set the first player's name
+                try {
+                    if (index === 0) {
+                        input.value = this.username;
+                    }
+                    const username = validateInput(input.value);
+                    return {
+                        username,
+                        isAI: checkbox ? checkbox.checked : false,
+                        aiDifficulty: (checkbox && checkbox.checked) ? slider.value : null,
+                    };
+                } catch (err) {
+                    hasErrors = true;
+                    errorMsg = err;
+                    console.log(err);
                 }
-                const name = validateInput(input.value);
-                return {
-                    name,
-                    isAI: checkbox ? checkbox.checked : false,
-                    difficulty: (checkbox && checkbox.checked) ? slider.value : null,
-                };
-            } catch (err) {
-                hasErrors = true;
-                errorMsg = err;
-                console.log(err);
+            });
+
+            if (hasErrors) {
+                alert(errorMsg);
+                return;
             }
+
+            const validPlayers = players.filter((player) => player.username.trim().length > 0);
+            if (validPlayers.length < 4 || validPlayers.length % 2 !== 0) {
+                alert("You need at minimum 4 players and an even number of players.");
+                return;
+            }
+            const username = validPlayers.map(player => player.username.toLowerCase());
+            const uniqueNames = new Set(username);
+            if (uniqueNames.size !== username.length) {
+                alert("Cannot have duplicate usernames");
+                return;
+            }
+            console.log("Starting tournament with players:", validPlayers);
+            GlobalEventEmitter.emit(EVENT_TYPES.START_TOURNAMENT, { players: validPlayers });
+            this.close();
         });
-
-        if (hasErrors) {
-            alert(errorMsg);
-            return;
-        }
-
-        const validPlayers = players.filter((player) => player.name.length > 0);
-        if (validPlayers.length < 4 || validPlayers.length % 2 !== 0) {
-            alert("You need at minimum 4 players and an even number of players.");
-            return;
-        }
-        console.log("Starting tournament with players:", validPlayers);
-        GlobalEventEmitter.emit(EVENT_TYPES.START_TOURNAMENT, { players: validPlayers });
-        this.close();
-    });
-}
-
-
+    }
 }
 
 customElements.define("tournament-setup-dialog", TournamentSetupDialog);

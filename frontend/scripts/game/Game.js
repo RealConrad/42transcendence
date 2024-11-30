@@ -20,11 +20,12 @@ import { apiCall} from "../api/api.js";
 import GlobalEventEmitter from "../utils/EventEmitter.js";
 
 export default class Game {
-    constructor(canvas, vsAI = true, player1Name, player2Name) {
+    constructor(canvas, player1Details, player2Details, isTournamentMatch = false) {
         this.isGameOver = false;
         this.isGamePaused = false;
         this.winner = null;
         this.maxScore = MAX_SCORE;
+        this.isTournamentMatch = isTournamentMatch;
 
         // Setup canvas
         this.canvas = canvas;
@@ -41,7 +42,7 @@ export default class Game {
         this.Battleground = new Battleground(this.canvas);
         
         // Setup player models and controllers
-        const playerPaddle = new Paddle(
+        const player1Paddle = new Paddle(
             0,
             this.canvas.height / 2,
             PADDLE_WIDTH,
@@ -58,15 +59,25 @@ export default class Game {
             this.canvas
         )
 
-        this.player1 = new Player(
-            player1Name,
-            playerPaddle,
-            new HumanController(playerPaddle, 'w', 's', this.inputManager)
-        );
-        this.player2 = vsAI
-            ? new Player('AI', player2Paddle, new AIController(player2Paddle, this.ball, 1, this.canvas)) // 3rd parameter is the difficulty level of the AI. 1 is super dumb, 5 is tough, 10 is darksouls
+        this.player1 = player1Details.isAI
+            ? new Player(
+                player1Details.username,
+                player1Paddle,
+                new AIController(player1Paddle, this.ball, player1Details.aiDifficulty, this.canvas)
+            )
             : new Player(
-                player2Name,
+                player1Details.username,
+                player1Paddle,
+                new HumanController(player1Paddle, 'w', 's', this.inputManager)
+            );
+        this.player2 = player2Details.isAI
+            ? new Player(
+                player2Details.username,
+                player2Paddle,
+                new AIController(player2Paddle, this.ball, player2Details.aiDifficulty, this.canvas)
+            )
+            : new Player(
+                player2Details.username,
                 player2Paddle,
                 new HumanController(player2Paddle, 'ArrowUp', 'ArrowDown', this.inputManager)
             );
@@ -98,11 +109,28 @@ export default class Game {
         requestAnimationFrame(this.gameLoop.bind(this));
     }
 
-
     checkWinCondition() {
         if (this.player1.score === this.maxScore || this.player2.score === this.maxScore) {
             this.isGameOver = true;
-            this.saveMatch();
+             if (this.player1.score === this.maxScore) {
+                this.winner = {
+                    player1Score: this.player1.score,
+                    player2Score: this.player2.score,
+                    username: this.player1.username,
+                    isAI: this.player1.controller instanceof AIController,
+                    difficulty: this.player1.controller instanceof AIController ? this.AIDifficulty : null
+                };
+            } else if (this.player2.score === this.maxScore) {
+                this.winner = {
+                    player1Score: this.player1.score,
+                    player2Score: this.player2.score,
+                    username: this.player2.username,
+                    isAI: this.player2.controller instanceof AIController,
+                    difficulty: this.player2.controller instanceof AIController ? this.AIDifficulty : null
+                };
+            }
+            if (!this.isTournamentMatch)
+                this.saveMatch();
         }
     }
 
@@ -115,6 +143,10 @@ export default class Game {
             this.isGamePaused = false;
             requestAnimationFrame(this.gameLoop.bind(this));
         }
+    }
+
+    getWinner() {
+        return this.winner;
     }
 
     resetGameState() {
