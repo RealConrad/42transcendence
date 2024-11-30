@@ -1,7 +1,7 @@
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
 import {EVENT_TYPES} from "../../utils/constants.js";
 import Game from "../../game/Game.js";
-import {apiCall, getAccessToken, getUserName} from "../../api/api.js";
+import {apiCall, getAccessToken, getUserName, refreshTokens} from "../../api/api.js";
 import { USER } from "../../utils/constants.js";
 
 export class DashboardView extends HTMLElement {
@@ -13,6 +13,7 @@ export class DashboardView extends HTMLElement {
         this.ctx = null;
         this.leftPaddle = null;
         this.rightPaddle = null;
+        this.accessToken = null;
     }
 
     
@@ -29,22 +30,22 @@ export class DashboardView extends HTMLElement {
         this.shadowRoot.innerHTML = this.html();
         this.setupEventListeners();
     }
-
+    
     async displayUser(){
+        let refresh = await refreshTokens();
+        console.log('refresh: ', refresh);
+        this.accessToken = getAccessToken();
+        if (!this.accessToken)
+            return;
         let data = await this.getUserData();
-        console.log('this is api data: ');
-        console.log(data);
-        USER.loggedIn = data.logged_in;
         USER.username = data.username;
         USER.profilePicture = data.profile_picture;
-        console.log('user logged in: ', USER.loggedIn);
-        console.log(USER.profilePicture);
-
         //render again
         this.loadMenuComponents();
         this.render();
         this.initMenu();
-        this.showAllDashboardUI();    }
+        this.showAllDashboardUI();
+    }
     
     async getUserData() {
         try {
@@ -77,7 +78,7 @@ export class DashboardView extends HTMLElement {
                     <span id="player2-display" class="player2_score">Player 2 - 0</span>
                 </div>
 
-            ${!USER.loggedIn ?
+            ${!this.accessToken ?
                 `
                     <button id="login-button" class="orange-button">
                         LOGIN
