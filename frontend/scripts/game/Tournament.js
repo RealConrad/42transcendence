@@ -34,6 +34,7 @@ export default class Tournament {
         this.matches.push(this.currentRound);
     }
 
+    // Credit: https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
     shufflePlayers(array) {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
