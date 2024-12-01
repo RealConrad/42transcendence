@@ -26,6 +26,8 @@ export default class Game {
         this.winner = null;
         this.maxScore = MAX_SCORE;
         this.isTournamentMatch = isTournamentMatch;
+        this.player1AIDiff = player1Details.aiDifficulty;
+        this.player2AIDiff = player2Details.aiDifficulty;
 
         // Setup canvas
         this.canvas = canvas;
@@ -34,7 +36,6 @@ export default class Game {
         // Setup Managers
         this.renderManager = new RenderManager(this.ctx, this.canvas);
         this.collisionManager = new CollisionManager(this);
-        this.uiManager = new UIManager();
         this.inputManager = new InputManager()
 
         this.ball = new Ball(this.canvas.width / 2, this.canvas.height / 2, 5, 5, 5);
@@ -88,9 +89,10 @@ export default class Game {
         this.renderManager.addRenderable(this.player1.paddle);
         this.renderManager.addRenderable(this.player2.paddle);
         this.renderManager.render();
-
-        eventEmitter.on('displayMenu', this.togglePause.bind(this));
-        eventEmitter.on('hideMenu', this.resumeGame.bind(this));
+        this.pauseGame = this.pauseGame.bind(this);
+        this.resumeGame = this.resumeGame.bind(this);
+        GlobalEventEmitter.on(EVENT_TYPES.PAUSE_GAME, this.pauseGame);
+        GlobalEventEmitter.on(EVENT_TYPES.RESUME_GAME, this.resumeGame);
     }
 
     start() {
@@ -109,6 +111,10 @@ export default class Game {
         requestAnimationFrame(this.gameLoop.bind(this));
     }
 
+    cleanup() {
+        GlobalEventEmitter.off(EVENT_TYPES.TOGGLE_GAME_MENU, this.toggleMenu);
+    }
+
     checkWinCondition() {
         if (this.player1.score === this.maxScore || this.player2.score === this.maxScore) {
             this.isGameOver = true;
@@ -118,7 +124,7 @@ export default class Game {
                     player2Score: this.player2.score,
                     username: this.player1.username,
                     isAI: this.player1.controller instanceof AIController,
-                    difficulty: this.player1.controller instanceof AIController ? this.AIDifficulty : null
+                    difficulty: this.player1.controller instanceof AIController ? this.player1AIDiff : null
                 };
             } else if (this.player2.score === this.maxScore) {
                 this.winner = {
@@ -126,7 +132,7 @@ export default class Game {
                     player2Score: this.player2.score,
                     username: this.player2.username,
                     isAI: this.player2.controller instanceof AIController,
-                    difficulty: this.player2.controller instanceof AIController ? this.AIDifficulty : null
+                    difficulty: this.player2.controller instanceof AIController ? this.player2AIDiff : null
                 };
             }
             if (!this.isTournamentMatch)
@@ -134,9 +140,12 @@ export default class Game {
         }
     }
 
-    togglePause() {
-        this.isGamePaused = !this.isGamePaused;
+    pauseGame() {
+        if (this.isGameOver) return;
+        this.isGamePaused = true;
+        GlobalEventEmitter.emit(EVENT_TYPES.SHOW_GAME_MENU, { isTournament: this.isTournamentMatch });
     }
+
 
     resumeGame() {
         if (!this.isGameOver) {

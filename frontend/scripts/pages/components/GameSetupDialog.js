@@ -52,12 +52,12 @@ export class GameSetupDialog extends HTMLElement {
 
     render() {
         this.shadowRoot.innerHTML = this.html();
-        this.setupEventListeners(); // Attach listeners after rendering
+        this.setupEventListeners();
     }
 
     setMatchType(matchType) {
         this.matchType = matchType;
-        this.render(); // Re-render when matchType changes
+        this.render();
     }
 
     setupEventListeners() {

@@ -24,9 +24,10 @@ export const EVENT_TYPES = {
     MATCH_TOURNAMENT: "match.tournament",
     START_TOURNAMENT: "start.tournament",
     SHOW_GAME_MENU: "show.game.menu",
-    TOGGLE_MENU: "toggle.menu",
+    TOGGLE_GAME_MENU: "toggle.game.menu",
     TOURNAMENT_UPDATE: "tournament.update",
-    MATCH_STARTED: "match.started",
+    RESUME_GAME: "resume.game",
+    PAUSE_GAME: "pause.game",
 }
 
 export const BASE_AUTH_API_URL = "http://127.0.0.1:8000/api/auth"

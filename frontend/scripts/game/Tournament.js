@@ -1,4 +1,6 @@
 import Game from "./Game.js"
+import GlobalEventEmitter from "../utils/EventEmitter.js";
+import {EVENT_TYPES} from "../utils/constants.js";
 
 export default class Tournament {
     constructor(players, canvas) {
@@ -109,6 +111,7 @@ export default class Tournament {
         this.winners = [];
         this.currentMatchIndex = 0;
         console.log("NEW ROUND: ", this.currentRound);
+        GlobalEventEmitter.emit(EVENT_TYPES.TOURNAMENT_UPDATE, {rounds: this.matches});
         this.startNextMatch();
     }
 

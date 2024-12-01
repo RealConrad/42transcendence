@@ -12,13 +12,35 @@ export class DashboardView extends HTMLElement {
         this.ctx = null;
         this.leftPaddle = null;
         this.rightPaddle = null;
+        this.resizeObserver = null;
+        this.isTournamentMatch = false;
+        // this.matchDataForMenuDialog = null;
+        this.isGameMenuOpen = false;
     }
 
     connectedCallback() {
         this.loadMenuComponents();
         this.render();
-        this.initMenu();
-        this.showAllDashboardUI();
+        const styleSheet = this.shadowRoot.getElementById('style-sheet');
+        if (styleSheet.sheet) {
+            this.initMenu();
+            this.showAllDashboardUI();
+        } else {
+            styleSheet.addEventListener('load', () => {
+                this.initMenu();
+                this.showAllDashboardUI();
+            });
+        }
+        this.handleKeyDown = this.handleKeyDown.bind(this);
+        this.onResumeGame = this.onResumeGame.bind(this);
+        window.addEventListener("keydown", this.handleKeyDown);
+    }
+
+    disconnectedCallback() {
+        window.removeEventListener('keydown', this.handleKeyDown);
+        if (this.resizeObserver) {
+            this.resizeObserver.disconnect();
+        }
     }
 
     render() {
@@ -28,7 +50,7 @@ export class DashboardView extends HTMLElement {
 
     html() {
         return `
-            <link rel="stylesheet" href="../../../styles/style.css">
+            <link id="style-sheet" rel="stylesheet" href="../../../styles/style.css">
             <header>
                 <div class="header-top">
                     <span id="player1-display" class="player1_score">Player 1 - 0</span>
@@ -142,6 +164,35 @@ export class DashboardView extends HTMLElement {
         GlobalEventEmitter.on(EVENT_TYPES.UPDATE_SCORE, ({ player1Name, player2Name, player1Score, player2Score }) => {
             this.updateScores(player1Name, player2Name, player1Score, player2Score);
         });
+        GlobalEventEmitter.on(EVENT_TYPES.TOURNAMENT_UPDATE, (data) => {
+            console.log("Tournament updated:", data);
+            this.gameData = data;
+        });
+        GlobalEventEmitter.on(EVENT_TYPES.RESUME_GAME, () => this.onResumeGame());
+    }
+
+    handleKeyDown(event) {
+        if (event.key === "Escape" && this.isGameRunning) {
+            this.toggleGameMenu();
+        }
+    }
+
+
+    toggleGameMenu() {
+        const gameMenuDialog = this.shadowRoot.getElementById("game-menu-dialog");
+        if (this.isGameMenuOpen) {
+            gameMenuDialog.close();
+            // 'RESUME_GAME' event will be emitted from GameMenuDialog
+            // 'onResumeGame' will handle the rest
+        } else {
+            gameMenuDialog.open();
+            this.isGameMenuOpen = true;
+            GlobalEventEmitter.emit(EVENT_TYPES.PAUSE_GAME);
+        }
+    }
+
+    onResumeGame() {
+        this.isGameMenuOpen = false;
     }
 
     openGameSetupDialog(matchType) {
@@ -158,9 +209,10 @@ export class DashboardView extends HTMLElement {
             this.canvas.width = this.shadowRoot.host.offsetWidth;
             this.canvas.height = this.shadowRoot.host.offsetHeight;
             this.drawMiddleLine();
+            console.log('UPDATING CANVAS:', this.canvas.width, "H: ", this.canvas.height);
         };
 
-        updateCanvasSize();
+        requestAnimationFrame(updateCanvasSize);
         window.addEventListener("resize", updateCanvasSize);
 
         this.leftPaddle = this.createPaddle("left");
@@ -168,6 +220,13 @@ export class DashboardView extends HTMLElement {
 
         this.initializePaddleMovement();
         this.initializeMenuInteractions();
+
+        const resizeObserver = new ResizeObserver(() => {
+            console.log("Resizing from observer");
+            updateCanvasSize();
+        });
+        resizeObserver.observe(this.shadowRoot.host);
+        this.resizeObserver = resizeObserver;
     }
 
     drawMiddleLine() {
@@ -187,7 +246,7 @@ export class DashboardView extends HTMLElement {
     createPaddle(side) {
         const paddle = document.createElement("div");
         paddle.classList.add("paddle");
-        paddle.style.height = `${this.canvas.height * 0.1}px`;
+        paddle.style.height = `100px`;
         paddle.style.top = `${(this.canvas.height - paddle.offsetHeight) / 2}px`; // Center vertically
         if (side === "left") {
             this.shadowRoot.querySelector("left-menu").appendChild(paddle);
@@ -260,19 +319,19 @@ export class DashboardView extends HTMLElement {
     startGame(player1Name, player2Name, vsAI, aiDifficulty = 5) {
         this.hideAllDashboardUI();
         this.isGameRunning = true;
-        if (vsAI)
-            player2Name = 'AI';
+        this.isTournamentMatch = false;
+
         const player1 = {
             username: player1Name,
             isAI: false,
             aiDifficulty: null,
-        }
+        };
         const player2 = {
             username: player2Name,
             isAI: vsAI,
             aiDifficulty: aiDifficulty,
-        }
-        console.log(`STARTING MATCH: ${player1Name} vs ${player2Name}`);
+        };
+
         this.updateScores(player1Name, player2Name, 0, 0);
         const game = new Game(this.canvas, player1, player2);
         game.start();
@@ -281,9 +340,13 @@ export class DashboardView extends HTMLElement {
     startTournament(players) {
         this.hideAllDashboardUI();
         this.isGameRunning = true;
-        console.log(players);
+        this.isTournamentMatch = true;
+
         const tournament = new Tournament(players, this.canvas);
         tournament.start();
+
+        // initial tournament data
+        this.gameData = { rounds: tournament.matches };
     }
 
     updateScores(player1Name, player2Name, player1Score, player2Score) {
