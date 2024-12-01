@@ -39,7 +39,7 @@ CORS_ORIGIN_WHITELIST = [
 CORS_ALLOW_CREDENTIALS = True
 
 AUTH_USER_MODEL = 'authentication.CustomUser'
-REMOTE_AUTH_USER_MODEL = 'remote_auth.RemoteAuthUser'
+
 JWT_SERVICE_URL = 'http://127.0.0.1:8001'
 
 # Application definition
