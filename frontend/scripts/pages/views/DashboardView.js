@@ -191,6 +191,13 @@ export class DashboardView extends HTMLElement {
         GlobalEventEmitter.on(EVENT_TYPES.UPDATE_SCORE, ({ player1Name, player2Name, player1Score, player2Score }) => {
             this.updateScores(player1Name, player2Name, player1Score, player2Score);
         })
+        //listen for event to render dashboard new
+        GlobalEventEmitter.on(EVENT_TYPES.RELOAD_DASHBOARD, (() =>
+        {
+            // console.log('event to rerender!');
+            this.displayUser();
+        }
+        ))
     }
 
     openGameSetupDialog(matchType) {

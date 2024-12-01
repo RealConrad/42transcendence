@@ -21,6 +21,7 @@ export const EVENT_TYPES = {
     MATCH_LOCAL: "match.local",
     QUIT_MATCH: "quit.match",
     UPDATE_SCORE: "update.score",
+    RELOAD_DASHBOARD: "reload.dashboard",
 }
 
 export const USER = {

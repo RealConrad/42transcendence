@@ -327,6 +327,7 @@ class AuthDialog extends HTMLElement {
 		}).then((data) => {
 			console.log(data);
 			setAccessToken(data.access_token);
+			GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
 			this.close();
 		}).catch(err => console.log(err));
 	}
@@ -354,6 +355,7 @@ class AuthDialog extends HTMLElement {
 		}).then((data) => {
 			console.log("LOGGED IN!");
 			setAccessToken(data.access_token);
+			GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
 			USER.username = username;
 			if (data.mfa_enable_flag) {
 				this.shadowRoot.getElementById("sign-in-view").style.display = "none"

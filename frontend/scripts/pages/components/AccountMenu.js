@@ -16,6 +16,7 @@ export class AccountMenu extends HTMLElement {
         this.imgUrl = USER.profilePicture; // TODO: get image from localstorage
         this.render();
         this.setupProfilePicture();
+        // GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
         //TODO:  Dummy data, hookup to API
         this.renderPreviousMatches([
             { player1: 'Conradasdasdasdasdasdasd', score1: 9, player2: 'Guest', score2: 10 },
@@ -158,6 +159,7 @@ html() {
                     .then(response => response.json())
                     .then(data => {
                         console.log("API Response: ", data);
+                        GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {}); ///////reload
                     })
                     .catch(error => {
                         console.error("Error uploading profile picture:", error);

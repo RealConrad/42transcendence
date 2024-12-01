@@ -1,4 +1,6 @@
-import { USER } from "../utils/constants.js";
+import { USER, EVENT_TYPES } from "../utils/constants.js";
+import GlobalEventEmitter from "../utils/EventEmitter.js";
+
 let accessToken = null;
 
 export const setAccessToken = (token) => {
