@@ -1,5 +1,6 @@
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
 import {EVENT_TYPES} from "../../utils/constants.js";
+import {getAccessToken} from "../../api/api.js";
 
 export class PlayMenu extends HTMLElement {
     constructor() {
@@ -28,6 +29,12 @@ export class PlayMenu extends HTMLElement {
                 <button style="text-align: right">local</button>
                 <span class="button-description">one keyboard? just dont elbow each other</span>
             </div>
+            ${getAccessToken() ? `
+                <div class="menu-option">
+                    <button style="text-align: right">tournament</button>
+                    <span class="button-description">gather your friends or face off against bots</span>
+                </div>
+                ` : ""}
         `
     }
 
@@ -49,6 +56,8 @@ export class PlayMenu extends HTMLElement {
                     GlobalEventEmitter.emit(EVENT_TYPES.MATCH_VS_AI);
                 } else if (buttonText === "local") {
                     GlobalEventEmitter.emit(EVENT_TYPES.MATCH_LOCAL);
+                } else if (buttonText === "tournament") {
+                    GlobalEventEmitter.emit(EVENT_TYPES.MATCH_TOURNAMENT);
                 }
             });
         });

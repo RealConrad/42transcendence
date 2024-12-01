@@ -10,6 +10,25 @@ export const getUserName = () => {
 
 export const getAccessToken = () => accessToken;
 
+export const validateInput = (input) => {
+    const sanitized = input.trim();
+    const maxLength = 200;
+    const minLength = 2;
+    if (/[^a-zA-Z0-9 _]/.test(sanitized)) {
+        throw new Error("Input contains invalid characters. Only include letters, '_', spaces or numbers.");
+    }
+    if (sanitized.length === 0) {
+        throw new Error("Input name cannot be empty.");
+    }
+    if (sanitized.length > maxLength) {
+        throw new Error(`Input must not exceed ${maxLength} characters.`);
+    }
+    if (sanitized.length < minLength) {
+        throw new Error(`Input must be at least ${minLength} characters.`);
+    }
+    return sanitized;
+}
+
 const refreshTokens = async () => {
     try {
         const response = await fetch('http://127.0.0.1:8002/api/token/refresh/', {
