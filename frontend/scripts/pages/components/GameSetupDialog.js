@@ -1,5 +1,6 @@
 import {EVENT_TYPES} from "../../utils/constants.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
+import {getAccessToken} from "../../api/api.js";
 
 export class GameSetupDialog extends HTMLElement {
     constructor() {
@@ -26,13 +27,19 @@ export class GameSetupDialog extends HTMLElement {
                         </div>
                         ${
                             this.matchType === "local"
-                                ? `
-                        <div class="group">
-                            <label for="player2-name">Player 2 Name:</label>
-                            <input type="text" id="player2-name" placeholder="Enter Player 2 Name" />
-                        </div>
-                        `
-                                : ""
+                                ? `${getAccessToken() ? `
+                                    <div class="group">
+                                        <label for="player2-name">Player 2 Name:</label>
+                                        <input type="text" id="player2-name" placeholder="Enter Player 2 Name" />
+                                    </div>
+                                ` : ""}
+                            `
+                                : `
+                                <div>
+                                    <label for="ai-difficulty-slider">AI Difficulty: <span id="difficulty-value">5</span></label>
+                                    <input type="range" class="ai-difficulty-slider" id="ai-difficulty-slider" min="1" max="10" step="1" value="5">
+                                </div>
+                                `
                         }
                     </div>
                     <button id="start-game-button" style="margin-bottom: 20px" class="sign-in-button">Start Game</button>
@@ -73,19 +80,26 @@ export class GameSetupDialog extends HTMLElement {
             });
         }
 
+        const AIDifficultySlider = this.shadowRoot.querySelector("#ai-difficulty-slider");
+        AIDifficultySlider.addEventListener('change', () => {
+            const difficultyValue = this.shadowRoot.querySelector("#difficulty-value");
+            difficultyValue.textContent = AIDifficultySlider.value;
+        })
         closeButton.addEventListener("click", () => {
             this.close();
         });
         startButton.addEventListener("click", () => {
-            const player1Name = this.shadowRoot.querySelector("#player1-name").value.trim();
+            let player1Name = this.shadowRoot.querySelector("#player1-name").value.trim();
+            if (localStorage.getItem("username")) {
+                player1Name = localStorage.getItem("username");
+            }
             const player2Name = this.matchType === "local"
                 ? this.shadowRoot.querySelector("#player2-name").value.trim()
                 : "AI";
 
             if (player1Name && player2Name) {
-                console.log(`${player1Name} vs ${player2Name}`);
                 const matchType = this.matchType;
-                GlobalEventEmitter.emit(EVENT_TYPES.START_MATCH, { player1Name, player2Name, matchType });
+                GlobalEventEmitter.emit(EVENT_TYPES.START_MATCH, { player1Name, player2Name, matchType, AIDifficulty: AIDifficultySlider.value });
                 this.close();
             } else {
                 alert("Enter all player names");

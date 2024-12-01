@@ -140,19 +140,16 @@ export class DashboardView extends HTMLElement {
 
         // Listen for
         GlobalEventEmitter.on(EVENT_TYPES.MATCH_VS_AI, () => {
-            console.log("VS AI");
             this.openGameSetupDialog("vs AI");
         });
         GlobalEventEmitter.on(EVENT_TYPES.MATCH_LOCAL, () => {
-            console.log("LOCAL");
             this.openGameSetupDialog("local");
         });
         GlobalEventEmitter.on(EVENT_TYPES.MATCH_TOURNAMENT, () => {
-            console.log("TOURNAMENT");
             tournamentSetupDialog.open();
         });
-        GlobalEventEmitter.on(EVENT_TYPES.START_MATCH, ({ player1Name, player2Name, matchType}) => {
-            this.startGame(player1Name, player2Name, matchType !== "local");
+        GlobalEventEmitter.on(EVENT_TYPES.START_MATCH, ({ player1Name, player2Name, matchType, AIDifficulty}) => {
+            this.startGame(player1Name, player2Name, matchType !== "local", AIDifficulty);
         });
         GlobalEventEmitter.on(EVENT_TYPES.START_TOURNAMENT, ({ players: players}) => {
             tournamentSetupDialog.close();
@@ -165,7 +162,6 @@ export class DashboardView extends HTMLElement {
             this.updateScores(player1Name, player2Name, player1Score, player2Score);
         });
         GlobalEventEmitter.on(EVENT_TYPES.TOURNAMENT_UPDATE, (data) => {
-            console.log("Tournament updated:", data);
             this.matchDataForMenuDialog = data;
             const gameMenuDialog = this.shadowRoot.getElementById("game-menu-dialog");
             if (gameMenuDialog) {
@@ -232,7 +228,6 @@ export class DashboardView extends HTMLElement {
         this.initializeMenuInteractions();
 
         const resizeObserver = new ResizeObserver(() => {
-            console.log("Resizing from observer");
             updateCanvasSize();
         });
         resizeObserver.observe(this.shadowRoot.host);
@@ -341,7 +336,6 @@ export class DashboardView extends HTMLElement {
             isAI: vsAI,
             aiDifficulty: aiDifficulty,
         };
-
         this.updateScores(player1Name, player2Name, 0, 0);
         const game = new Game(this.canvas, player1, player2);
         game.start();
@@ -370,7 +364,6 @@ export class DashboardView extends HTMLElement {
     endGame() {
         this.isGameRunning = false;
         this.showAllDashboardUI();
-        console.log("Match ended, dashboard UI Restored");
     }
 
     hideAllDashboardUI() {
