@@ -1,6 +1,6 @@
-import {getAccessToken} from "../../api/api.js";
+import {apiCall, getAccessToken} from "../../api/api.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
-import {EVENT_TYPES} from "../../utils/constants.js";
+import {BASE_AUTH_API_URL, EVENT_TYPES} from "../../utils/constants.js";
 
 export class AccountMenu extends HTMLElement {
     constructor() {
@@ -147,6 +147,21 @@ html() {
             const file = event.target.files[0];
             if (file) {
                 // TODO: CREATE API TO UPLOAD PROFILE PICTURE
+                console.log("FILE: ", file);
+                const formData = new FormData();
+                formData.append("file", file);
+
+                apiCall(`${BASE_AUTH_API_URL}/save_profile_pic/`, {
+                    method: "POST",
+                    body: formData,
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("API Response: ", data);
+                    })
+                    .catch(error => {
+                        console.error("Error uploading profile picture:", error);
+                    })
             }
         });
     }

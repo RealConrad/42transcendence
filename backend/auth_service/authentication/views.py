@@ -2,13 +2,12 @@ import requests
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
-from django.conf import settings
-from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK
-
 from .models import CustomUser
 from .serializers import RegisterSerializer, LoginSerializer
+from .authentication import JWTAuthentication
 
 JWT_SERVICE_URL = 'http://jwtservice:8002/api/token/generate-tokens/'
+JWT_VERIFY_URL = 'http://jwtservice:8002/api/token/verify/'
 
 class RegisterView(generics.CreateAPIView):
     permission_classes = [AllowAny]
@@ -29,6 +28,9 @@ class RegisterView(generics.CreateAPIView):
                 tokens = jwt_response.json()
                 access_token = tokens.get('access_token')
                 refresh_token = tokens.get('refresh_token')
+
+                user.logged_in = True
+                user.save()
 
                 response = Response({
                     "detail": "User registered successfully",
@@ -70,12 +72,23 @@ class LoginView(generics.GenericAPIView):
                 access_token = tokens.get('access_token')
                 refresh_token = tokens.get('refresh_token')
 
+                profile_picture_url = (
+                    request.build_absolute_uri(user.profile_picture.url)
+                    if user.profile_picture and hasattr(user.profile_picture, 'url')
+                    else None
+                )
+
+                user.logged_in = True
+                user.save()
+
                 response = Response({
                     "detail": "User logged in successfully",
                     "username": user.username,
                     "user_id": user.id,
                     "access_token": access_token,
                     "mfa_enable_flag": user.mfa_enabled,
+                    "logged_in": user.logged_in,
+                    "profile_picture": profile_picture_url,
                 }, status=status.HTTP_200_OK)
 
                 response.set_cookie(
@@ -125,3 +138,66 @@ class SetMFAFlagView(generics.GenericAPIView):
             {'detail': f'MFA flag set to {flag_status}'},
             status=status.HTTP_200_OK
         )
+
+
+class SaveProfilePicture(generics.GenericAPIView):
+    """
+    Generic view to store user profile picture
+    """
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        user = request.user
+
+        # Saving the file
+        uploaded_file = request.FILES.get('file')
+        if not uploaded_file:
+            return Response(
+                {'detail': "No File uploaded"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # renaming and saving the file
+        file_name = f"{user.id}_{uploaded_file.name}"
+        user.profile_picture.save(file_name, uploaded_file)
+        user.save()
+
+        profile_picture_url = (
+            request.build_absolute_uri(user.profile_picture.url)
+            if user.profile_picture and hasattr(user.profile_picture, 'url')
+            else None
+        )
+
+        return Response({
+            'detail': "Profile picture uploaded successfully",
+             'profile_picture': profile_picture_url
+        }, status=status.HTTP_200_OK )
+
+
+class GetUserData(generics.GenericAPIView):
+    """
+    Generic View to retrieve user data
+    """
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+
+        profile_picture_url = (
+            request.build_absolute_uri(user.profile_picture.url)
+            if user.profile_picture and hasattr(user.profile_picture, 'url')
+            else None
+        )
+
+        response = Response({
+            "detail": "User data",
+            "username": user.username,
+            "user_id": user.id,
+            "mfa_enable_flag": user.mfa_enabled,
+            "logged_in": user.logged_in,
+            "profile_picture": profile_picture_url,
+        }, status=status.HTTP_200_OK)
+
+        return response
