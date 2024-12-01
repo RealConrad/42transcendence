@@ -1,0 +1,47 @@
+global:
+  scrape_interval: 15s
+
+  external_labels:
+    monitor: 'codelab-monitor'
+
+scrape_configs:
+  # - job_name: 'authdb'
+  #   static_configs:
+  #     - targets: ['authdb:5432']
+
+  # - job_name: 'authservice'
+  #   static_configs:
+  #     - targets: ['authservice:8000']
+
+  # - job_name: 'mfadb'
+  #   static_configs:
+  #     - targets: ['mfadb:5433']
+
+  # - job_name: 'mfaservice'
+  #   static_configs:
+  #     - targets: ['mfaservice:8011']
+
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080/metrics']
+  # - job_name: 'jwtdb'
+  #   static_configs:
+  #     - targets: ['jwtdb:5434']
+
+  # - job_name: 'jwtservice'
+  #   static_configs:
+  #     - targets: ['jwtservice:8002']
+
+  # - job_name: 'gamedb'
+  #   static_configs:
+  #     - targets: ['gamedb:5435']
+
+  # - job_name: 'gameservice'
+  #   static_configs:
+  #     - targets: ['gameservice:8003']
+
+  # - job_name: 'nginx'
+  #   static_configs:
+  #     - targets: ['nginx:443', 'nginx:80']
+
+

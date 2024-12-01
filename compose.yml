@@ -76,6 +76,7 @@ services:
       - .env
     ports:
       - "8001:8001"
+      - "8011:8011"
     networks:
       - transcendence
 
@@ -166,6 +167,48 @@ services:
     networks:
       - transcendence
 
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./prometheus/prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    networks:
+      - transcendence
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    env_file:
+      - .env
+    volumes:
+      - ./grafana/grafana_data:/var/lib/grafana
+      - ./grafana/config/grafana.ini:/etc/grafana/grafana.ini:ro
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro  # Persistent dashboards
+      - ./grafana/logs:/var/log/grafana 
+    ports:
+      - "3000:3000"
+    networks:
+      - transcendence
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor
+    container_name: cadvisor
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - transcendence
+
 volumes:
   auth_postgres_data:
     name: transcendence_auth_postgres_data
@@ -175,3 +218,5 @@ volumes:
     name: transcendence_game_postgres_data
   jwt_postgres_data:
     name: transcendence_jwt_postgres_data
+  prometheus-data:
+    name: transcendence_prometheus_data
