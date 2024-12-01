@@ -136,6 +136,8 @@ export default class Tournament {
                     const winner = game.getWinner();
                     match.player1.score = winner.player1Score;
                     match.player2.score = winner.player2Score;
+                    match.player1Score = winner.player1Score;
+                    match.player2Score = winner.player2Score;
                     resolve(winner);
                 } else {
                     requestAnimationFrame(checkGameOver);

@@ -115,7 +115,6 @@ export class GameMenuDialog extends HTMLElement {
 
     renderTournamentStandings() {
         if (!this.gameData || !this.gameData.rounds) return `<div>No tournament data available.</div>`;
-
         return `
             <div class="tournament-standings">
                 ${this.gameData.rounds
