@@ -29,7 +29,7 @@ export class PlayMenu extends HTMLElement {
                 <button style="text-align: right">local</button>
                 <span class="button-description">one keyboard? just dont elbow each other</span>
             </div>
-            ${!getAccessToken() ? `
+            ${getAccessToken() ? `
                 <div class="menu-option">
                     <button style="text-align: right">tournament</button>
                     <span class="button-description">gather your friends or face off against bots</span>
