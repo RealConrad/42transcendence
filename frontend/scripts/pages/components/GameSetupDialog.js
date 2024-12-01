@@ -93,7 +93,7 @@ export class GameSetupDialog extends HTMLElement {
             this.close();
         });
         startButton.addEventListener("click", () => {
-            let player1Name = this.shadowRoot.querySelector("#player1-name").value.trim();
+            let player1Name = this.shadowRoot.querySelector("#player1-name")?.value?.trim();
             if (localStorage.getItem("username")) {
                 player1Name = localStorage.getItem("username");
             }

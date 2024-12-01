@@ -326,6 +326,7 @@ class AuthDialog extends HTMLElement {
 			}
 		}).then((data) => {
 			console.log(data);
+			localStorage.setItem("username", data.username);
 			setAccessToken(data.access_token);
 			this.close();
 		}).catch(err => console.log(err));

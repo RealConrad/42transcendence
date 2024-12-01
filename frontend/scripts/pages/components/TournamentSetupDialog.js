@@ -7,7 +7,7 @@ export class TournamentSetupDialog extends HTMLElement {
         super();
         this.attachShadow({mode: 'open'})
         // TODO: Get from localstorage
-        this.username = "Conrad";
+        this.username = localStorage.getItem("username");
     }
 
     connectedCallback() {
