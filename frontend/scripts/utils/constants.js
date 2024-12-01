@@ -13,21 +13,22 @@ export const FORM_ERROR_MESSAGES = {
 }
 
 export const EVENT_TYPES = {
-    CURSOR_MOVE: "cursor.move",
-    CURSOR_HOVER: "cursor.hover",
-    CURSOR_UNHOVER: "cursor.unhover",
-    START_MATCH: "start.match",
-    MATCH_VS_AI: "match.vs.ai",
-    MATCH_LOCAL: "match.local",
-    QUIT_MATCH: "quit.match",
-    UPDATE_SCORE: "update.score",
-    MATCH_TOURNAMENT: "match.tournament",
-    START_TOURNAMENT: "start.tournament",
-    SHOW_GAME_MENU: "show.game.menu",
-    TOGGLE_GAME_MENU: "toggle.game.menu",
-    TOURNAMENT_UPDATE: "tournament.update",
-    RESUME_GAME: "resume.game",
-    PAUSE_GAME: "pause.game",
+    CURSOR_MOVE: "cursor_move",
+    CURSOR_HOVER: "cursor_hover",
+    CURSOR_UNHOVER: "cursor_unhover",
+    START_MATCH: "start_match",
+    MATCH_VS_AI: "match_vs_ai",
+    MATCH_LOCAL: "match_local",
+    QUIT_MATCH: "quit_match",
+    UPDATE_SCORE: "update_score",
+    MATCH_TOURNAMENT: "match_tournament",
+    START_TOURNAMENT: "start_tournament",
+    SHOW_GAME_MENU: "show_game_menu",
+    TOGGLE_GAME_MENU: "toggle_game_menu",
+    TOURNAMENT_UPDATE: "tournament_update",
+    RESUME_GAME: "resume_game",
+    PAUSE_GAME: "pause_game",
+    QUIT_GAME: "quit_game",
 }
 
 export const BASE_AUTH_API_URL = "http://127.0.0.1:8000/api/auth"
