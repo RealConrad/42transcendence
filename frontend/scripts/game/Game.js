@@ -16,9 +16,10 @@ import AIController from "./controllers/AIController.js";
 import InputManager from "./managers/InputManager.js";
 import { apiCall} from "../api/api.js";
 import GlobalEventEmitter from "../utils/EventEmitter.js";
+import PowerUp from "./models/powerups/PowerUp.js";
 
 export default class Game {
-    constructor(canvas, player1Details, player2Details, isTournamentMatch = false) {
+    constructor(canvas, player1Details, player2Details, isTournamentMatch = false, powerUpCount = 100) {
         this.isGameOver = false;
         this.isGamePaused = false;
         this.winner = null;
@@ -39,7 +40,14 @@ export default class Game {
         this.ball = new Ball(this.canvas.width / 2, this.canvas.height / 2, 5, 5, 5);
 
         this.Battleground = new Battleground(this.canvas);
-        
+
+
+        // Setup powerups
+        if (powerUpCount > 0) {
+            this.powerUps = [];
+            this.createPowerUps(powerUpCount);
+        }
+
         // Setup player models and controllers
         const player1Paddle = new Paddle(
             0,
@@ -95,6 +103,19 @@ export default class Game {
         this.updatePlayerScore();
     }
 
+    createPowerUps(count) {
+        const types = ['%', '>', '&', '¿', '|' , '-' , '@' , '+' , '=' ,'*'];
+        console.log(`Power-up creating ${count} powerups`);
+        for (let i = 0; i < count; i++) {
+            const randomX = Math.random() * (this.canvas.width - 30);
+            const randomY = Math.random() * (this.canvas.height - 30);
+            const randomType = types[Math.floor(Math.random() * types.length)];
+            const power = new PowerUp(this.ctx, randomX, randomY, randomType);
+            this.powerUps.push(power);
+            this.renderManager.addRenderable(power);
+        }
+    }
+
     start() {
         requestAnimationFrame(this.gameLoop.bind(this));
     }
@@ -106,9 +127,27 @@ export default class Game {
         this.ball.move();
         this.player1.controller.update();
         this.player2.controller.update();
+        this.checkPowerUpCollection();
         this.checkWinCondition();
         this.renderManager.render();
         requestAnimationFrame(this.gameLoop.bind(this));
+    }
+
+    checkPowerUpCollection() {
+        this.powerUps.forEach(powerUp => {
+            if (powerUp.isActive && this.checkCollision(this.ball, powerUp)) {
+                powerUp.collectPowerUp(this, this.player1);
+            }
+        });
+    }
+    
+    checkCollision(ball, powerUp) {
+        return (
+            ball.x < powerUp.x + powerUp.size &&
+            ball.x + ball.radius > powerUp.x &&
+            ball.y < powerUp.y + powerUp.size &&
+            ball.y + ball.radius > powerUp.y
+        );
     }
 
     cleanup() {
