@@ -158,6 +158,9 @@ export class DashboardView extends HTMLElement {
         GlobalEventEmitter.on(EVENT_TYPES.QUIT_MATCH, () => {
             this.endGame();
         });
+        GlobalEventEmitter.on(EVENT_TYPES.GAME_OVER, () => {
+            this.isGameRunning = false;
+        });
         GlobalEventEmitter.on(EVENT_TYPES.UPDATE_SCORE, ({ player1Name, player2Name, player1Score, player2Score }) => {
             this.updateScores(player1Name, player2Name, player1Score, player2Score);
         });
@@ -348,9 +351,6 @@ export class DashboardView extends HTMLElement {
 
         const tournament = new Tournament(players, this.canvas);
         tournament.start();
-
-        // initial tournament data
-        // this.matchDataForMenuDialog = { data: tournament.bracket };
     }
 
     updateScores(player1Name, player2Name, player1Score, player2Score) {

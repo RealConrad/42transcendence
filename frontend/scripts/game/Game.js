@@ -139,12 +139,13 @@ export default class Game {
                 };
 
             }
-            if (!this.isTournamentMatch)
+            if (!this.isTournamentMatch) {
                  GlobalEventEmitter.emit(EVENT_TYPES.GAME_OVER, {
                      winner: this.winner.username,
                      isTournament: this.isTournamentMatch
                  });
                 this.saveMatch();
+            }
         }
     }
 
