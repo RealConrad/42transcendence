@@ -74,6 +74,7 @@ export default class Tournament {
             if (this.currentRoundIndex >= this.bracket.length) {
                 const champion = this.bracket[this.bracket.length - 1][0].winner;
                 console.log(`${champion.username} won the Tournament!`);
+                GlobalEventEmitter.emit(EVENT_TYPES.GAME_OVER, { winner: champion.username, isTournament: true });
                 return;
             } else {
                 GlobalEventEmitter.emit(EVENT_TYPES.TOURNAMENT_UPDATE, { rounds: this.bracket });

@@ -7,6 +7,8 @@ export class GameMenuDialog extends HTMLElement {
         this.attachShadow({ mode: "open" });
         this.isTournamentMatch = false;
         this.gameData = null;
+        this.isGameOver = false; // game or tournament is over
+        this.winner = null;
     }
 
     connectedCallback() {
@@ -15,14 +17,22 @@ export class GameMenuDialog extends HTMLElement {
         this.setupListeners();
 
         GlobalEventEmitter.on(EVENT_TYPES.SHOW_GAME_MENU, this.showMenu.bind(this));
+        GlobalEventEmitter.on(EVENT_TYPES.GAME_OVER, this.showGameOver.bind(this));
         this.shadowRoot.addEventListener("click", this.handleBackgroundClick.bind(this));
     }
 
     disconnectedCallback() {
         GlobalEventEmitter.off(EVENT_TYPES.SHOW_GAME_MENU, this.showMenu.bind(this));
+        GlobalEventEmitter.off(EVENT_TYPES.GAME_OVER, this.showGameOver.bind(this));
         this.shadowRoot.removeEventListener("click", this.handleBackgroundClick.bind(this));
     }
 
+    showGameOver({winner, isTournament = false}) {
+        this.isGameOver = true;
+        this.isTournamentMatch = isTournament;
+        this.winner = winner;
+        this.open();
+    }
 
     updateTournamentData(gameData) {
         this.gameData = gameData;
@@ -32,6 +42,7 @@ export class GameMenuDialog extends HTMLElement {
     }
 
     showMenu({ isTournament }) {
+       if (this.isGameOver) return;
        this.isTournamentMatch = isTournament;
        this.open();
     }
@@ -42,12 +53,13 @@ export class GameMenuDialog extends HTMLElement {
     }
 
     close() {
+        this.isGameOver = false;
         this.style.display = "none";
         GlobalEventEmitter.emit(EVENT_TYPES.RESUME_GAME);
     }
 
     handleBackgroundClick(event) {
-        if (event.target.id === "overlay") {
+        if (event.target.id === "overlay" && !this.isGameOver) {
             this.close();
         }
     }
@@ -57,13 +69,25 @@ export class GameMenuDialog extends HTMLElement {
             <link rel="stylesheet" href="../../../styles/dialog.css">
             <div id="overlay" class="overlay2">
                 <div class="dialog2">
-                    <div class="heading">Game Menu</div>
                     ${
-                        this.isTournamentMatch
-                            ? this.renderTournamentStandings()
-                            : `<div>Paused</div>`
+                        this.isGameOver
+                            ? `<div class="heading">${this.winner} won ${this.isTournamentMatch ? 'the Tournament' : 'the Game'}!</div>`
+                            : `<div class="heading">Game Menu</div>`
                     }
-                    <button id="resume-game" class="sign-in-button" style="width: 50%; margin-bottom: 20px;">Resume</button>
+                    ${
+                        this.isGameOver
+                            ? ''
+                            : (
+                                this.isTournamentMatch
+                                    ? this.renderTournamentStandings()
+                                    : `<div>Paused</div>`
+                            )
+                    }
+                    ${
+                        this.isGameOver
+                            ? ''
+                            : `<button id="resume-game" class="sign-in-button" style="width: 50%; margin-bottom: 20px;">Resume</button>`
+                    }
                     <button id="quit-game" class="sign-in-button" style="width: 50%">Quit</button>
                 </div>
             </div>
@@ -128,12 +152,16 @@ export class GameMenuDialog extends HTMLElement {
                     .join("")}
             </div>
         `;
+
     }
 
     setupListeners() {
-        this.shadowRoot.querySelector("#resume-game").addEventListener("click", () => {
-            this.close();
-        });
+        const resumeButton = this.shadowRoot.querySelector("#resume-game");
+        if (resumeButton) {
+            resumeButton.addEventListener("click", () => {
+                this.close();
+            });
+        }
         this.shadowRoot.querySelector("#quit-game").addEventListener("click", () => {
             GlobalEventEmitter.emit(EVENT_TYPES.QUIT_GAME);
             this.close();

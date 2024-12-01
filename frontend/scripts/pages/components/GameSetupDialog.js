@@ -22,17 +22,18 @@ export class GameSetupDialog extends HTMLElement {
                     <div class="heading">Game Setup</div>
                     <div class="flex-container">
                         <div class="group">
-                            <label for="player1-name">Player 1 Name:</label>
-                            <input type="text" id="player1-name" placeholder="Enter Player 1 Name" />
+                            ${!getAccessToken() ? `
+                                    <label for="player1-name">Player 1 Name:</label>
+                                    <input type="text" id="player1-name" placeholder="Enter Player 1 Name" />
+                                ` : ""}
                         </div>
                         ${
                             this.matchType === "local"
-                                ? `${getAccessToken() ? `
-                                    <div class="group">
-                                        <label for="player2-name">Player 2 Name:</label>
-                                        <input type="text" id="player2-name" placeholder="Enter Player 2 Name" />
-                                    </div>
-                                ` : ""}
+                                ? `
+                                <div class="group">
+                                    <label for="player2-name">Player 2 Name:</label>
+                                    <input type="text" id="player2-name" placeholder="Enter Player 2 Name" />
+                                </div>   
                             `
                                 : `
                                 <div>
@@ -81,10 +82,13 @@ export class GameSetupDialog extends HTMLElement {
         }
 
         const AIDifficultySlider = this.shadowRoot.querySelector("#ai-difficulty-slider");
-        AIDifficultySlider.addEventListener('change', () => {
-            const difficultyValue = this.shadowRoot.querySelector("#difficulty-value");
-            difficultyValue.textContent = AIDifficultySlider.value;
-        })
+        if (AIDifficultySlider) {
+            AIDifficultySlider.addEventListener('change', () => {
+                const difficultyValue = this.shadowRoot.querySelector("#difficulty-value");
+                difficultyValue.textContent = AIDifficultySlider.value;
+            })
+
+        }
         closeButton.addEventListener("click", () => {
             this.close();
         });
@@ -99,7 +103,8 @@ export class GameSetupDialog extends HTMLElement {
 
             if (player1Name && player2Name) {
                 const matchType = this.matchType;
-                GlobalEventEmitter.emit(EVENT_TYPES.START_MATCH, { player1Name, player2Name, matchType, AIDifficulty: AIDifficultySlider.value });
+                const AIDifficulty = AIDifficultySlider ? AIDifficultySlider.value : null;
+                GlobalEventEmitter.emit(EVENT_TYPES.START_MATCH, { player1Name, player2Name, matchType, AIDifficulty  });
                 this.close();
             } else {
                 alert("Enter all player names");

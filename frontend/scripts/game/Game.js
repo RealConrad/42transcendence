@@ -112,7 +112,7 @@ export default class Game {
     }
 
     cleanup() {
-        GlobalEventEmitter.off(EVENT_TYPES.TOGGLE_GAME_MENU, this.toggleMenu);
+        // TODO: Clean up event listeners
     }
 
     checkWinCondition() {
@@ -126,6 +126,9 @@ export default class Game {
                     isAI: this.player1.controller instanceof AIController,
                     difficulty: this.player1.controller instanceof AIController ? this.player1AIDiff : null
                 };
+                if (!this.isTournamentMatch)
+                    this.saveMatch();
+
             } else if (this.player2.score === this.maxScore) {
                 this.winner = {
                     player1Score: this.player1.score,
@@ -134,8 +137,13 @@ export default class Game {
                     isAI: this.player2.controller instanceof AIController,
                     difficulty: this.player2.controller instanceof AIController ? this.player2AIDiff : null
                 };
+
             }
             if (!this.isTournamentMatch)
+                 GlobalEventEmitter.emit(EVENT_TYPES.GAME_OVER, {
+                     winner: this.winner.username,
+                     isTournament: this.isTournamentMatch
+                 });
                 this.saveMatch();
         }
     }
