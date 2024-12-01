@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'tokens',
+    'remote_tokens',
 ]
 
 MIDDLEWARE = [
@@ -154,3 +155,11 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
     'USER_ID_CLAIM': 'user_id',
 }
+
+# Environments for 42 API
+
+STATE = os.getenv('STATE')
+CLIENT_ID = os.getenv('CLIENT_ID')
+CLIENT_SECRET = os.getenv('CLIENT_SECRET')
+REDIRECT_URI = os.getenv('REDIRECT_URI')
+AUTHORIZE_42_URL = os.getenv('AUTHORIZE_42_URL')
