@@ -19,7 +19,6 @@ export default class Tournament {
         this.startNextMatch();
     }
 
-
     // Credit: https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
     shufflePlayers(array) {
         for (let i = array.length - 1; i > 0; i--) {
@@ -30,13 +29,8 @@ export default class Tournament {
     }
 
     generateBracket() {
-        // Shuffle players
         const shuffledPlayers = this.shufflePlayers([...this.players]);
-
-        // Calculate the number of rounds
         const numRounds = Math.log2(shuffledPlayers.length);
-
-        // Initialize rounds
         for (let roundIndex = 0; roundIndex < numRounds; roundIndex++) {
             this.bracket.push([]);
             const numMatches = Math.pow(2, numRounds - roundIndex - 1);
