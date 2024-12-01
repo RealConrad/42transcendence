@@ -173,6 +173,7 @@ export class DashboardView extends HTMLElement {
             }
         });
         GlobalEventEmitter.on(EVENT_TYPES.RESUME_GAME, () => this.onResumeGame());
+        GlobalEventEmitter.on(EVENT_TYPES.QUIT_GAME, () => this.quitGame())
     }
 
     handleKeyDown(event) {
@@ -194,6 +195,11 @@ export class DashboardView extends HTMLElement {
             this.isGameMenuOpen = true;
             GlobalEventEmitter.emit(EVENT_TYPES.PAUSE_GAME);
         }
+    }
+
+    quitGame() {
+        this.isGameRunning = false;
+        this.showAllDashboardUI();
     }
 
     onResumeGame() {

@@ -12,11 +12,17 @@ export default class Tournament {
         this.bracket = []; // Array of rounds, each round is an array of matches
         this.currentRoundIndex = 0;
         this.currentMatchIndex = 0;
+        this.isTournamentOver = false;
+        GlobalEventEmitter.on(EVENT_TYPES.QUIT_GAME, this.quitTournament.bind(this));
     }
 
     start() {
         this.generateBracket();
         this.startNextMatch();
+    }
+
+    quitTournament() {
+        this.isTournamentOver = true;
     }
 
     // Credit: https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
@@ -57,6 +63,8 @@ export default class Tournament {
     }
 
     async startNextMatch() {
+        if (this.isTournamentOver)
+            return;
         GlobalEventEmitter.emit(EVENT_TYPES.TOURNAMENT_UPDATE, { rounds: this.bracket });
         const currentRound = this.bracket[this.currentRoundIndex];
         if (!currentRound || this.currentMatchIndex >= currentRound.length) {

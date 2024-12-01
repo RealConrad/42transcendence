@@ -135,6 +135,10 @@ export class GameMenuDialog extends HTMLElement {
         this.shadowRoot.querySelector("#resume-game").addEventListener("click", () => {
             this.close();
         });
+        this.shadowRoot.querySelector("#quit-game").addEventListener("click", () => {
+            GlobalEventEmitter.emit(EVENT_TYPES.QUIT_GAME);
+            this.close();
+        });
     }
 }
 

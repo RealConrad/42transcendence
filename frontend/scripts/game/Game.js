@@ -93,6 +93,7 @@ export default class Game {
         this.resumeGame = this.resumeGame.bind(this);
         GlobalEventEmitter.on(EVENT_TYPES.PAUSE_GAME, this.pauseGame);
         GlobalEventEmitter.on(EVENT_TYPES.RESUME_GAME, this.resumeGame);
+        GlobalEventEmitter.on(EVENT_TYPES.QUIT_GAME, this.quitGame.bind(this));
         this.updatePlayerScore();
     }
 
@@ -152,6 +153,15 @@ export default class Game {
             this.isGamePaused = false;
             requestAnimationFrame(this.gameLoop.bind(this));
         }
+    }
+
+    quitGame() {
+        this.isGameOver = true;
+        this.renderManager.clearCanvas();
+        this.resetGameState();
+        GlobalEventEmitter.off(EVENT_TYPES.PAUSE_GAME, this.pauseGame);
+        GlobalEventEmitter.off(EVENT_TYPES.RESUME_GAME, this.resumeGame);
+        GlobalEventEmitter.off(EVENT_TYPES.QUIT_GAME, this.quitGame);
     }
 
     getWinner() {
