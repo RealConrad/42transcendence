@@ -32,7 +32,6 @@ export class GameMenuDialog extends HTMLElement {
     }
 
     showMenu({ isTournament }) {
-        console.log("match type: ", isTournament);
        this.isTournamentMatch = isTournament;
        this.open();
     }

@@ -147,7 +147,6 @@ html() {
             const file = event.target.files[0];
             if (file) {
                 // TODO: CREATE API TO UPLOAD PROFILE PICTURE
-                console.log("FILE: ", file);
             }
         });
     }
