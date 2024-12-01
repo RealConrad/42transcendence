@@ -14,8 +14,6 @@ import RenderManager from "./managers/RenderManager.js";
 import CollisionManager from "./managers/CollisionManager.js";
 import AIController from "./controllers/AIController.js";
 import InputManager from "./managers/InputManager.js";
-import UIManager from "./managers/UIManager.js";
-import eventEmitter from "./EventEmitter.js";
 import { apiCall} from "../api/api.js";
 import GlobalEventEmitter from "../utils/EventEmitter.js";
 
