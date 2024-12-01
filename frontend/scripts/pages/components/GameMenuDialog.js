@@ -6,6 +6,7 @@ export class GameMenuDialog extends HTMLElement {
         super();
         this.attachShadow({ mode: "open" });
         this.isTournamentMatch = false;
+        this.gameData = null;
     }
 
     connectedCallback() {
@@ -22,9 +23,18 @@ export class GameMenuDialog extends HTMLElement {
         this.shadowRoot.removeEventListener("click", this.handleBackgroundClick.bind(this));
     }
 
-    showMenu({ isTournamentMatch }) {
-        this.isTournamentMatch = isTournamentMatch;
-        this.open();
+
+    updateTournamentData(gameData) {
+        this.gameData = gameData;
+        if (this.isTournamentMatch && this.style.display === "block") {
+            this.render();
+        }
+    }
+
+    showMenu({ isTournament }) {
+        console.log("match type: ", isTournament);
+       this.isTournamentMatch = isTournament;
+       this.open();
     }
 
     open() {
@@ -46,53 +56,80 @@ export class GameMenuDialog extends HTMLElement {
     render() {
         this.shadowRoot.innerHTML = `
             <link rel="stylesheet" href="../../../styles/dialog.css">
-            <div id="overlay" class="overlay">
-                <div class="dialog">
+            <div id="overlay" class="overlay2">
+                <div class="dialog2">
                     <div class="heading">Game Menu</div>
                     ${
                         this.isTournamentMatch
                             ? this.renderTournamentStandings()
                             : `<div>Paused</div>`
                     }
-                    <button id="resume-game" class="sign-in-button">Resume</button>
+                    <button id="resume-game" class="sign-in-button" style="width: 50%; margin-bottom: 20px;">Resume</button>
+                    <button id="quit-game" class="sign-in-button" style="width: 50%">Quit</button>
                 </div>
             </div>
         `;
         this.setupListeners();
     }
 
-    renderTournamentStandings() {
-        if (!this.gameData || !this.gameData.rounds) return `<div>No tournament data available.</div>`;
-
-        return `
-            <div class="tournament-standings">
-                ${this.gameData.rounds
-                    .map(
-                        (round, roundIndex) => `
-                        <div class="round">
-                            <div class="round-heading">Round ${roundIndex + 1}</div>
-                            ${round
-                                .map(
-                                    (match) => `
-                                <div class="match">
-                                    <span>${match.player1.username}</span> vs 
-                                    <span>${match.player2.username}</span>
-                                    ${
-                                        match.winner
-                                            ? `<span class="winner">Winner: ${match.winner.username}</span>`
-                                            : ""
-                                    }
-                                </div>
-                            `
-                                )
-                                .join("")}
-                        </div>
-                    `
-                    )
-                    .join("")}
-            </div>
-        `;
+    getPlayerClass(match, playerKey) {
+        if (!match.winner) {
+            return '';
+        }
+        if (match[playerKey] && match.winner.username === match[playerKey].username) {
+            return 'winner';
+        } else {
+            return 'loser';
+        }
     }
+    truncateName(name) {
+        const maxLength = 12;
+        if (name.length > maxLength) {
+            return name.substring(0, maxLength - 1) + '…';
+        }
+        return name;
+    }
+
+renderTournamentStandings() {
+    if (!this.gameData || !this.gameData.rounds) return `<div>No tournament data available.</div>`;
+
+    return `
+        <div class="tournament-standings">
+            ${this.gameData.rounds
+                .map(
+                    (round, roundIndex) => `
+                    <div class="round">
+                        <div class="round-heading">Round ${roundIndex + 1}</div>
+                        ${round
+                            .map(
+                                (match) => `
+                            <div class="match-box">
+                                <div class="match">
+                                    <span class="player-name ${this.getPlayerClass(match, 'player1')}" title="${match.player1 ? match.player1.username : "TBD"}">
+                                        ${this.truncateName(match.player1 ? match.player1.username : "TBD")}
+                                    </span>
+                                    <span class="score ${this.getPlayerClass(match, 'player1')}">
+                                        ${match.player1Score !== undefined ? match.player1Score.toString().padStart(4, ' ') : '   -'}
+                                    </span>
+                                    <span class="vs">vs</span>
+                                    <span class="score ${this.getPlayerClass(match, 'player2')}">
+                                        ${match.player2Score !== undefined ? match.player2Score.toString().padStart(4, ' ') : '-   '}
+                                    </span>
+                                    <span class="player-name ${this.getPlayerClass(match, 'player2')}" title="${match.player2 ? match.player2.username : "TBD"}">
+                                        ${this.truncateName(match.player2 ? match.player2.username : "TBD")}
+                                    </span>
+                                </div>
+                            </div>
+                        `
+                            )
+                            .join("")}
+                    </div>
+                `
+                )
+                .join("")}
+        </div>
+    `;
+}
 
     setupListeners() {
         this.shadowRoot.querySelector("#resume-game").addEventListener("click", () => {

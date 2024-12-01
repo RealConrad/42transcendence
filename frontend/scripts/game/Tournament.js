@@ -9,32 +9,16 @@ export default class Tournament {
         }
         this.canvas = canvas;
         this.players = players; // Array of { username, isAI, aiDifficulty }
-        this.currentRound = [];
-        this.winners = [];
-        this.matches = [];
+        this.bracket = []; // Array of rounds, each round is an array of matches
+        this.currentRoundIndex = 0;
         this.currentMatchIndex = 0;
-        this.numberOfRounds = 0;
     }
 
     start() {
-        this.init();
+        this.generateBracket();
         this.startNextMatch();
     }
 
-    init() {
-        const shuffledPlayers = this.shufflePlayers([...this.players]);
-
-        for (let i = 0; i < shuffledPlayers.length; i += 2) {
-            const match = {
-                player1: shuffledPlayers[i],
-                player2: shuffledPlayers[i + 1],
-                round: 0,
-                winner: null,
-            }
-            this.currentRound.push(match);
-        }
-        this.matches.push(this.currentRound);
-    }
 
     // Credit: https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
     shufflePlayers(array) {
@@ -45,17 +29,83 @@ export default class Tournament {
         return array;
     }
 
+    generateBracket() {
+        // Shuffle players
+        const shuffledPlayers = this.shufflePlayers([...this.players]);
+
+        // Calculate the number of rounds
+        const numRounds = Math.log2(shuffledPlayers.length);
+
+        // Initialize rounds
+        for (let roundIndex = 0; roundIndex < numRounds; roundIndex++) {
+            this.bracket.push([]);
+            const numMatches = Math.pow(2, numRounds - roundIndex - 1);
+            for (let matchIndex = 0; matchIndex < numMatches; matchIndex++) {
+                this.bracket[roundIndex].push({
+                    player1: null,
+                    player2: null,
+                    winner: null,
+                    round: roundIndex,
+                });
+            }
+        }
+
+        // Assign players to first round matches
+        const firstRoundMatches = this.bracket[0];
+        for (let i = 0; i < shuffledPlayers.length; i++) {
+            const matchIndex = Math.floor(i / 2);
+            if (i % 2 === 0) {
+                firstRoundMatches[matchIndex].player1 = shuffledPlayers[i];
+            } else {
+                firstRoundMatches[matchIndex].player2 = shuffledPlayers[i];
+            }
+        }
+    }
+
     async startNextMatch() {
-        if (this.currentMatchIndex >= this.currentRound.length) {
-            console.log("All matches have been played for this round");
-            this.prepareNextRound();
+        GlobalEventEmitter.emit(EVENT_TYPES.TOURNAMENT_UPDATE, { rounds: this.bracket });
+        const currentRound = this.bracket[this.currentRoundIndex];
+        if (!currentRound || this.currentMatchIndex >= currentRound.length) {
+            // Move to next round
+            this.currentRoundIndex++;
+            this.currentMatchIndex = 0;
+            if (this.currentRoundIndex >= this.bracket.length) {
+                console.log("Tournament is over");
+                const champion = this.bracket[this.bracket.length - 1][0].winner;
+                console.log(`${champion.username} won the Tournament!`);
+                return;
+            } else {
+                GlobalEventEmitter.emit(EVENT_TYPES.TOURNAMENT_UPDATE, { rounds: this.bracket });
+                this.startNextMatch();
+                return;
+            }
+        }
+
+        const match = currentRound[this.currentMatchIndex];
+
+        // If both players are null, this match is not ready yet
+        if (!match.player1 || !match.player2) {
+            console.log(`Match ${this.currentMatchIndex + 1} in Round ${this.currentRoundIndex + 1} is not ready.`);
+            this.currentMatchIndex++;
+            this.startNextMatch();
             return;
         }
-        const match = this.currentRound[this.currentMatchIndex];
+
         console.log(`Starting match: ${match.player1.username} vs ${match.player2.username}`);
         const winner = await this.playMatch(match);
         match.winner = winner;
-        this.winners.push(winner);
+
+        // Assign winner to the next round
+        if (this.currentRoundIndex + 1 < this.bracket.length) {
+            const nextRoundMatchIndex = Math.floor(this.currentMatchIndex / 2);
+            const nextMatch = this.bracket[this.currentRoundIndex + 1][nextRoundMatchIndex];
+            if (this.currentMatchIndex % 2 === 0) {
+                nextMatch.player1 = winner;
+            } else {
+                nextMatch.player2 = winner;
+            }
+        }
+
         this.currentMatchIndex++;
         this.startNextMatch();
     }
@@ -63,63 +113,39 @@ export default class Tournament {
     playMatch(match) {
         return new Promise((resolve) => {
             if (match.player1.isAI && match.player2.isAI) {
-                console.warn("Both players are AI - skipping this match...");
+                console.warn("Both players are AI - randomly selecting a winner...");
                 const winner = Math.random() < 0.5 ? match.player1 : match.player2;
+                // TODO: CREATE RANDOM SCORES??
+                match.player1Score = 0;
+                match.player2Score = 0;
                 resolve(winner);
+                return;
             }
+
             const game = new Game(
                 this.canvas,
                 match.player1,
                 match.player2,
                 true,
-            )
+            );
 
             const checkGameOver = () => {
                 if (game.isGameOver) {
                     const winner = game.getWinner();
+                    match.player1Score = game.player1.score;
+                    match.player2Score = game.player2.score;
                     resolve(winner);
                 } else {
                     requestAnimationFrame(checkGameOver);
                 }
-            }
-            game.updatePlayerScore();
+            };
             game.start();
             checkGameOver();
-        })
-    }
-
-    prepareNextRound() {
-        this.numberOfRounds++;
-        if (this.winners.length === 1) {
-            console.log(`${this.winners[0].username} won the Tournament!`);
-            console.log("COMPLETE MATCHES: ", this.matches);
-
-            return;
-        }
-        console.log("=====Advancing to next round=====");
-        this.currentRound = [];
-        this.matches.push(this.currentRound);
-        for (let i = 0; i < this.winners.length; i += 2) {
-            const match = {
-                player1: this.winners[i],
-                player2: this.winners[i + 1],
-                winner: null,
-                round: this.numberOfRounds,
-            };
-            this.currentRound.push(match);
-        }
-        this.winners = [];
-        this.currentMatchIndex = 0;
-        console.log("NEW ROUND: ", this.currentRound);
-        GlobalEventEmitter.emit(EVENT_TYPES.TOURNAMENT_UPDATE, {rounds: this.matches});
-        this.startNextMatch();
+        });
     }
 
     resetTournament() {
-        this.currentRound = [];
-        this.winners = [];
         this.matches = [];
         this.currentMatchIndex = 0;
-        this.numberOfRounds = 0;
     }
 }

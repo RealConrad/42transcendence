@@ -14,7 +14,7 @@ export class DashboardView extends HTMLElement {
         this.rightPaddle = null;
         this.resizeObserver = null;
         this.isTournamentMatch = false;
-        // this.matchDataForMenuDialog = null;
+        this.matchDataForMenuDialog = null;
         this.isGameMenuOpen = false;
     }
 
@@ -166,7 +166,11 @@ export class DashboardView extends HTMLElement {
         });
         GlobalEventEmitter.on(EVENT_TYPES.TOURNAMENT_UPDATE, (data) => {
             console.log("Tournament updated:", data);
-            this.gameData = data;
+            this.matchDataForMenuDialog = data;
+            const gameMenuDialog = this.shadowRoot.getElementById("game-menu-dialog");
+            if (gameMenuDialog) {
+                gameMenuDialog.updateTournamentData(this.matchDataForMenuDialog);
+            }
         });
         GlobalEventEmitter.on(EVENT_TYPES.RESUME_GAME, () => this.onResumeGame());
     }
@@ -185,6 +189,7 @@ export class DashboardView extends HTMLElement {
             // 'RESUME_GAME' event will be emitted from GameMenuDialog
             // 'onResumeGame' will handle the rest
         } else {
+            gameMenuDialog.matchType = this.isTournamentMatch;
             gameMenuDialog.open();
             this.isGameMenuOpen = true;
             GlobalEventEmitter.emit(EVENT_TYPES.PAUSE_GAME);
@@ -209,7 +214,6 @@ export class DashboardView extends HTMLElement {
             this.canvas.width = this.shadowRoot.host.offsetWidth;
             this.canvas.height = this.shadowRoot.host.offsetHeight;
             this.drawMiddleLine();
-            console.log('UPDATING CANVAS:', this.canvas.width, "H: ", this.canvas.height);
         };
 
         requestAnimationFrame(updateCanvasSize);
@@ -346,7 +350,7 @@ export class DashboardView extends HTMLElement {
         tournament.start();
 
         // initial tournament data
-        this.gameData = { rounds: tournament.matches };
+        // this.matchDataForMenuDialog = { data: tournament.bracket };
     }
 
     updateScores(player1Name, player2Name, player1Score, player2Score) {

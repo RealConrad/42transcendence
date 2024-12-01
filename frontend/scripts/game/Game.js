@@ -93,6 +93,7 @@ export default class Game {
         this.resumeGame = this.resumeGame.bind(this);
         GlobalEventEmitter.on(EVENT_TYPES.PAUSE_GAME, this.pauseGame);
         GlobalEventEmitter.on(EVENT_TYPES.RESUME_GAME, this.resumeGame);
+        this.updatePlayerScore();
     }
 
     start() {
@@ -145,7 +146,6 @@ export default class Game {
         this.isGamePaused = true;
         GlobalEventEmitter.emit(EVENT_TYPES.SHOW_GAME_MENU, { isTournament: this.isTournamentMatch });
     }
-
 
     resumeGame() {
         if (!this.isGameOver) {
