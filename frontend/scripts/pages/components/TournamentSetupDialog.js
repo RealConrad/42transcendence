@@ -77,6 +77,29 @@ export class TournamentSetupDialog extends HTMLElement {
 
     close() {
         this.style.display = "none";
+        this.resetInputs();
+    }
+
+    resetInputs() {
+        const playerInputs = this.shadowRoot.getElementById('player-inputs');
+        while (playerInputs.children.length > 4) {
+            playerInputs.removeChild(playerInputs.lastChild);
+        }
+        for (let i = 2; i <= 4; i++) {
+            const playerInput = playerInputs.children[i - 1];
+            const input = playerInput.querySelector('input[type="text"]');
+            const checkbox = this.shadowRoot.getElementById(`ai-checkbox-${i}`);
+            const slider = this.shadowRoot.getElementById(`ai-difficulty-slider-${i}`);
+            const difficultyValue = this.shadowRoot.getElementById(`difficulty-value-${i}`);
+
+            input.value = '';
+            checkbox.checked = false;
+            slider.value = '5';
+            slider.disabled = true;
+            if (difficultyValue) {
+                difficultyValue.textContent = '5';
+            }
+        }
     }
 
     setupEventListeners() {
