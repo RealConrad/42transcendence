@@ -171,7 +171,7 @@ volumes:
     name: transcendence_auth_postgres_data
   mfa_postgres_data:
     name: transcendence_mfa_postgres_data
-#  game_postgres_data:
-#    name: transcendence_game_postgres_data
+  game_postgres_data:
+    name: transcendence_game_postgres_data
   jwt_postgres_data:
     name: transcendence_jwt_postgres_data

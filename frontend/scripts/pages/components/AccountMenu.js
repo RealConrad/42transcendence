@@ -12,7 +12,7 @@ export class AccountMenu extends HTMLElement {
     }
     connectedCallback() {
         this.accessToken = getAccessToken();
-        this.username = "Conrad"; // TODO: get username from localstorage
+        this.username = localStorage.getItem("username"); // TODO: get username from localstorage
         this.imgUrl = null; // TODO: get image from localstorage
         this.render();
         this.setupProfilePicture();

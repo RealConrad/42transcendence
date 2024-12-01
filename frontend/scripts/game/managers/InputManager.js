@@ -1,5 +1,3 @@
-import eventEmitter from "../EventEmitter.js";
-
 export default class InputManager {
     constructor() {
         this.keys = {}
@@ -11,33 +9,11 @@ export default class InputManager {
     }
 
     handleKeyDown(e) {
-        const key = e.key;
-        if (this.discreteKeys.has(key) && !this.keys[key]) {
-            this.keys[key] = true;
-            this.emitDiscreteAction(key, true);
-            return;
-        }
-        this.keys[key] = true;
+        this.keys[e.key] = true;
     }
 
     handleKeyUp(e) {
-        const key = e.key;
-        if (this.discreteKeys.has(key) && this.keys[key]) {
-            this.keys[e.key] = false;
-            // this.emitDiscreteAction(key, false);
-            return;
-        }
-        this.keys[key] = false;
-    }
-
-    emitDiscreteAction(key, isPressed) {
-        switch (key) {
-            case 'Escape':
-                eventEmitter.emit('toggleMenu', isPressed);
-                break;
-            default:
-                break;
-        }
+        this.keys[e.key] = false;
     }
 
     isKeyPressed(key) {

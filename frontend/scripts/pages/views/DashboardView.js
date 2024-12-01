@@ -1,6 +1,7 @@
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
 import {EVENT_TYPES} from "../../utils/constants.js";
 import Game from "../../game/Game.js";
+import Tournament from "../../game/Tournament.js";
 
 export class DashboardView extends HTMLElement {
     constructor() {
@@ -11,13 +12,35 @@ export class DashboardView extends HTMLElement {
         this.ctx = null;
         this.leftPaddle = null;
         this.rightPaddle = null;
+        this.resizeObserver = null;
+        this.isTournamentMatch = false;
+        this.matchDataForMenuDialog = null;
+        this.isGameMenuOpen = false;
     }
 
     connectedCallback() {
         this.loadMenuComponents();
         this.render();
-        this.initMenu();
-        this.showAllDashboardUI();
+        const styleSheet = this.shadowRoot.getElementById('style-sheet');
+        if (styleSheet.sheet) {
+            this.initMenu();
+            this.showAllDashboardUI();
+        } else {
+            styleSheet.addEventListener('load', () => {
+                this.initMenu();
+                this.showAllDashboardUI();
+            });
+        }
+        this.handleKeyDown = this.handleKeyDown.bind(this);
+        this.onResumeGame = this.onResumeGame.bind(this);
+        window.addEventListener("keydown", this.handleKeyDown);
+    }
+
+    disconnectedCallback() {
+        window.removeEventListener('keydown', this.handleKeyDown);
+        if (this.resizeObserver) {
+            this.resizeObserver.disconnect();
+        }
     }
 
     render() {
@@ -27,7 +50,7 @@ export class DashboardView extends HTMLElement {
 
     html() {
         return `
-            <link rel="stylesheet" href="../../../styles/style.css">
+            <link id="style-sheet" rel="stylesheet" href="../../../styles/style.css">
             <header>
                 <div class="header-top">
                     <span id="player1-display" class="player1_score">Player 1 - 0</span>
@@ -42,6 +65,8 @@ export class DashboardView extends HTMLElement {
                 <canvas id="gameCanvas"></canvas>
                 <auth-dialog id="auth-dialog"></auth-dialog>
                 <game-setup-dialog id="game-setup-dialog"></game-setup-dialog>
+                <tournament-setup-dialog id="tournament-setup-dialog"></tournament-setup-dialog>
+                <game-menu-dialog id="game-menu-dialog"></game-menu-dialog>
                 <left-menu>
                     <div class="menu-option">
                         <button>HowTo</button>
@@ -80,7 +105,9 @@ export class DashboardView extends HTMLElement {
     }
 
     loadMenuComponents() {
-        import ("../components/GameSetupDialog.js");
+        import ("../components/GameMenuDialog.js");
+        import("../components/GameSetupDialog.js");
+        import("../components/TournamentSetupDialog.js");
         import("../components/AuthDialog.js");
         import("../components/HowToMenu.js");
         import("../components/PlayMenu.js");
@@ -92,6 +119,7 @@ export class DashboardView extends HTMLElement {
         const loginButton = this.shadowRoot.getElementById("login-button");
         const authDialogPopup = this.shadowRoot.getElementById("auth-dialog");
         const contributor = this.shadowRoot.querySelector(".team");
+        const tournamentSetupDialog = this.shadowRoot.getElementById("tournament-setup-dialog");
         loginButton.addEventListener("click", () => {
             authDialogPopup.open();
         });
@@ -102,6 +130,7 @@ export class DashboardView extends HTMLElement {
             GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_UNHOVER, { element: loginButton});
         });
 
+        // Emit
         contributor.addEventListener("mouseover", () => {
             GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_HOVER, { element: contributor});
         });
@@ -109,23 +138,71 @@ export class DashboardView extends HTMLElement {
             GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_UNHOVER, { element: contributor});
         });
 
+        // Listen for
         GlobalEventEmitter.on(EVENT_TYPES.MATCH_VS_AI, () => {
-            console.log("VS AI");
             this.openGameSetupDialog("vs AI");
         });
         GlobalEventEmitter.on(EVENT_TYPES.MATCH_LOCAL, () => {
-            console.log("LOCAL");
             this.openGameSetupDialog("local");
         });
-        GlobalEventEmitter.on(EVENT_TYPES.START_MATCH, ({ player1Name, player2Name, matchType}) => {
-            this.startGame(player1Name, player2Name, matchType !== "local");
+        GlobalEventEmitter.on(EVENT_TYPES.MATCH_TOURNAMENT, () => {
+            tournamentSetupDialog.open();
+        });
+        GlobalEventEmitter.on(EVENT_TYPES.START_MATCH, ({ player1Name, player2Name, matchType, AIDifficulty}) => {
+            this.startGame(player1Name, player2Name, matchType !== "local", AIDifficulty);
+        });
+        GlobalEventEmitter.on(EVENT_TYPES.START_TOURNAMENT, ({ players: players}) => {
+            tournamentSetupDialog.close();
+            this.startTournament(players);
         });
         GlobalEventEmitter.on(EVENT_TYPES.QUIT_MATCH, () => {
             this.endGame();
         });
+        GlobalEventEmitter.on(EVENT_TYPES.GAME_OVER, () => {
+            this.isGameRunning = false;
+        });
         GlobalEventEmitter.on(EVENT_TYPES.UPDATE_SCORE, ({ player1Name, player2Name, player1Score, player2Score }) => {
             this.updateScores(player1Name, player2Name, player1Score, player2Score);
-        })
+        });
+        GlobalEventEmitter.on(EVENT_TYPES.TOURNAMENT_UPDATE, (data) => {
+            this.matchDataForMenuDialog = data;
+            const gameMenuDialog = this.shadowRoot.getElementById("game-menu-dialog");
+            if (gameMenuDialog) {
+                gameMenuDialog.updateTournamentData(this.matchDataForMenuDialog);
+            }
+        });
+        GlobalEventEmitter.on(EVENT_TYPES.RESUME_GAME, () => this.onResumeGame());
+        GlobalEventEmitter.on(EVENT_TYPES.QUIT_GAME, () => this.quitGame())
+    }
+
+    handleKeyDown(event) {
+        if (event.key === "Escape" && this.isGameRunning) {
+            this.toggleGameMenu();
+        }
+    }
+
+
+    toggleGameMenu() {
+        const gameMenuDialog = this.shadowRoot.getElementById("game-menu-dialog");
+        if (this.isGameMenuOpen) {
+            gameMenuDialog.close();
+            // 'RESUME_GAME' event will be emitted from GameMenuDialog
+            // 'onResumeGame' will handle the rest
+        } else {
+            gameMenuDialog.matchType = this.isTournamentMatch;
+            gameMenuDialog.open();
+            this.isGameMenuOpen = true;
+            GlobalEventEmitter.emit(EVENT_TYPES.PAUSE_GAME);
+        }
+    }
+
+    quitGame() {
+        this.isGameRunning = false;
+        this.showAllDashboardUI();
+    }
+
+    onResumeGame() {
+        this.isGameMenuOpen = false;
     }
 
     openGameSetupDialog(matchType) {
@@ -144,7 +221,7 @@ export class DashboardView extends HTMLElement {
             this.drawMiddleLine();
         };
 
-        updateCanvasSize();
+        requestAnimationFrame(updateCanvasSize);
         window.addEventListener("resize", updateCanvasSize);
 
         this.leftPaddle = this.createPaddle("left");
@@ -152,6 +229,12 @@ export class DashboardView extends HTMLElement {
 
         this.initializePaddleMovement();
         this.initializeMenuInteractions();
+
+        const resizeObserver = new ResizeObserver(() => {
+            updateCanvasSize();
+        });
+        resizeObserver.observe(this.shadowRoot.host);
+        this.resizeObserver = resizeObserver;
     }
 
     drawMiddleLine() {
@@ -171,7 +254,7 @@ export class DashboardView extends HTMLElement {
     createPaddle(side) {
         const paddle = document.createElement("div");
         paddle.classList.add("paddle");
-        paddle.style.height = `${this.canvas.height * 0.1}px`;
+        paddle.style.height = `100px`;
         paddle.style.top = `${(this.canvas.height - paddle.offsetHeight) / 2}px`; // Center vertically
         if (side === "left") {
             this.shadowRoot.querySelector("left-menu").appendChild(paddle);
@@ -241,14 +324,33 @@ export class DashboardView extends HTMLElement {
         }
     }
 
-    startGame(player1Name, player2Name, vsAI) {
+    startGame(player1Name, player2Name, vsAI, aiDifficulty = 5) {
         this.hideAllDashboardUI();
         this.isGameRunning = true;
-        console.log(`STARTING MATCH: ${player1Name} vs ${player2Name}`);
-        // update initial scores
+        this.isTournamentMatch = false;
+
+        const player1 = {
+            username: player1Name,
+            isAI: false,
+            aiDifficulty: null,
+        };
+        const player2 = {
+            username: player2Name,
+            isAI: vsAI,
+            aiDifficulty: aiDifficulty,
+        };
         this.updateScores(player1Name, player2Name, 0, 0);
-        const game = new Game(this.canvas, vsAI, player1Name, player2Name);
+        const game = new Game(this.canvas, player1, player2);
         game.start();
+    }
+
+    startTournament(players) {
+        this.hideAllDashboardUI();
+        this.isGameRunning = true;
+        this.isTournamentMatch = true;
+
+        const tournament = new Tournament(players, this.canvas);
+        tournament.start();
     }
 
     updateScores(player1Name, player2Name, player1Score, player2Score) {
@@ -262,12 +364,12 @@ export class DashboardView extends HTMLElement {
     endGame() {
         this.isGameRunning = false;
         this.showAllDashboardUI();
-        console.log("Match ended, dashboard UI Restored");
     }
 
     hideAllDashboardUI() {
         this.leftPaddle.style.display = "none";
         this.rightPaddle.style.display = "none";
+        this.shadowRoot.querySelector("#login-button").style.display = "none";
         this.shadowRoot.querySelector("left-menu").style.display = "none";
         this.shadowRoot.querySelector("right-menu").style.display = "none";
         this.ctx.setLineDash([]);
@@ -278,6 +380,8 @@ export class DashboardView extends HTMLElement {
     showAllDashboardUI() {
         this.leftPaddle.style.display = "block";
         this.rightPaddle.style.display = "block";
+        this.drawMiddleLine();
+        this.shadowRoot.querySelector("#login-button").style.display = "block";
         this.shadowRoot.querySelector("left-menu").style.display = "grid";
         this.shadowRoot.querySelector("right-menu").style.display = "block";
         this.shadowRoot.querySelector(".player1_score").style.display = "none";
