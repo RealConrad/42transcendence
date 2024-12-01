@@ -23,7 +23,7 @@ scrape_configs:
 
   - job_name: 'cadvisor'
     static_configs:
-      - targets: ['cadvisor:8080/metrics']
+      - targets: ['cadvisor:8080']
   # - job_name: 'jwtdb'
   #   static_configs:
   #     - targets: ['jwtdb:5434']
