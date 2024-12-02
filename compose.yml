@@ -188,24 +188,23 @@ services:
       - ./grafana/config/grafana.ini:/etc/grafana/grafana.ini:ro
       - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
       - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
-      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro  # Persistent dashboards
-      - ./grafana/logs:/var/log/grafana 
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - ./grafana/logs:/var/log/grafana
     ports:
       - "3000:3000"
     networks:
       - transcendence
 
   cadvisor:
-    image: gcr.io/cadvisor/cadvisor
+    image: gcr.io/cadvisor/cadvisor:latest
     container_name: cadvisor
     ports:
       - "8080:8080"
     volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:rw
-      - /sys:/sys:ro
-      - /sys/fs/cgroup:/sys/fs/cgroup:ro
-      - /var/lib/docker/:/var/lib/docker:ro
+        - /:/rootfs:ro # Gets information about the host
+        - /sys:/sys:ro # Gets information from the host about the container ressource usage
+        - /var/run/docker.sock:/var/run/docker.sock:ro # Gets information from the docker daemon
+        - /var/lib/docker/:/var/lib/docker:ro # Gets metadata information from the docker daemon
     networks:
       - transcendence
 
