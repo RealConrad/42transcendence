@@ -16,7 +16,7 @@ class VerifyOAuthTokenView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        access_token = request.data.get('access_token')
+        access_token = request.data.get('token')
         if not access_token:
             return Response(
                 {'detail': 'access token is required'},
