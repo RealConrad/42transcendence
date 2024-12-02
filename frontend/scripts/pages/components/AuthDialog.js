@@ -1,4 +1,4 @@
-import {setAccessToken, apiCall} from "../../api/api.js";
+import {setAccessToken, apiCall, setAuthMethod} from "../../api/api.js";
 import {BASE_AUTH_API_URL, BASE_MFA_API_URL, EVENT_TYPES, FORM_ERROR_MESSAGES} from "../../utils/constants.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
 import {Router} from '../../Router.js'
@@ -329,7 +329,9 @@ class AuthDialog extends HTMLElement {
 		}).then((data) => {
 			console.log(data);
 			localStorage.setItem("username", data.username);
+			localStorage.setItem('authMethod', 'JWT');
 			setAccessToken(data.access_token);
+			setAuthMethod('JWT');
 			this.close();
 		}).catch(err => console.log(err));
 	}
@@ -356,6 +358,7 @@ class AuthDialog extends HTMLElement {
 			}
 		}).then((data) => {
 			console.log("LOGGED IN!");
+			setAuthMethod('JWT');
 			setAccessToken(data.access_token);
 			if (data.mfa_enable_flag) {
 				this.shadowRoot.getElementById("sign-in-view").style.display = "none"
@@ -481,14 +484,18 @@ export async function handleCallback() {
 					headers: {
 						"Content-Type": "application/json",
 					},
+					credentials: "include",
 					body: JSON.stringify({code, state})
 				});
 
 				if (response.ok) {
 					const data = await response.json();
 					console.log("OAuth Success:", data);
-					console.log("username:", data.username);
+					localStorage.setItem("username", data.username);
+					localStorage.setItem('authMethod', '42OAuth');
 					console.log(`Welcome, ${data.username}!`);
+					setAuthMethod('42OAuth');
+					setAccessToken(data.access_token);
 					Router.navigateTo("/");
 				} else {
 					console.error("Error from backed 42 OAuth API");
