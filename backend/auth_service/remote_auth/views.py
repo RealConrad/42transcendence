@@ -56,21 +56,23 @@ class CallbackAPI(APIView):
             if token_response.status_code == 200:
                 token_data = token_response.json()
                 user = create_user_from_token_data(token_data)
+                access_token = token_data.get('access_token')
+                refresh_token = token_data.get('refresh_token')
 
-                # profile_picture_url = unquote(user.profile_picture.url.replace('/media/', ''))
                 response = Response(
                     {
                         'detail': "User logged in successfully",
                         'username': user.username,
                         'profile_picture': user.profile_picture_url,
-                        'access_token': token_data.get("access_token"),
+                        'access_token': access_token,
+                        'refresh_token': refresh_token,
                     },
                     status=HTTP_200_OK
                 )
 
                 response.set_cookie(
                     key='refresh_token',
-                    value=token_data.get("refresh_token"),
+                    value=refresh_token,
                     httponly=True,
                     secure=False,
                     samesite='Lax',
