@@ -1,4 +1,26 @@
+import {BASE_JWT_API_URL} from "../utils/constants.js";
+import {BASE_OAUTH_JWT_API_URL} from "../utils/constants.js";
+
 let accessToken = null;
+
+const AUTH_METHODS = {
+    JWT: 'JWT',
+    FORTY_42: '42OAuth',
+}
+
+let authMethod = AUTH_METHODS.JWT; // Default authentication method
+
+const setAuthMethod = (method) => {
+    if (Object.values(AUTH_METHODS).includes(method)) {
+        authMethod = method;
+    } else {
+        console.error('Invalid authentication method');
+    }
+};
+
+const getAuthMethod = () => authMethod;
+
+export { AUTH_METHODS, setAuthMethod, getAuthMethod };
 
 export const setAccessToken = (token) => {
     accessToken = token;
@@ -31,15 +53,33 @@ export const validateInput = (input) => {
 
 const refreshTokens = async () => {
     try {
-        const response = await fetch('http://127.0.0.1:8002/api/token/refresh/', {
+        const authMethod = localStorage.getItem('authMethod');
+        let refreshUrl;
+
+        switch (authMethod) {
+            case AUTH_METHODS.JWT:
+                refreshUrl = `${BASE_JWT_API_URL}/refresh/`;
+                break;
+
+            case AUTH_METHODS.FORTY_42:
+                refreshUrl = `${BASE_OAUTH_JWT_API_URL}/refresh/`;
+                break;
+
+            default:
+                throw new Error("Authentication method not set");
+        }
+
+        const response = await fetch(refreshUrl, {
             method: "POST",
             credentials: 'include',
         });
         if (!response.ok) {
+            console.log("Error refreshing token from backend:", response.json());
             throw new Error("Token refresh failed");
         }
         const data = await response.json();
         console.info("Refreshed tokens");
+        console.log("new_access_token: ", data.access_token);
         setAccessToken(data.access_token);
     } catch (error) {
         console.log("Failed to refresh tokens,", error);
@@ -50,6 +90,7 @@ window.onload = async () => {
     console.log("Page refreshed, trying to get new tokens....");
     if (!accessToken) {
         try {
+            console.log("")
             await refreshTokens();
         } catch (error) {
             console.error("Unable to refresh tokens on page load: ", error);
