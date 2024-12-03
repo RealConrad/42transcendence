@@ -19,6 +19,7 @@ export class DashboardView extends HTMLElement {
         this.isTournamentMatch = false;
         this.matchDataForMenuDialog = null;
         this.isGameMenuOpen = false;
+        setDefaultPicture();
     }
 
     connectedCallback() {
@@ -57,6 +58,9 @@ export class DashboardView extends HTMLElement {
         USER.username = getUserName();
         USER.profilePicture = getUserPicture();
         USER.backupProfilePicture = getDefaultPicture();
+        console.log('USER INFO:')
+        console.log(USER)
+        // USER.username = null;
     }
     
     
@@ -79,8 +83,8 @@ export class DashboardView extends HTMLElement {
             :
             `
             <button id="login-button" class="user-display">
-            <img src="${USER.profilePicture ? `${USER.profilePicture}`: `${USER.backupProfilePicture}`}" id="login-profile-pic">
-            <div>${USER.username}</div>
+                <img src="${USER.profilePicture ? `${USER.profilePicture}`: `${USER.backupProfilePicture}`}">
+                <div>${USER.username}</div>
             </button>
             `
             }
@@ -196,7 +200,8 @@ export class DashboardView extends HTMLElement {
             }
         });
         GlobalEventEmitter.on(EVENT_TYPES.RESUME_GAME, () => this.onResumeGame());
-        GlobalEventEmitter.on(EVENT_TYPES.QUIT_GAME, () => this.quitGame())
+        GlobalEventEmitter.on(EVENT_TYPES.QUIT_GAME, () => this.quitGame());
+        GlobalEventEmitter.on(EVENT_TYPES.RELOAD_DASHBOARD, () => this.connectedCallback());
     }
 
     handleKeyDown(event) {
@@ -405,7 +410,7 @@ export class DashboardView extends HTMLElement {
         this.leftPaddle.style.display = "block";
         this.rightPaddle.style.display = "block";
         this.drawMiddleLine();
-        this.shadowRoot.querySelector("#login-button").style.display = "block";
+        this.shadowRoot.querySelector("#login-button").style.display = "flex"; //changed here from block to flex
         this.shadowRoot.querySelector("left-menu").style.display = "grid";
         this.shadowRoot.querySelector("right-menu").style.display = "block";
         this.shadowRoot.querySelector(".player1_score").style.display = "none";

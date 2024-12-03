@@ -37,13 +37,12 @@ export const setLocalPicture = (url) => {
     console.log('set pic to:', url);
 }
 export const setDefaultPicture = async () => {
-    if (getDefaultPicture()){
-        console.log('default already loaded');
+    if (!getDefaultPicture()){
+        await fetchDogPicture().then((url)=>{
+            localStorage.setItem('DefaultPicture', url);
+            console.log('set default picture: ', url);
+        });
     }
-	await fetchDogPicture().then((url)=>{
-        localStorage.setItem('DefaultPicture', url);
-        console.log('set default picture: ', url);
-    });
 }
 
 export const getUserName = () => {
@@ -77,7 +76,7 @@ export const validateInput = (input) => {
     return sanitized;
 }
 
-const refreshTokens = async () => {
+export const refreshTokens = async () => {
     try {
         const authMethod = localStorage.getItem('authMethod');
         let refreshUrl;
