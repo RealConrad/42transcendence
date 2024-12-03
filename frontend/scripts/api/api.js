@@ -30,7 +30,7 @@ export const setAccessToken = (token) => {
 }
 
 export const setLocalUsername = (username) => {
-    localStorage.setItem('Username', username);
+    localStorage.setItem('username', username);
 }
 export const setLocalPicture = (url) => {
     localStorage.setItem('ProfilePicture', url);
@@ -45,7 +45,7 @@ export const setDefaultPicture = async () => {
 }
 
 export const getUserName = () => {
-    return localStorage.getItem("Username");
+    return localStorage.getItem("username");
 }
 export const getUserPicture = () => {
     return localStorage.getItem("ProfilePicture");
