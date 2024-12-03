@@ -1,6 +1,6 @@
-import {apiCall, getAccessToken} from "../../api/api.js";
+import {apiCall, getAccessToken, setLocalPicture} from "../../api/api.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
-import {BASE_AUTH_API_URL, EVENT_TYPES} from "../../utils/constants.js";
+import {BASE_AUTH_API_URL, EVENT_TYPES, USER} from "../../utils/constants.js";
 
 export class AccountMenu extends HTMLElement {
     constructor() {
@@ -12,10 +12,11 @@ export class AccountMenu extends HTMLElement {
     }
     connectedCallback() {
         this.accessToken = getAccessToken();
-        this.username = localStorage.getItem("username"); // TODO: get username from localstorage
-        this.imgUrl = null; // TODO: get image from localstorage
+        this.username = USER.username; // TODO: get username from localstorage
+        this.imgUrl = USER.profilePicture; // TODO: get image from localstorage
         this.render();
         this.setupProfilePicture();
+        // GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
         //TODO:  Dummy data, hookup to API
         this.renderPreviousMatches([
             { player1: 'Conradasdasdasdasdasdasd', score1: 9, player2: 'Guest', score2: 10 },
@@ -53,7 +54,7 @@ html() {
                 <div class="container">
                     <div class="heading">
                         <div class="profile-picture" id="profile-picture-id">
-                            <img alt=""> 
+                            <img src="${this.imgUrl}" alt=""> 
                             <span class="initial"></span>
                         </div>
                         <div>
@@ -157,7 +158,8 @@ html() {
                 })
                     .then(response => response.json())
                     .then(data => {
-                        console.log("API Response: ", data);
+                        setLocalPicture(data.profile_picture);
+                        GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
                     })
                     .catch(error => {
                         console.error("Error uploading profile picture:", error);

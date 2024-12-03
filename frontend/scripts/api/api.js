@@ -1,10 +1,13 @@
 import {BASE_JWT_API_URL} from "../utils/constants.js";
 import {BASE_OAUTH_JWT_API_URL} from "../utils/constants.js";
 
+import { USER, EVENT_TYPES } from "../utils/constants.js";
+import GlobalEventEmitter from "../utils/EventEmitter.js";
+
 let accessToken = null;
 
 const AUTH_METHODS = {
-    JWT: 'JWT',
+    JWT: 'JWT', //normal
     FORTY_42: '42OAuth',
 }
 
@@ -26,8 +29,29 @@ export const setAccessToken = (token) => {
     accessToken = token;
 }
 
+export const setLocalUsername = (username) => {
+    localStorage.setItem('Username', username);
+}
+export const setLocalPicture = (url) => {
+    localStorage.setItem('ProfilePicture', url);
+}
+export const setDefaultPicture = async () => {
+    if (!getDefaultPicture()){
+        await fetchDogPicture().then((url)=>{
+            localStorage.setItem('DefaultPicture', url);
+            // console.log('set default picture: ', url);
+        });
+    }
+}
+
 export const getUserName = () => {
-    return localStorage.getItem("username");
+    return localStorage.getItem("Username");
+}
+export const getUserPicture = () => {
+    return localStorage.getItem("ProfilePicture");
+}
+export const getDefaultPicture = () => {
+    return localStorage.getItem("DefaultPicture");
 }
 
 export const getAccessToken = () => accessToken;
@@ -51,7 +75,7 @@ export const validateInput = (input) => {
     return sanitized;
 }
 
-const refreshTokens = async () => {
+export const refreshTokens = async () => {
     try {
         const authMethod = localStorage.getItem('authMethod');
         let refreshUrl;
@@ -83,6 +107,7 @@ const refreshTokens = async () => {
         setAccessToken(data.access_token);
     } catch (error) {
         console.log("Failed to refresh tokens,", error);
+        deleteUser();       //added
     }
 }
 
@@ -107,14 +132,20 @@ window.onload = async () => {
  * @returns {Promise<Response>} The response from the server
  */
 export const apiCall = async (url, options = {}) => {
+    const authMethod = localStorage.getItem('authMethod');
+
     if (!accessToken) {
         await refreshTokens();
     }
-
+    
     options.headers = {
         ...options.headers,
         Authorization: `Bearer ${getAccessToken()}`,
     };
+    
+    if (authMethod === AUTH_METHODS.FORTY_42) {
+        options.headers['X-42-Token'] = 'true';
+    }
     const response = await fetch(url, options);
 
     if (response.status === 401 || response.status === 403) {
@@ -131,3 +162,32 @@ export const apiCall = async (url, options = {}) => {
     return response;
 }
 
+export const fetchDogPicture = async () => {
+    const apiURL = "https://dog.ceo/api/breeds/image/random";
+
+    try {
+        const response = await fetch(apiURL); // Wait for the fetch request
+        if (!response.ok) {
+            throw new Error("Network response was not ok");
+        }
+        
+        const data = await response.json(); // Wait for the JSON parsing
+        // console.log('data: ');
+        // console.log(data);
+        let url = data.message;
+        console.log('fetching pic: ', url);
+        return url;
+        // dogImage.src = data.message; // `message` contains the image URL
+    } catch (error) {
+        console.error("There was a problem with the fetch operation:", error);
+        return null;
+    }
+}
+
+function deleteUser(){
+    accessToken = null;
+    USER.username = null;
+    USER.profilePicture = null;
+    USER.backupProfilePicture = null;
+    localStorage.clear();
+}

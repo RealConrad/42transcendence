@@ -1,8 +1,7 @@
-import {setAccessToken, apiCall, setAuthMethod} from "../../api/api.js";
+import {setAccessToken, apiCall, setAuthMethod, setLocalUsername, setDefaultPicture, fetchDogPicture, setLocalPicture} from "../../api/api.js";
 import {BASE_AUTH_API_URL, BASE_MFA_API_URL, EVENT_TYPES, FORM_ERROR_MESSAGES} from "../../utils/constants.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
 import {Router} from '../../Router.js'
-
 
 class AuthDialog extends HTMLElement {
 	constructor() {
@@ -328,10 +327,12 @@ class AuthDialog extends HTMLElement {
 			}
 		}).then((data) => {
 			console.log(data);
-			localStorage.setItem("username", data.username);
+			// localStorage.setItem("Username", data.username);
 			localStorage.setItem('authMethod', 'JWT');
+			setLocalUsername(username);
 			setAccessToken(data.access_token);
 			setAuthMethod('JWT');
+			GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
 			this.close();
 		}).catch(err => console.log(err));
 	}
@@ -360,12 +361,17 @@ class AuthDialog extends HTMLElement {
 			console.log("LOGGED IN!");
 			setAuthMethod('JWT');
 			setAccessToken(data.access_token);
+			// setDefaultPicture();
+			setLocalUsername(username);
+			GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
+			// USER.username = username;
 			if (data.mfa_enable_flag) {
 				this.shadowRoot.getElementById("sign-in-view").style.display = "none"
 				this.shadowRoot.getElementById("otp-view").style.display = "block";
 			} else {
 				this.close();
 			}
+			// console.log('user logged in: ' , USER.loggedIn);
 		}).catch(err => console.error(err));
 	}
 
@@ -491,7 +497,8 @@ export async function handleCallback() {
 				if (response.ok) {
 					const data = await response.json();
 					console.log("OAuth Success:", data);
-					localStorage.setItem("username", data.username);
+					setLocalUsername(data.username);
+					setLocalPicture(data.profile_picture);
 					localStorage.setItem('authMethod', '42OAuth');
 					console.log(`Welcome, ${data.username}!`);
 					setAuthMethod('42OAuth');

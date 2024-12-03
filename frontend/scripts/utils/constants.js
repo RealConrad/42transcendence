@@ -30,6 +30,14 @@ export const EVENT_TYPES = {
     PAUSE_GAME: "pause_game",
     QUIT_GAME: "quit_game",
     GAME_OVER: "game_over",
+    RELOAD_DASHBOARD: "reload_dashboard",
+
+}
+
+export const USER = {
+    username: null,
+    profilePicture: null,
+    backupProfilePicture: null,
 }
 
 export const BASE_AUTH_API_URL = "http://127.0.0.1:8000/api/auth"
