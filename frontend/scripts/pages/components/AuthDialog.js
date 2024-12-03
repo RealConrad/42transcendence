@@ -1,6 +1,7 @@
-import {setAccessToken, apiCall, setLocalUsername, setDefaultPicture, fetchDogPicture} from "../../api/api.js";
+import {setAccessToken, apiCall, setAuthMethod, setLocalUsername, setDefaultPicture, fetchDogPicture} from "../../api/api.js";
 import {BASE_AUTH_API_URL, BASE_MFA_API_URL, EVENT_TYPES, FORM_ERROR_MESSAGES} from "../../utils/constants.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
+import {Router} from '../../Router.js'
 import {USER} from '../../utils/constants.js'
 
 class AuthDialog extends HTMLElement {
@@ -257,7 +258,8 @@ class AuthDialog extends HTMLElement {
 		//TODO: Change sign in view and auth button query to enable 2fa button
 		this.shadowRoot.getElementById("sign-in-view").querySelector(".auth-button").addEventListener("click", (e) => {
 			e.preventDefault();
-			this.enable2FA();
+			// this.enable2FA();
+			this.authorize42();
 		});
 
 		this.shadowRoot.getElementById("enable-2fa-view").querySelector(".sign-in-button").addEventListener("click", (e) => {
@@ -326,7 +328,10 @@ class AuthDialog extends HTMLElement {
 			}
 		}).then((data) => {
 			console.log(data);
+			localStorage.setItem("username", data.username);
+			localStorage.setItem('authMethod', 'JWT');
 			setAccessToken(data.access_token);
+			setAuthMethod('JWT');
 			setLocalUsername(username);
 			GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
 			this.close();
@@ -355,6 +360,7 @@ class AuthDialog extends HTMLElement {
 			}
 		}).then((data) => {
 			console.log("LOGGED IN!");
+			setAuthMethod('JWT');
 			setAccessToken(data.access_token);
 			// setDefaultPicture();
 			setLocalUsername(username);
@@ -368,6 +374,23 @@ class AuthDialog extends HTMLElement {
 			}
 			// console.log('user logged in: ' , USER.loggedIn);
 		}).catch(err => console.error(err));
+	}
+
+	async authorize42()  {
+		const response = await fetch(`${BASE_AUTH_API_URL}/authorize/`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+		})
+
+		const data = await response.json()
+		if (response.ok) {
+			window.location.href = data.location;
+
+		} else {
+			console.error("Some backend error");
+		}
 	}
 
 	enable2FA() {
@@ -450,8 +473,44 @@ class AuthDialog extends HTMLElement {
 
 	connectedCallback() {
 		this.render();
-		this.attachEventListeners()
+		this.attachEventListeners();
 	}
 }
 
 customElements.define("auth-dialog", AuthDialog);
+
+export async function handleCallback() {
+		const urlParams = new URLSearchParams(window.location.search);
+		const code = urlParams.get("code");
+		const state = urlParams.get("state");
+
+		if(code && state) {
+			try {
+				const response = await fetch(`${BASE_AUTH_API_URL}/callback/`, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					credentials: "include",
+					body: JSON.stringify({code, state})
+				});
+
+				if (response.ok) {
+					const data = await response.json();
+					console.log("OAuth Success:", data);
+					localStorage.setItem("username", data.username);
+					localStorage.setItem('authMethod', '42OAuth');
+					console.log(`Welcome, ${data.username}!`);
+					setAuthMethod('42OAuth');
+					setAccessToken(data.access_token);
+					Router.navigateTo("/");
+				} else {
+					console.error("Error from backed 42 OAuth API");
+				}
+			} catch (error) {
+				console.error("Error during callback handling:", error);
+			}
+		} else {
+			console.log("Authorization code not found in URL");
+		}
+	}

@@ -14,17 +14,18 @@ import RenderManager from "./managers/RenderManager.js";
 import CollisionManager from "./managers/CollisionManager.js";
 import AIController from "./controllers/AIController.js";
 import InputManager from "./managers/InputManager.js";
-import UIManager from "./managers/UIManager.js";
-import eventEmitter from "./EventEmitter.js";
 import { apiCall} from "../api/api.js";
 import GlobalEventEmitter from "../utils/EventEmitter.js";
 
 export default class Game {
-    constructor(canvas, vsAI = true, player1Name, player2Name) {
+    constructor(canvas, player1Details, player2Details, isTournamentMatch = false) {
         this.isGameOver = false;
         this.isGamePaused = false;
         this.winner = null;
         this.maxScore = MAX_SCORE;
+        this.isTournamentMatch = isTournamentMatch;
+        this.player1AIDiff = player1Details.aiDifficulty;
+        this.player2AIDiff = player2Details.aiDifficulty;
 
         // Setup canvas
         this.canvas = canvas;
@@ -33,7 +34,6 @@ export default class Game {
         // Setup Managers
         this.renderManager = new RenderManager(this.ctx, this.canvas);
         this.collisionManager = new CollisionManager(this);
-        this.uiManager = new UIManager();
         this.inputManager = new InputManager()
 
         this.ball = new Ball(this.canvas.width / 2, this.canvas.height / 2, 5, 5, 5);
@@ -41,7 +41,7 @@ export default class Game {
         this.Battleground = new Battleground(this.canvas);
         
         // Setup player models and controllers
-        const playerPaddle = new Paddle(
+        const player1Paddle = new Paddle(
             0,
             this.canvas.height / 2,
             PADDLE_WIDTH,
@@ -58,15 +58,25 @@ export default class Game {
             this.canvas
         )
 
-        this.player1 = new Player(
-            player1Name,
-            playerPaddle,
-            new HumanController(playerPaddle, 'w', 's', this.inputManager)
-        );
-        this.player2 = vsAI
-            ? new Player('AI', player2Paddle, new AIController(player2Paddle, this.ball, 1, this.canvas)) // 3rd parameter is the difficulty level of the AI. 1 is super dumb, 5 is tough, 10 is darksouls
+        this.player1 = player1Details.isAI
+            ? new Player(
+                player1Details.username,
+                player1Paddle,
+                new AIController(player1Paddle, this.ball, player1Details.aiDifficulty, this.canvas)
+            )
             : new Player(
-                player2Name,
+                player1Details.username,
+                player1Paddle,
+                new HumanController(player1Paddle, 'w', 's', this.inputManager)
+            );
+        this.player2 = player2Details.isAI
+            ? new Player(
+                player2Details.username,
+                player2Paddle,
+                new AIController(player2Paddle, this.ball, player2Details.aiDifficulty, this.canvas)
+            )
+            : new Player(
+                player2Details.username,
                 player2Paddle,
                 new HumanController(player2Paddle, 'ArrowUp', 'ArrowDown', this.inputManager)
             );
@@ -77,9 +87,12 @@ export default class Game {
         this.renderManager.addRenderable(this.player1.paddle);
         this.renderManager.addRenderable(this.player2.paddle);
         this.renderManager.render();
-
-        eventEmitter.on('displayMenu', this.togglePause.bind(this));
-        eventEmitter.on('hideMenu', this.resumeGame.bind(this));
+        this.pauseGame = this.pauseGame.bind(this);
+        this.resumeGame = this.resumeGame.bind(this);
+        GlobalEventEmitter.on(EVENT_TYPES.PAUSE_GAME, this.pauseGame);
+        GlobalEventEmitter.on(EVENT_TYPES.RESUME_GAME, this.resumeGame);
+        GlobalEventEmitter.on(EVENT_TYPES.QUIT_GAME, this.quitGame.bind(this));
+        this.updatePlayerScore();
     }
 
     start() {
@@ -98,16 +111,48 @@ export default class Game {
         requestAnimationFrame(this.gameLoop.bind(this));
     }
 
+    cleanup() {
+        // TODO: Clean up event listeners
+    }
 
     checkWinCondition() {
         if (this.player1.score === this.maxScore || this.player2.score === this.maxScore) {
             this.isGameOver = true;
-            this.saveMatch();
+             if (this.player1.score === this.maxScore) {
+                this.winner = {
+                    player1Score: this.player1.score,
+                    player2Score: this.player2.score,
+                    username: this.player1.username,
+                    isAI: this.player1.controller instanceof AIController,
+                    difficulty: this.player1.controller instanceof AIController ? this.player1AIDiff : null
+                };
+                if (!this.isTournamentMatch)
+                    this.saveMatch();
+
+            } else if (this.player2.score === this.maxScore) {
+                this.winner = {
+                    player1Score: this.player1.score,
+                    player2Score: this.player2.score,
+                    username: this.player2.username,
+                    isAI: this.player2.controller instanceof AIController,
+                    difficulty: this.player2.controller instanceof AIController ? this.player2AIDiff : null
+                };
+
+            }
+            if (!this.isTournamentMatch) {
+                 GlobalEventEmitter.emit(EVENT_TYPES.GAME_OVER, {
+                     winner: this.winner.username,
+                     isTournament: this.isTournamentMatch
+                 });
+                this.saveMatch();
+            }
         }
     }
 
-    togglePause() {
-        this.isGamePaused = !this.isGamePaused;
+    pauseGame() {
+        if (this.isGameOver) return;
+        this.isGamePaused = true;
+        GlobalEventEmitter.emit(EVENT_TYPES.SHOW_GAME_MENU, { isTournament: this.isTournamentMatch });
     }
 
     resumeGame() {
@@ -115,6 +160,19 @@ export default class Game {
             this.isGamePaused = false;
             requestAnimationFrame(this.gameLoop.bind(this));
         }
+    }
+
+    quitGame() {
+        this.isGameOver = true;
+        this.renderManager.clearCanvas();
+        this.resetGameState();
+        GlobalEventEmitter.off(EVENT_TYPES.PAUSE_GAME, this.pauseGame);
+        GlobalEventEmitter.off(EVENT_TYPES.RESUME_GAME, this.resumeGame);
+        GlobalEventEmitter.off(EVENT_TYPES.QUIT_GAME, this.quitGame);
+    }
+
+    getWinner() {
+        return this.winner;
     }
 
     resetGameState() {

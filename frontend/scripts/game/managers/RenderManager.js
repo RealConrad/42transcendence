@@ -13,8 +13,12 @@ export default class RenderManager {
         this.renderables = this.renderables.filter(item => item !== object);
     }
 
-    render() {
+    clearCanvas() {
         this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    }
+
+    render() {
+        this.clearCanvas();
         this.renderables.forEach(obj => obj.draw(this.ctx));
     }
 
