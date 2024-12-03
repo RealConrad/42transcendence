@@ -7,7 +7,7 @@ import GlobalEventEmitter from "../utils/EventEmitter.js";
 let accessToken = null;
 
 const AUTH_METHODS = {
-    JWT: 'JWT',
+    JWT: 'JWT', //normal
     FORTY_42: '42OAuth',
 }
 
@@ -34,13 +34,12 @@ export const setLocalUsername = (username) => {
 }
 export const setLocalPicture = (url) => {
     localStorage.setItem('ProfilePicture', url);
-    console.log('set pic to:', url);
 }
 export const setDefaultPicture = async () => {
     if (!getDefaultPicture()){
         await fetchDogPicture().then((url)=>{
             localStorage.setItem('DefaultPicture', url);
-            console.log('set default picture: ', url);
+            // console.log('set default picture: ', url);
         });
     }
 }
@@ -133,14 +132,20 @@ window.onload = async () => {
  * @returns {Promise<Response>} The response from the server
  */
 export const apiCall = async (url, options = {}) => {
+    const authMethod = localStorage.getItem('authMethod');
+
     if (!accessToken) {
         await refreshTokens();
     }
-
+    
     options.headers = {
         ...options.headers,
         Authorization: `Bearer ${getAccessToken()}`,
     };
+    
+    if (authMethod === AUTH_METHODS.FORTY_42) {
+        options.headers['X-42-Token'] = 'true';
+    }
     const response = await fetch(url, options);
 
     if (response.status === 401 || response.status === 403) {

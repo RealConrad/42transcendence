@@ -2,7 +2,7 @@ import GlobalEventEmitter from "../../utils/EventEmitter.js";
 import {EVENT_TYPES} from "../../utils/constants.js";
 import Game from "../../game/Game.js";
 import Tournament from "../../game/Tournament.js";
-import {apiCall, getAccessToken, getUserName, getUserPicture, refreshTokens, fetchDogPicture, getDefaultPicture, setDefaultPicture} from "../../api/api.js";
+import {getUserName, getUserPicture,getDefaultPicture, setDefaultPicture} from "../../api/api.js";
 import { USER } from "../../utils/constants.js";
 
 
@@ -49,7 +49,6 @@ export class DashboardView extends HTMLElement {
     }
     
     render() {
-        console.log('rendering dashboard');
         this.shadowRoot.innerHTML = this.html();
         this.setupEventListeners();
     }
@@ -58,35 +57,33 @@ export class DashboardView extends HTMLElement {
         USER.username = getUserName();
         USER.profilePicture = getUserPicture();
         USER.backupProfilePicture = getDefaultPicture();
-        console.log('USER INFO:')
-        console.log(USER)
-        // USER.username = null;
+        // console.log('USER INFO:')
+        // console.log(USER)
     }
-    
     
     html() {
         return `
             <link id="style-sheet" rel="stylesheet" href="../../../styles/style.css">
+            ${USER.username ? `
+            <!--HERE DEACTIVATING BUTTON CLICK AFTER LOGIN-->
+            <style>
+                #login-button{ pointer-events: none }
+            </style> ` : ``}
             <header>
-            <div class="header-top">
-            <span id="player1-display" class="player1_score">Player 1 - 0</span>
-            <div class="title">PONG</div>
-            <span id="player2-display" class="player2_score">Player 2 - 0</span>
-            </div>
+                <div class="header-top">
+                    <span id="player1-display" class="player1_score">Player 1 - 0</span>
+                        <div class="title">PONG</div>
+                    <span id="player2-display" class="player2_score">Player 2 - 0</span>
+                </div>
             
             ${!USER.username ?
-            `
-            <button id="login-button" class="orange-button">
+            `<button id="login-button" class="orange-button">
                 LOGIN
-            </button>
-            `  
-            :
-            `
-            <button id="login-button" class="user-display">
+            </button>` :
+            `<button id="login-button" class="user-display">
                 <img src="${USER.profilePicture ? `${USER.profilePicture}`: `${USER.backupProfilePicture}`}">
                 <div>${USER.username}</div>
-            </button>
-            `
+            </button>`
             }
             </header>
             <main-menu>
@@ -419,39 +416,3 @@ export class DashboardView extends HTMLElement {
 }
 
 customElements.define("dashboard-view", DashboardView);
-
-        // async displayUser(){
-        //     await refreshTokens();
-        //     this.accessToken = getAccessToken();
-        //     if (!this.accessToken)
-        //         return;
-        //     let data = await this.getUserData();
-        //     USER.username = data.username;
-        //     USER.profilePicture = data.profile_picture;
-        //     if (!USER.profilePicture){
-        //         USER.backupProfilePicture = await fetchDogPicture();
-        //     }
-    
-        //     //render again
-        //     this.loadMenuComponents();
-        //     this.render();
-        //     this.initMenu();
-        //     this.showAllDashboardUI();
-        // }
-        
-        // async getUserData() {
-        //     try {
-        //         const response = await apiCall('http://127.0.0.1:8000/api/auth/get_user_data/');
-        //         if (response.ok) {
-        //             const data = await response.json();
-        //             return data; // Return the fetched data
-        //         } else {
-        //             const errorData = await response.json();
-        //             console.error("Response not 200");
-        //             throw new Error(JSON.stringify(errorData));
-        //         }
-        //     } catch (error) {
-        //         console.error("An error occurred:", error);
-        //         throw error;
-        //     }
-        // }
