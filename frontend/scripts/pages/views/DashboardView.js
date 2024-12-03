@@ -1,7 +1,7 @@
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
 import {EVENT_TYPES} from "../../utils/constants.js";
 import Game from "../../game/Game.js";
-import {apiCall, getAccessToken, getUserName, refreshTokens} from "../../api/api.js";
+import {apiCall, getAccessToken, getUserName, getUserPicture, refreshTokens, fetchDogPicture, getDefaultPicture, setDefaultPicture} from "../../api/api.js";
 import { USER } from "../../utils/constants.js";
 
 
@@ -15,230 +15,199 @@ export class DashboardView extends HTMLElement {
         this.leftPaddle = null;
         this.rightPaddle = null;
         this.accessToken = null;
+        setDefaultPicture();
     }
 
-    
     connectedCallback() {
+        this.getUserInfo();
         this.loadMenuComponents();
         this.render();
         this.initMenu();
         this.showAllDashboardUI();
-        this.displayUser();
     }
     
     render() {
+        console.log('rendering dashboard');
         this.shadowRoot.innerHTML = this.html();
         this.setupEventListeners();
     }
-    
-    async displayUser(){
-        await refreshTokens();
-        this.accessToken = getAccessToken();
-        if (!this.accessToken)
-            return;
-        let data = await this.getUserData();
-        USER.username = data.username;
-        USER.profilePicture = data.profile_picture;
-        // this.accessToken = true;
-        // USER.username = 'vlenard';
 
-        if (!USER.profilePicture){
-            USER.backupProfilePicture = await fetchDogPicture();
-        }
-
-        //render again
-        this.loadMenuComponents();
-        this.render();
-        this.initMenu();
-        this.showAllDashboardUI();
+    getUserInfo(){
+        USER.username = getUserName();
+        USER.profilePicture = getUserPicture();
+        USER.backupProfilePicture = getDefaultPicture();
     }
     
-    async getUserData() {
-        try {
-            const response = await apiCall('http://127.0.0.1:8000/api/auth/get_user_data/');
-            if (response.ok) {
-                const data = await response.json();
-                return data; // Return the fetched data
-            } else {
-                const errorData = await response.json();
-                console.error("Response not 200");
-                throw new Error(JSON.stringify(errorData));
-            }
-        } catch (error) {
-            console.error("An error occurred:", error);
-            throw error;
-        }
-    }
-
+    
     html() {
         return `
-            <link rel="stylesheet" href="../../../styles/style.css">
-            ${this.accessToken ?
-                `<style>
-                #login-button{
-                    pointer-events: none;
-                }
-                </style>
-                `:``
+        <link rel="stylesheet" href="../../../styles/style.css">
+        ${USER.username ?
+            `<style>
+            #login-button{
+            pointer-events: none;
             }
+            </style>
+            `:``
+        }
             <header>
-                <div class="header-top">
-                    <span id="player1-display" class="player1_score">Player 1 - 0</span>
-                    <div class="title">PONG</div>
-                    <span id="player2-display" class="player2_score">Player 2 - 0</span>
-                </div>
-
-            ${!this.accessToken ?
-                `
-                    <button id="login-button" class="orange-button">
-                        LOGIN
-                    </button>
-                `  
-                :
-                `
-                    <button id="login-button" class="user-display">
-                        <img src="${USER.profilePicture ? `${USER.profilePicture}`: `${USER.backupProfilePicture}`}" id="login-profile-pic">
-                        <div>${USER.username}</div>
-                    </button>
-                `
+            <div class="header-top">
+            <span id="player1-display" class="player1_score">Player 1 - 0</span>
+            <div class="title">PONG</div>
+            <span id="player2-display" class="player2_score">Player 2 - 0</span>
+            </div>
+            
+            ${!USER.username ?
+            `
+            <button id="login-button" class="orange-button">
+                LOGIN
+            </button>
+            `  
+            :
+            `
+            <button id="login-button" class="user-display">
+            <img src="${USER.profilePicture ? `${USER.profilePicture}`: `${USER.backupProfilePicture}`}" id="login-profile-pic">
+            <div>${USER.username}</div>
+            </button>
+            `
             }
             </header>
             <main-menu>
-                <canvas id="gameCanvas"></canvas>
-                <auth-dialog id="auth-dialog"></auth-dialog>
-                <game-setup-dialog id="game-setup-dialog"></game-setup-dialog>
-                <left-menu>
-                    <div class="menu-option">
-                        <button>HowTo</button>
-                        <span class="button-description">What is this?</span>
-                    </div>
-                    <div class="menu-option">
-                        <button>Play</button>
-                        <span class="button-description">How would you like your PONG today?</span>
-                    </div>
-                    <div class="menu-option">
-                        <button>Account</button>
-                        <span class="button-description">Who are you anyway?</span>
-                    </div>
-                    <div class="menu-option" style="grid-row-start: 4;">
-                        <button>About</button>
-                        <span class="button-description">ft_transcendence at 42 Heilbronn</span>
-                    </div>
-                </left-menu>
-                <right-menu>
-                    <div id="right-menu-container"></div>
-                </right-menu>
+            <canvas id="gameCanvas"></canvas>
+            <auth-dialog id="auth-dialog"></auth-dialog>
+            <game-setup-dialog id="game-setup-dialog"></game-setup-dialog>
+            <left-menu>
+            <div class="menu-option">
+            <button>HowTo</button>
+            <span class="button-description">What is this?</span>
+            </div>
+            <div class="menu-option">
+            <button>Play</button>
+            <span class="button-description">How would you like your PONG today?</span>
+            </div>
+            <div class="menu-option">
+            <button>Account</button>
+            <span class="button-description">Who are you anyway?</span>
+            </div>
+            <div class="menu-option" style="grid-row-start: 4;">
+            <button>About</button>
+            <span class="button-description">ft_transcendence at 42 Heilbronn</span>
+            </div>
+            </left-menu>
+            <right-menu>
+            <div id="right-menu-container"></div>
+            </right-menu>
             </main-menu>
             <footer>
-                <div class="footer-container">
-                    <div class="footer-label">Created By</div>
-                    <div class="team">
-                        <a href="https://github.com/RealConrad/" target="_blank" class="teammate teammate1">cwenz</a>
-                        <a href="https://www.github.com/kglebows/" target="_blank" class="teammate teammate2">kglebows</a>
-                        <a href="https://www.github.com/harshkumbhani/" target="_blank" class="teammate teammate3">hkumbhan</a>
-                        <a href="https://github.com/vivilenard/" target="_blank" class="teammate teammate4">vivi</a>
-                        <a href="https://github.com/PetruCazac/" target="_blank" class="teammate teammate5">pcazac</a>
-                    </div>
-                </div>
+            <div class="footer-container">
+            <div class="footer-label">Created By</div>
+            <div class="team">
+            <a href="https://github.com/RealConrad/" target="_blank" class="teammate teammate1">cwenz</a>
+            <a href="https://www.github.com/kglebows/" target="_blank" class="teammate teammate2">kglebows</a>
+            <a href="https://www.github.com/harshkumbhani/" target="_blank" class="teammate teammate3">hkumbhan</a>
+            <a href="https://github.com/vivilenard/" target="_blank" class="teammate teammate4">vivi</a>
+            <a href="https://github.com/PetruCazac/" target="_blank" class="teammate teammate5">pcazac</a>
+            </div>
+            </div>
             </footer>
-        `;
-    }
-
-    loadMenuComponents() {
-        import ("../components/GameSetupDialog.js");
-        import("../components/AuthDialog.js");
-        import("../components/HowToMenu.js");
-        import("../components/PlayMenu.js");
-        import("../components/AccountMenu.js");
-        import("../components/AboutMenu.js");
-    }
-
-    setupEventListeners() {
-        const loginButton = this.shadowRoot.getElementById("login-button");
-        const authDialogPopup = this.shadowRoot.getElementById("auth-dialog");
-        const contributor = this.shadowRoot.querySelector(".team");
-        loginButton.addEventListener("click", () => {
-            authDialogPopup.open();
-        });
-        loginButton.addEventListener("mouseover", () => {
-            GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_HOVER, { element: loginButton});
-        });
-        loginButton.addEventListener("mouseout", () => {
-            GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_UNHOVER, { element: loginButton});
-        });
-
-        contributor.addEventListener("mouseover", () => {
-            GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_HOVER, { element: contributor});
-        });
-        contributor.addEventListener("mouseout", () => {
-            GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_UNHOVER, { element: contributor});
-        });
-
-        GlobalEventEmitter.on(EVENT_TYPES.MATCH_VS_AI, () => {
-            console.log("VS AI");
-            this.openGameSetupDialog("vs AI");
-        });
-        GlobalEventEmitter.on(EVENT_TYPES.MATCH_LOCAL, () => {
-            console.log("LOCAL");
-            this.openGameSetupDialog("local");
-        });
-        GlobalEventEmitter.on(EVENT_TYPES.START_MATCH, ({ player1Name, player2Name, matchType}) => {
-            this.startGame(player1Name, player2Name, matchType !== "local");
-        });
-        GlobalEventEmitter.on(EVENT_TYPES.QUIT_MATCH, () => {
-            this.endGame();
-        });
-        GlobalEventEmitter.on(EVENT_TYPES.UPDATE_SCORE, ({ player1Name, player2Name, player1Score, player2Score }) => {
-            this.updateScores(player1Name, player2Name, player1Score, player2Score);
-        })
-        //listen for event to render dashboard new
-        GlobalEventEmitter.on(EVENT_TYPES.RELOAD_DASHBOARD, (() =>
-        {
-            // console.log('event to rerender!');
-            this.displayUser();
+            `;
         }
-        ))
-    }
-
-    openGameSetupDialog(matchType) {
-        const gameSetupDialog = this.shadowRoot.getElementById("game-setup-dialog");
-        gameSetupDialog.setMatchType(matchType);
-        gameSetupDialog.open();
-    }
-
-    initMenu() {
-        this.canvas = this.shadowRoot.getElementById("gameCanvas");
-        this.ctx = this.canvas.getContext("2d");
-
-        const updateCanvasSize = () => {
-            this.canvas.width = this.shadowRoot.host.offsetWidth;
-            this.canvas.height = this.shadowRoot.host.offsetHeight;
-            this.drawMiddleLine();
-        };
-
-        updateCanvasSize();
-        window.addEventListener("resize", updateCanvasSize);
-
-        this.leftPaddle = this.createPaddle("left");
-        this.rightPaddle = this.createPaddle("right");
-
-        this.initializePaddleMovement();
-        this.initializeMenuInteractions();
-    }
-
-    drawMiddleLine() {
-        const paddleWidth = this.canvas.width / 128;
-        this.ctx.strokeStyle = "white";
-        this.ctx.lineWidth = paddleWidth;
-        this.ctx.setLineDash([paddleWidth, paddleWidth]);
-
-        this.ctx.beginPath();
-        this.ctx.moveTo(this.canvas.width / 2, 0);
-        this.ctx.lineTo(this.canvas.width / 2, this.canvas.height);
-        this.ctx.stroke();
-
-        this.ctx.setLineDash([]); // Reset line dash
-    }
+        
+        loadMenuComponents() {
+            import ("../components/GameSetupDialog.js");
+            import("../components/AuthDialog.js");
+            import("../components/HowToMenu.js");
+            import("../components/PlayMenu.js");
+            import("../components/AccountMenu.js");
+            import("../components/AboutMenu.js");
+        }
+        
+        setupEventListeners() {
+            const loginButton = this.shadowRoot.getElementById("login-button");
+            const authDialogPopup = this.shadowRoot.getElementById("auth-dialog");
+            const contributor = this.shadowRoot.querySelector(".team");
+            loginButton.addEventListener("click", () => {
+                authDialogPopup.open();
+            });
+            loginButton.addEventListener("mouseover", () => {
+                GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_HOVER, { element: loginButton});
+            });
+            loginButton.addEventListener("mouseout", () => {
+                GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_UNHOVER, { element: loginButton});
+            });
+            
+            contributor.addEventListener("mouseover", () => {
+                GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_HOVER, { element: contributor});
+            });
+            contributor.addEventListener("mouseout", () => {
+                GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_UNHOVER, { element: contributor});
+            });
+            
+            GlobalEventEmitter.on(EVENT_TYPES.MATCH_VS_AI, () => {
+                console.log("VS AI");
+                this.openGameSetupDialog("vs AI");
+            });
+            GlobalEventEmitter.on(EVENT_TYPES.MATCH_LOCAL, () => {
+                console.log("LOCAL");
+                this.openGameSetupDialog("local");
+            });
+            GlobalEventEmitter.on(EVENT_TYPES.START_MATCH, ({ player1Name, player2Name, matchType}) => {
+                this.startGame(player1Name, player2Name, matchType !== "local");
+            });
+            GlobalEventEmitter.on(EVENT_TYPES.QUIT_MATCH, () => {
+                this.endGame();
+            });
+            GlobalEventEmitter.on(EVENT_TYPES.UPDATE_SCORE, ({ player1Name, player2Name, player1Score, player2Score }) => {
+                this.updateScores(player1Name, player2Name, player1Score, player2Score);
+            })
+            GlobalEventEmitter.on(EVENT_TYPES.RELOAD_DASHBOARD, (() =>
+                {
+                    //this.displayUser()
+                    this.connectedCallback();
+                }
+            ))
+        }
+        
+        openGameSetupDialog(matchType) {
+            const gameSetupDialog = this.shadowRoot.getElementById("game-setup-dialog");
+            gameSetupDialog.setMatchType(matchType);
+            gameSetupDialog.open();
+        }
+        
+        initMenu() {
+            this.canvas = this.shadowRoot.getElementById("gameCanvas");
+            this.ctx = this.canvas.getContext("2d");
+            
+            const updateCanvasSize = () => {
+                this.canvas.width = this.shadowRoot.host.offsetWidth;
+                this.canvas.height = this.shadowRoot.host.offsetHeight;
+                this.drawMiddleLine();
+            };
+            
+            updateCanvasSize();
+            window.addEventListener("resize", updateCanvasSize);
+            
+            this.leftPaddle = this.createPaddle("left");
+            this.rightPaddle = this.createPaddle("right");
+            
+            this.initializePaddleMovement();
+            this.initializeMenuInteractions();
+        }
+        
+        drawMiddleLine() {
+            const paddleWidth = this.canvas.width / 128;
+            this.ctx.strokeStyle = "white";
+            this.ctx.lineWidth = paddleWidth;
+            this.ctx.setLineDash([paddleWidth, paddleWidth]);
+            
+            this.ctx.beginPath();
+            this.ctx.moveTo(this.canvas.width / 2, 0);
+            this.ctx.lineTo(this.canvas.width / 2, this.canvas.height);
+            this.ctx.stroke();
+            
+            this.ctx.setLineDash([]); // Reset line dash
+        }
+        
 
     createPaddle(side) {
         const paddle = document.createElement("div");
@@ -357,26 +326,40 @@ export class DashboardView extends HTMLElement {
     }
 }
 
-
-const fetchDogPicture = async () => {
-    const apiURL = "https://dog.ceo/api/breeds/image/random";
-
-    try {
-        const response = await fetch(apiURL); // Wait for the fetch request
-        if (!response.ok) {
-            throw new Error("Network response was not ok");
-        }
-        
-        const data = await response.json(); // Wait for the JSON parsing
-        console.log('data: ');
-        console.log(data);
-        console.log('fetching pic: ', data.message);
-        return data.message;
-        // dogImage.src = data.message; // `message` contains the image URL
-    } catch (error) {
-        console.error("There was a problem with the fetch operation:", error);
-        return null;
-    }
-}
-
 customElements.define("dashboard-view", DashboardView);
+
+        // async displayUser(){
+        //     await refreshTokens();
+        //     this.accessToken = getAccessToken();
+        //     if (!this.accessToken)
+        //         return;
+        //     let data = await this.getUserData();
+        //     USER.username = data.username;
+        //     USER.profilePicture = data.profile_picture;
+        //     if (!USER.profilePicture){
+        //         USER.backupProfilePicture = await fetchDogPicture();
+        //     }
+    
+        //     //render again
+        //     this.loadMenuComponents();
+        //     this.render();
+        //     this.initMenu();
+        //     this.showAllDashboardUI();
+        // }
+        
+        // async getUserData() {
+        //     try {
+        //         const response = await apiCall('http://127.0.0.1:8000/api/auth/get_user_data/');
+        //         if (response.ok) {
+        //             const data = await response.json();
+        //             return data; // Return the fetched data
+        //         } else {
+        //             const errorData = await response.json();
+        //             console.error("Response not 200");
+        //             throw new Error(JSON.stringify(errorData));
+        //         }
+        //     } catch (error) {
+        //         console.error("An error occurred:", error);
+        //         throw error;
+        //     }
+        // }

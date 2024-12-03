@@ -1,4 +1,4 @@
-import {apiCall, getAccessToken} from "../../api/api.js";
+import {apiCall, getAccessToken, setLocalPicture} from "../../api/api.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
 import {BASE_AUTH_API_URL, EVENT_TYPES, USER} from "../../utils/constants.js";
 
@@ -158,8 +158,8 @@ html() {
                 })
                     .then(response => response.json())
                     .then(data => {
-                        console.log("API Response: ", data);
-                        GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {}); ///////reload
+                        setLocalPicture(data.profile_picture);
+                        GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
                     })
                     .catch(error => {
                         console.error("Error uploading profile picture:", error);

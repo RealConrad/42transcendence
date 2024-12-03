@@ -1,4 +1,4 @@
-import {setAccessToken, apiCall} from "../../api/api.js";
+import {setAccessToken, apiCall, setLocalUsername, setDefaultPicture, fetchDogPicture} from "../../api/api.js";
 import {BASE_AUTH_API_URL, BASE_MFA_API_URL, EVENT_TYPES, FORM_ERROR_MESSAGES} from "../../utils/constants.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
 import {USER} from '../../utils/constants.js'
@@ -327,6 +327,7 @@ class AuthDialog extends HTMLElement {
 		}).then((data) => {
 			console.log(data);
 			setAccessToken(data.access_token);
+			setLocalUsername(username);
 			GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
 			this.close();
 		}).catch(err => console.log(err));
@@ -355,8 +356,10 @@ class AuthDialog extends HTMLElement {
 		}).then((data) => {
 			console.log("LOGGED IN!");
 			setAccessToken(data.access_token);
+			// setDefaultPicture();
+			setLocalUsername(username);
 			GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
-			USER.username = username;
+			// USER.username = username;
 			if (data.mfa_enable_flag) {
 				this.shadowRoot.getElementById("sign-in-view").style.display = "none"
 				this.shadowRoot.getElementById("otp-view").style.display = "block";

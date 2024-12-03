@@ -5,13 +5,33 @@ let accessToken = null;
 
 export const setAccessToken = (token) => {
     accessToken = token;
-    USER.loggedIn = true;
-    //change button here?
+}
 
+export const setLocalUsername = (username) => {
+    localStorage.setItem('Username', username);
+}
+export const setLocalPicture = (url) => {
+    localStorage.setItem('ProfilePicture', url);
+    console.log('set pic to:', url);
+}
+export const setDefaultPicture = async () => {
+    if (getDefaultPicture()){
+        console.log('default already loaded');
+    }
+	await fetchDogPicture().then((url)=>{
+        localStorage.setItem('DefaultPicture', url);
+        console.log('set default picture: ', url);
+    });
 }
 
 export const getUserName = () => {
-    return localStorage.getItem("username");
+    return localStorage.getItem("Username");
+}
+export const getUserPicture = () => {
+    return localStorage.getItem("ProfilePicture");
+}
+export const getDefaultPicture = () => {
+    return localStorage.getItem("DefaultPicture");
 }
 
 export const getAccessToken = () => accessToken;
@@ -31,6 +51,7 @@ export const refreshTokens = async () => {
         setAccessToken(data.access_token);
     } catch (error) {
         console.log("Failed to refresh tokens,", error);
+        deleteUser();       //added
     }
 }
 
@@ -78,3 +99,32 @@ export const apiCall = async (url, options = {}) => {
     return response;
 }
 
+export const fetchDogPicture = async () => {
+    const apiURL = "https://dog.ceo/api/breeds/image/random";
+
+    try {
+        const response = await fetch(apiURL); // Wait for the fetch request
+        if (!response.ok) {
+            throw new Error("Network response was not ok");
+        }
+        
+        const data = await response.json(); // Wait for the JSON parsing
+        // console.log('data: ');
+        // console.log(data);
+        let url = data.message;
+        console.log('fetching pic: ', url);
+        return url;
+        // dogImage.src = data.message; // `message` contains the image URL
+    } catch (error) {
+        console.error("There was a problem with the fetch operation:", error);
+        return null;
+    }
+}
+
+function deleteUser(){
+    accessToken = null;
+    USER.username = null;
+    USER.profilePicture = null;
+    USER.backupProfilePicture = null;
+    localStorage.clear();
+}
