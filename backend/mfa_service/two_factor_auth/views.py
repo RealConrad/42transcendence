@@ -1,5 +1,7 @@
 import pyotp
 import requests
+from rest_framework.status import HTTP_400_BAD_REQUEST
+
 from .helpers import (
     create_otp_secret_for_user,
     generate_qr_code,
@@ -25,7 +27,8 @@ class Enable2FAView(APIView):
         user_profile = user.userprofile
         if user_profile.mfa_enabled:
             return Response(
-                {'detail': '2FA is already enabled.'}
+                {'detail': '2FA is already enabled.'},
+                status=HTTP_400_BAD_REQUEST
             )
         otp_secret = create_otp_secret_for_user(user)
         qr_code = generate_qr_code(otp_secret, user)
