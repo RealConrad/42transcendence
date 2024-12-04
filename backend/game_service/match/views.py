@@ -56,5 +56,18 @@ class MatchHistoryView(ListAPIView):
     serializer_class = MatchSerializer
 
     def get_queryset(self):
-        user_id = self.request.user.id
-        return Match.objects.filter(user_id=user_id)
+        return Match.objects.filter(user=self.request.user)
+
+    def list(self, request, *args, **kwargs):
+        profile = get_object_or_404(UserProfile, user=request.user)
+        profile_serializer = UserProfileSerializer(profile)
+
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+
+        response_data = {
+            "tournaments": profile_serializer.data,
+            "games": serializer.data
+        }
+
+        return Response(response_data, status=status.HTTP_200_OK)
