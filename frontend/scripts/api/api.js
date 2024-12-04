@@ -108,6 +108,7 @@ export const refreshTokens = async () => {
     } catch (error) {
         console.log("Failed to refresh tokens,", error);
         deleteUser();       //added
+        GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
     }
 }
 
