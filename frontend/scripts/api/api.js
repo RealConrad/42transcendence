@@ -11,20 +11,6 @@ const AUTH_METHODS = {
     FORTY_42: '42OAuth',
 }
 
-let authMethod = AUTH_METHODS.JWT; // Default authentication method
-
-const setAuthMethod = (method) => {
-    if (Object.values(AUTH_METHODS).includes(method)) {
-        authMethod = method;
-    } else {
-        console.error('Invalid authentication method');
-    }
-};
-
-const getAuthMethod = () => authMethod;
-
-export { AUTH_METHODS, setAuthMethod, getAuthMethod };
-
 export const setAccessToken = (token) => {
     accessToken = token;
 }
