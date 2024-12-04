@@ -17,8 +17,9 @@ class SaveMatchView(CreateAPIView):
 
     def perform_create(self, serializer):
         try:
-            user_id = self.request.user.id
-            serializer.save(user_id=user_id)
+            user = self.request.user
+            serializer.save(user=user)
+            logger.info(f"Match successfully saved for user {user.username}")
         except serializers.ValidationError as e:
             raise
         except Exception as e:
