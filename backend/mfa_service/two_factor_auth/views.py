@@ -82,7 +82,8 @@ class Verify2FAView(APIView):
                             status=status.HTTP_500_INTERNAL_SERVER_ERROR
                         )
                 return Response(
-                    {"message": "2FA verification successful"},
+                    {"message": "2FA verification successful",
+                     "username": user.username},
                     status=status.HTTP_200_OK
                 )
             else:
