@@ -1,9 +1,25 @@
 from django.core.exceptions import ValidationError
-
+from django.contrib.auth.models import User
 from django.db import models
 
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    tournaments_played = models.IntegerField(default=0)
+    tournaments_won = models.IntegerField(default=0)
+
+    def __str__(self):
+        return f"UserProfile: {self.user.username}"
+
+    def increment_tournaments_played(self):
+        self.tournaments_played += 1
+        self.save()
+
+    def increment_tournaments_won(self):
+        self.tournaments_won += 1
+        self.save()
+
 class Match(models.Model):
-    user_id = models.IntegerField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="matches", null=True)
     player1_username = models.CharField(max_length=200)
     player2_username = models.CharField(max_length=200)
     winner = models.CharField(max_length=200)
