@@ -43,6 +43,8 @@ export class AccountMenu extends HTMLElement {
 html() {
     return `
         <link rel="stylesheet" href="../../../styles/account.css">
+        <!--<link id="style-sheet" rel="stylesheet" href="../../../styles/style.css">-->
+
         ${!this.accessToken ? 
             `
                 <div class="guest-view">
@@ -60,6 +62,11 @@ html() {
                         <div>
                             ${this.username}
                         </div>
+                    </div>
+                    <div>
+                    <button class="orange-2FA-button">
+                        Enable 2FAaaaH
+                    </button>
                     </div>
                     <div class="total-match-stats">
                         <div class="matches-won">
