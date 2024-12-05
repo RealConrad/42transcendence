@@ -19,23 +19,6 @@ export class AccountMenu extends HTMLElement {
         // GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
 
         this.renderPreviousMatches();
-        //TODO:  Dummy data, hookup to API
-        // this.renderPreviousMatches([
-        //     { player1: 'Conradasdasdasdasdasdasd', score1: 9, player2: 'Guest', score2: 10 },
-        //     { player1: 'Conrad', score1: 15, player2: 'Konrad', score2: 7 },
-        //     { player1: 'Conrad', score1: 12, player2: 'this is a very vert vert long name', score2: 12 },
-        //     { player1: 'Conrad', score1: 12, player2: 'Konrad', score2: 12 },
-        //     { player1: 'Conrad', score1: 12, player2: 'Konrad', score2: 12 },
-        //     { player1: 'Conrad', score1: 19, player2: 'Konrad', score2: 12 },
-        //     { player1: 'Conrad', score1: 1, player2: 'Konrad', score2: 12 },
-        //     { player1: 'Conrad', score1: 46, player2: 'Konrad', score2: 23 },
-        //     { player1: 'Conrad', score1: 12, player2: 'Konrad', score2: 12 },
-        //     { player1: 'Conrad', score1: 2, player2: 'Konrad', score2: 33 },
-        //     { player1: 'Conrad', score1: 12, player2: 'Konrad', score2: 3 },
-        //     { player1: 'Conrad', score1: 12, player2: 'Konrad', score2: 12 },
-        //     { player1: 'Conrad', score1: 6, player2: 'Konrad', score2: 56 },
-        //     { player1: 'Conrad', score1: 88, player2: 'Konrad', score2: 66 },
-        // ]);
     }
 
     render() {
@@ -110,6 +93,17 @@ html() {
         // Parsing the JSON response
         const data = await response.json();
 
+
+        const totalMatchWins = data.total_matches.wins;
+        const totalMatchLosses = data.total_matches.losses;
+
+        console.log("Match history:", data);
+        const totalWinsElement = this.shadowRoot.getElementById("matches-won");
+        totalWinsElement.textContent = `${totalMatchWins}`;
+
+        const totalLossesElement = this.shadowRoot.getElementById("matches-lost");
+        totalLossesElement.textContent = `${totalMatchLosses}`;
+
         const tournamentsPlayed = data.tournaments.tournaments_played;
         const tournamentsWon = data.tournaments.tournaments_won;
         const tournamentStatsElement = this.shadowRoot.getElementById("tournament-stats");
@@ -183,7 +177,6 @@ html() {
         fileInput.addEventListener('change', (event) => {
             const file = event.target.files[0];
             if (file) {
-                // TODO: CREATE API TO UPLOAD PROFILE PICTURE
                 console.log("FILE: ", file);
                 const formData = new FormData();
                 formData.append("file", file);
