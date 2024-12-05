@@ -44,4 +44,6 @@ scrape_configs:
   #   static_configs:
   #     - targets: ['nginx:443', 'nginx:80']
 
+rule_files:
+  - 'alert_rules.yml'
 
