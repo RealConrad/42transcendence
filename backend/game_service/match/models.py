@@ -6,6 +6,8 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     tournaments_played = models.IntegerField(default=0)
     tournaments_won = models.IntegerField(default=0)
+    total_matches_won = models.IntegerField(default=0)
+    total_matches_lost = models.IntegerField(default=0)
 
     def __str__(self):
         return f"UserProfile: {self.user.username}"
