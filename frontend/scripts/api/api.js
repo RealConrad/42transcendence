@@ -128,8 +128,10 @@ export const apiCall = async (url, options = {}) => {
         ...options.headers,
         Authorization: `Bearer ${getAccessToken()}`,
     };
-    
-    if (authMethod === AUTH_METHODS.FORTY_42) {
+
+    console.log("access_token:", getAccessToken());
+
+    if (authMethod === '42OAuth') {
         options.headers['X-42-Token'] = 'true';
     }
     const response = await fetch(url, options);
@@ -138,6 +140,11 @@ export const apiCall = async (url, options = {}) => {
         console.warn("Access token expired, refreshing...");
         await refreshTokens();
         options.headers.Authorization = `Bearer ${getAccessToken()}`;
+        console.log("access_token:", getAccessToken());
+
+        if (authMethod === '42OAuth') {
+            options.headers['X-42-Token'] = 'true';
+        }
         return fetch(url, options);
     }
     if (!response.ok) {
