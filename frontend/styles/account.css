@@ -58,6 +58,8 @@
 
 
 .orange-2FA-button{
+    all: unset;
+    pointer-events: auto;
     display: block;
 	background: var(--background-yellow);
 	color: black;

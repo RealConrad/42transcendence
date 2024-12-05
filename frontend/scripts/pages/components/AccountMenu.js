@@ -38,6 +38,7 @@ export class AccountMenu extends HTMLElement {
 
     render() {
         this.shadowRoot.innerHTML = this.html();
+        this.attachEventListeners();
     }
 
 html() {
@@ -64,7 +65,7 @@ html() {
                         </div>
                     </div>
                     <div>
-                    <button class="orange-2FA-button">
+                    <button class="orange-2FA-button" id="enableFaButton">
                         Enable 2FAaaaH
                     </button>
                     </div>
@@ -92,6 +93,20 @@ html() {
     `;
 }
 
+    attachEventListeners(){
+        const enableFaButton = this.shadowRoot.getElementById("enableFaButton");
+        enableFaButton.addEventListener("mouseover", () => {
+            GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_HOVER, { element: enableFaButton});
+        });
+        enableFaButton.addEventListener("mouseout", () => {
+            GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_UNHOVER, { element: enableFaButton});
+        });
+        enableFaButton.addEventListener("click", () => {
+            // console.log('fa button clicked');
+            GlobalEventEmitter.emit(EVENT_TYPES.ENABLE_TWOFACTOR, { element: enableFaButton });
+        });
+
+    }
 
     renderPreviousMatches(matches) {
         const matchesContainer = this.shadowRoot.getElementById('previous-matches');

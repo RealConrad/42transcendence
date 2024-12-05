@@ -132,6 +132,12 @@ class AuthDialog extends HTMLElement {
 		this.style.display = "block";
 	}
 
+	openEnable2fa() {
+		this.enable2FA()
+		this.shadowRoot.getElementById("sign-in-view").style.display = "none";
+		this.style.display = "block";
+	}
+	
 	close() {
 		this.style.display = "none";
 	}
@@ -359,7 +365,7 @@ class AuthDialog extends HTMLElement {
 			}
 		}).then((data) => {
 			console.log("LOGGED IN!");
-			setAuthMethod('JWT');
+			localStorage.setItem('authMethod', 'JWT');
 			setAccessToken(data.access_token);
 			// setDefaultPicture();
 			setLocalUsername(username);

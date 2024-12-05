@@ -31,7 +31,7 @@ export const EVENT_TYPES = {
     QUIT_GAME: "quit_game",
     GAME_OVER: "game_over",
     RELOAD_DASHBOARD: "reload_dashboard",
-
+    ENABLE_TWOFACTOR: "enable_twofactor",
 }
 
 export const USER = {
