@@ -1,4 +1,4 @@
-import {apiCall, getAccessToken, setLocalPicture} from "../../api/api.js";
+import {apiCall, getAccessToken, setLocalPicture, get2FAstatus, getLocal2FA, setLocal2FA, disable2FA} from "../../api/api.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
 import {BASE_AUTH_API_URL, EVENT_TYPES, USER} from "../../utils/constants.js";
 
@@ -12,9 +12,11 @@ export class AccountMenu extends HTMLElement {
     }
     connectedCallback() {
         this.accessToken = getAccessToken();
-        this.username = USER.username; // TODO: get username from localstorage
-        this.imgUrl = USER.profilePicture; // TODO: get image from localstorage
+        this.username = USER.username;
+        this.imgUrl = USER.profilePicture;
         this.render();
+        if (USER.username)
+            this.setupEventListeners();
         this.setupProfilePicture();
         // GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
         //TODO:  Dummy data, hookup to API
@@ -38,7 +40,6 @@ export class AccountMenu extends HTMLElement {
 
     render() {
         this.shadowRoot.innerHTML = this.html();
-        this.attachEventListeners();
     }
 
 html() {
@@ -65,9 +66,7 @@ html() {
                         </div>
                     </div>
                     <div>
-                    <button class="orange-2FA-button" id="enableFaButton">
-                        Enable 2FAaaaH
-                    </button>
+                        <button class="orange-2FA-button" id="TwoFactorAuthButton">Enable 2FA</button>
                     </div>
                     <div class="total-match-stats">
                         <div class="matches-won">
@@ -89,27 +88,54 @@ html() {
                     </div>
                 </div>
             `
+            }
+            `;
         }
-    `;
-}
 
-    attachEventListeners(){
-        const enableFaButton = this.shadowRoot.getElementById("enableFaButton");
-        enableFaButton.addEventListener("mouseover", () => {
-            GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_HOVER, { element: enableFaButton});
-        });
-        enableFaButton.addEventListener("mouseout", () => {
-            GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_UNHOVER, { element: enableFaButton});
-        });
-        enableFaButton.addEventListener("click", () => {
-            // console.log('fa button clicked');
-            GlobalEventEmitter.emit(EVENT_TYPES.ENABLE_TWOFACTOR, { element: enableFaButton });
-        });
+        toggle2faButton(status){
+            const TwoFactorAuthButton = this.shadowRoot.getElementById("TwoFactorAuthButton");
+            if (!TwoFactorAuthButton) return;
+            console.log('toggling');
+            if (status == false) 
+                TwoFactorAuthButton.innerHTML = "Enable 2FA";
+            if (status == true)
+                TwoFactorAuthButton.innerHTML = "Disable 2FA";
 
-    }
-
-    renderPreviousMatches(matches) {
-        const matchesContainer = this.shadowRoot.getElementById('previous-matches');
+        }
+        
+        setupEventListeners(){
+            const TwoFactorAuthButton = this.shadowRoot.getElementById("TwoFactorAuthButton");
+            get2FAstatus().then((status) => {
+                if (status == 200){ setLocal2FA(false); }//means 2FA is not set up yet
+                if (status == 400){ setLocal2FA(true); }//means 2FA is already enabled
+                console.log('get local 2FA: ', getLocal2FA());
+                if (getLocal2FA() == 'false')
+                    this.toggle2faButton(false);
+                else if(getLocal2FA() == 'true')
+                    this.toggle2faButton(true);
+            })
+            TwoFactorAuthButton.addEventListener("mouseover", () => {
+                GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_HOVER, { element: TwoFactorAuthButton});
+            });
+            TwoFactorAuthButton.addEventListener("mouseout", () => {
+                GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_UNHOVER, { element: TwoFactorAuthButton});
+            });
+            TwoFactorAuthButton.addEventListener("click", () => {
+                if (getLocal2FA() == 'false'){
+                    GlobalEventEmitter.emit(EVENT_TYPES.SET_TWOFACTOR, { element: TwoFactorAuthButton });
+                }
+                else if (getLocal2FA() == 'true'){
+                    disable2FA().then((success) => {
+                        if (success == true){
+                            this.toggle2faButton(false);
+                        }
+                    })
+                }
+            });
+        }
+        
+        renderPreviousMatches(matches) {
+            const matchesContainer = this.shadowRoot.getElementById('previous-matches');
         if (!matchesContainer) {
             return;
         }

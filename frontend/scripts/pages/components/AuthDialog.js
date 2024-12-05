@@ -1,4 +1,5 @@
-import {setAccessToken, apiCall, setAuthMethod, setLocalUsername, setDefaultPicture, fetchDogPicture, setLocalPicture} from "../../api/api.js";
+import {setAccessToken, apiCall, setAuthMethod, setLocalUsername,
+	setLocalPicture, setLocal2FA} from "../../api/api.js";
 import {BASE_AUTH_API_URL, BASE_MFA_API_URL, EVENT_TYPES, FORM_ERROR_MESSAGES} from "../../utils/constants.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
 import {Router} from '../../Router.js'
@@ -133,9 +134,16 @@ class AuthDialog extends HTMLElement {
 	}
 
 	openEnable2fa() {
-		this.enable2FA()
-		this.shadowRoot.getElementById("sign-in-view").style.display = "none";
-		this.style.display = "block";
+		this.enable2FA().then((data)=>{
+			if (data == 200){
+			console.log('enabled 2fa: ', data); 
+			this.shadowRoot.getElementById("sign-in-view").style.display = "none";
+			this.style.display = "block";
+			}
+			else if (data == 400){
+				console.log('not enabling bc already enabled?')
+			}
+		})
 	}
 	
 	close() {
@@ -254,7 +262,7 @@ class AuthDialog extends HTMLElement {
 				this.register(username, password);
 			}
 		});
-
+		//this one
 		this.shadowRoot.getElementById("otp-view").querySelector(".sign-in-button").addEventListener("click", (e) => {
 			e.preventDefault();
 			this.handleOtpVerification();
@@ -310,6 +318,10 @@ class AuthDialog extends HTMLElement {
 				GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_UNHOVER, { element: button });
 			});
 		});
+
+		// GlobalEventEmitter.on(EVENT_TYPES.UNSET_TWOFACTOR, (() => {
+		// 	this.disable2FA()
+		// }))
 	}
 
 	register(username, password) {
@@ -369,13 +381,13 @@ class AuthDialog extends HTMLElement {
 			setAccessToken(data.access_token);
 			// setDefaultPicture();
 			setLocalUsername(username);
-			GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
 			// USER.username = username;
 			if (data.mfa_enable_flag) {
 				this.shadowRoot.getElementById("sign-in-view").style.display = "none"
 				this.shadowRoot.getElementById("otp-view").style.display = "block";
 			} else {
 				this.close();
+				GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
 			}
 			// console.log('user logged in: ' , USER.loggedIn);
 		}).catch(err => console.error(err));
@@ -398,48 +410,34 @@ class AuthDialog extends HTMLElement {
 		}
 	}
 
-	enable2FA() {
-		apiCall(`${BASE_MFA_API_URL}/enable/`, {
+	async enable2FA() {
+		let response = await apiCall(`${BASE_MFA_API_URL}/enable/`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json"
 			},
 		})
-			.then((response) => {
-				if(!response.ok) {
-					throw new Error("Failed to fetch QR code for enabling 2FA");
-				}
-				return response.blob()
-			}) .then((blob) => {
-				const qrCodeURL = URL.createObjectURL(blob);
-				const qrCodeElement = this.shadowRoot.getElementById("qr-code");
-				qrCodeElement.src = qrCodeURL;
+		if(!response.ok) {
+			console.log('response status: ', response.status);
+			return response.status;
+		}
+		let blob = await response.blob();
+		const qrCodeURL = URL.createObjectURL(blob);
+		const qrCodeElement = this.shadowRoot.getElementById("qr-code");
+		qrCodeElement.src = qrCodeURL;
 
-				this.shadowRoot.getElementById("sign-in-view").style.display = "none";
-				this.shadowRoot.getElementById("enable-2fa-view").style.display = "block";
-		}) .catch((error) => {
-			console.error("Error enabling 2FA:", error);
-		})
+		this.shadowRoot.getElementById("sign-in-view").style.display = "none";
+		this.shadowRoot.getElementById("enable-2fa-view").style.display = "block";
+		return 200;
+		// }
+		// catch(error){
+		// 	console.error("Error enabling 2FA:", error);
+		// 	return 0;
+		// }
 	}
 
-	disable2FA() {
-		apiCall(`${BASE_MFA_API_URL}/disable/`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-		})
-			.then((response) => response.json())
-			.then((data) => {
-				console.log("2FA disabled successfully!", data);
-				this.close();
-			}) .catch((error) => {
-				console.error("Failed to disable 2FA");
-		})
-	}
-
-	verify2FA(otpCode) {
-		apiCall(`${BASE_MFA_API_URL}/verify/`, {
+	async verify2FA(otpCode) {
+		return apiCall(`${BASE_MFA_API_URL}/verify/`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -452,9 +450,11 @@ class AuthDialog extends HTMLElement {
 			.then((data) => {
 				console.log("OTP Verified Successfully!", data);
 				this.close();
+				return true;
 		}) .catch((error) => {
 			console.error("Error during OTP Verification:", error);
 			this.showError("otp", "Invalid OTP. Please try again.");
+			return false;
 		});
 	}
 
@@ -466,8 +466,16 @@ class AuthDialog extends HTMLElement {
 		});
 
 		if (otpCode.length === 6) {
-			this.verify2FA(otpCode);
-		} else {
+			this.verify2FA(otpCode).then((val)=>{
+				console.log('verification status: ', val);
+				if (val){
+					// GlobalEventEmitter.emit(EVENT_TYPES.SET_TWOFACTOR, {})
+					setLocal2FA(true);
+					GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
+				}
+			})
+		}
+		else {
 			console.error("Invalid OTP: Must be 6 digits");
 			const errorMessage = this.shadowRoot.querySelector(".error-message");
 			if (errorMessage) {
