@@ -1,6 +1,6 @@
 import {apiCall, getAccessToken, setLocalPicture} from "../../api/api.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
-import {BASE_AUTH_API_URL, EVENT_TYPES, USER} from "../../utils/constants.js";
+import {BASE_AUTH_API_URL, BASE_GAME_API_URL, EVENT_TYPES, USER} from "../../utils/constants.js";
 
 export class AccountMenu extends HTMLElement {
     constructor() {
@@ -17,23 +17,25 @@ export class AccountMenu extends HTMLElement {
         this.render();
         this.setupProfilePicture();
         // GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
+
+        this.renderPreviousMatches();
         //TODO:  Dummy data, hookup to API
-        this.renderPreviousMatches([
-            { player1: 'Conradasdasdasdasdasdasd', score1: 9, player2: 'Guest', score2: 10 },
-            { player1: 'Conrad', score1: 15, player2: 'Konrad', score2: 7 },
-            { player1: 'Conrad', score1: 12, player2: 'this is a very vert vert long name', score2: 12 },
-            { player1: 'Conrad', score1: 12, player2: 'Konrad', score2: 12 },
-            { player1: 'Conrad', score1: 12, player2: 'Konrad', score2: 12 },
-            { player1: 'Conrad', score1: 19, player2: 'Konrad', score2: 12 },
-            { player1: 'Conrad', score1: 1, player2: 'Konrad', score2: 12 },
-            { player1: 'Conrad', score1: 46, player2: 'Konrad', score2: 23 },
-            { player1: 'Conrad', score1: 12, player2: 'Konrad', score2: 12 },
-            { player1: 'Conrad', score1: 2, player2: 'Konrad', score2: 33 },
-            { player1: 'Conrad', score1: 12, player2: 'Konrad', score2: 3 },
-            { player1: 'Conrad', score1: 12, player2: 'Konrad', score2: 12 },
-            { player1: 'Conrad', score1: 6, player2: 'Konrad', score2: 56 },
-            { player1: 'Conrad', score1: 88, player2: 'Konrad', score2: 66 },
-        ]);
+        // this.renderPreviousMatches([
+        //     { player1: 'Conradasdasdasdasdasdasd', score1: 9, player2: 'Guest', score2: 10 },
+        //     { player1: 'Conrad', score1: 15, player2: 'Konrad', score2: 7 },
+        //     { player1: 'Conrad', score1: 12, player2: 'this is a very vert vert long name', score2: 12 },
+        //     { player1: 'Conrad', score1: 12, player2: 'Konrad', score2: 12 },
+        //     { player1: 'Conrad', score1: 12, player2: 'Konrad', score2: 12 },
+        //     { player1: 'Conrad', score1: 19, player2: 'Konrad', score2: 12 },
+        //     { player1: 'Conrad', score1: 1, player2: 'Konrad', score2: 12 },
+        //     { player1: 'Conrad', score1: 46, player2: 'Konrad', score2: 23 },
+        //     { player1: 'Conrad', score1: 12, player2: 'Konrad', score2: 12 },
+        //     { player1: 'Conrad', score1: 2, player2: 'Konrad', score2: 33 },
+        //     { player1: 'Conrad', score1: 12, player2: 'Konrad', score2: 3 },
+        //     { player1: 'Conrad', score1: 12, player2: 'Konrad', score2: 12 },
+        //     { player1: 'Conrad', score1: 6, player2: 'Konrad', score2: 56 },
+        //     { player1: 'Conrad', score1: 88, player2: 'Konrad', score2: 66 },
+        // ]);
     }
 
     render() {
@@ -73,6 +75,12 @@ html() {
                             <div class="score" id="matches-lost">0</div>
                         </div>
                     </div>
+                    <div class="tournament-stats">
+                        <div class="tournaments">
+                            TOURNAMENTS
+                            <div id="tournament-stats">0 won of 0 played</div>
+                        </div>
+                    </div>
                     <div class="previous-matches-container">
                         <div class="previous-matches-heading">Previous Matches</div>
                         <div class="previous-matches" id="previous-matches">
@@ -86,7 +94,35 @@ html() {
 }
 
 
-    renderPreviousMatches(matches) {
+    async renderPreviousMatches() {
+
+        const response = await apiCall(`${BASE_GAME_API_URL}/match-history/`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        });
+
+        if (!response.ok) {
+            throw new Error(`Error fetching match history`);
+        }
+
+        // Parsing the JSON response
+        const data = await response.json();
+
+        const tournamentsPlayed = data.tournaments.tournaments_played;
+        const tournamentsWon = data.tournaments.tournaments_won;
+        const tournamentStatsElement = this.shadowRoot.getElementById("tournament-stats");
+        tournamentStatsElement.textContent = `${tournamentsWon} won of ${tournamentsPlayed} played`;
+
+        // Extract and process matches data
+        const matches = data.games.reverse().map(game => ({
+            player1: game.player1_username,
+            score1: game.player1_score,
+            player2: game.player2_username,
+            score2: game.player2_score
+        }));
+
         const matchesContainer = this.shadowRoot.getElementById('previous-matches');
         if (!matchesContainer) {
             return;
