@@ -21,7 +21,14 @@ class SaveMatchView(CreateAPIView):
     def perform_create(self, serializer):
         try:
             user = self.request.user
-            serializer.save(user=user)
+            match = serializer.save(user=user)
+
+            player1_userprofile = UserProfile.objects.get(user=user)
+            if match.winner == match.player1_username:
+                player1_userprofile.total_matches_won += 1
+            else:
+                player1_userprofile.total_matches_lost += 1
+            player1_userprofile.save()
             logger.info(f"Match successfully saved for user {user.username}")
         except serializers.ValidationError as e:
             raise
@@ -65,7 +72,13 @@ class MatchHistoryView(ListAPIView):
         queryset = self.get_queryset()
         serializer = self.get_serializer(queryset, many=True)
 
+        total_matches = {
+            "wins": profile.total_matches_won,
+            "losses": profile.total_matches_lost,
+        }
+
         response_data = {
+            "total_matches": total_matches,
             "tournaments": profile_serializer.data,
             "games": serializer.data
         }
