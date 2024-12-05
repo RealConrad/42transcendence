@@ -128,6 +128,7 @@ html() {
                     disable2FA().then((success) => {
                         if (success == true){
                             this.toggle2faButton(false);
+                            GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
                         }
                     })
                 }

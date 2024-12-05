@@ -206,17 +206,16 @@ export const get2FAstatus = async () => {
 
 export const disable2FA = async () => {
     return apiCall(`${BASE_MFA_API_URL}/disable/`, {
-        method: "POST",
+        method: "PUT",
         headers: {
             "Content-Type": "application/json"
         },
     })
         .then((response) => response.json())
         .then((data) => {
-            console.log("2FA disabled successfully!", data);
-            this.close();
+            // this.close();
             setLocal2FA(false);
-            GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
+            console.log("2FA disabled successfully!", data);
             return true;
         }) .catch((error) => {
             console.error("Failed to disable 2FA");
