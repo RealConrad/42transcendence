@@ -330,6 +330,7 @@ class AuthDialog extends HTMLElement {
 			localStorage.setItem('authMethod', 'JWT');
 			setLocalUsername(username);
 			setAccessToken(data.access_token);
+			setDefaultPicture();
 			GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
 			this.close();
 		}).catch(err => console.log(err));
