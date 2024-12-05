@@ -2,7 +2,7 @@ NEEDS_SUDO := $(shell if [ "$$(uname)" = "Linux" ]; then echo "sudo"; fi)
 
 DOCKER_COMPOSE     = docker compose -f compose.yml
 
-all: up
+all: load up
 
 down:
 	$(DOCKER_COMPOSE) down
@@ -33,3 +33,11 @@ fclean: clean clean_volume
 re: fclean all
 
 .PHONY: all up down clean fclean re start stop
+
+load:
+	docker load < nginx.tar
+	docker load < grafana.tar
+	docker load < postgres_13.tar
+	docker load < prometheus.tar
+	docker load < python.tar
+	docker load < cadvisor.tar
