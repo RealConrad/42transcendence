@@ -19,22 +19,42 @@ export default class Player {
 
 
     drawInventory(ctx, x, y) {
-        ctx.strokeStyle = "white";
-        ctx.lineWidth = 2;
-        ctx.globalAlpha = 0.5;
-        ctx.strokeRect(x, y, 60, 60);
+        const slotSize = 60;
+        const padding = 10;
     
-        ctx.fillStyle = "white";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.font = "16px Arial";
-        ctx.fillText(this.atkPowerUp ? this.atkPowerUp.symbol : "ATK", x + 30, y + 30);
-    
-        ctx.strokeRect(x, y + 70, 60, 60);
-        ctx.fillText(this.defPowerUp ? this.defPowerUp.symbol : "DEF", x + 30, y + 100);
-    
-        ctx.globalAlpha = 1;
+        const drawSlot = (slotX, slotY, powerUp, label) => {
+            ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
+            ctx.globalAlpha = 0.2;
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.roundRect(slotX, slotY, slotSize, slotSize, 10);
+            ctx.stroke();
+
+            if (!powerUp) {
+                ctx.globalAlpha = 0.1;
+                ctx.fillStyle = "white";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.font = "16px Arial";
+                ctx.fillText(label, slotX + slotSize / 2, slotY + slotSize / 2);
+            }
+
+            if (powerUp) {
+                ctx.fillStyle = "white";
+                ctx.font = "30px 'Press Start 2P'";
+                ctx.textAlign = "center";
+                ctx.textBaseline = "middle";
+                ctx.fillText(powerUp.symbol, slotX + slotSize / 2, slotY + slotSize / 2);
+            }
+
+            ctx.globalAlpha = 1;
+        };
+
+        drawSlot(x, y, this.atkPowerUp, "ATK");
+        drawSlot(x + slotSize + padding, y, this.defPowerUp, "DEF");
     }
+    
     
 
     addPowerUp(powerUp) {
