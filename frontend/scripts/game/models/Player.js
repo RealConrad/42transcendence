@@ -5,7 +5,10 @@ export default class Player {
         this.paddle = paddle;
         this.controller = controller;
         this.atkPowerUp = null;
-        this.defPowerUp = null; //
+        this.defPowerUp = null;
+        this.ai = controller.ai;
+        this.ball = controller.ball;
+        this.canvas = controller.canvas;
     }
     
 
@@ -71,6 +74,9 @@ export default class Player {
     }
 
     activatePowerUp(type, game) {
+        if (this.controller.ai === true) {
+            return;
+        }
         const powerUp = type === "ATK" ? this.atkPowerUp : this.defPowerUp;
         if (!powerUp) {
             console.log(`No ${type} power-up to activate!`);
@@ -138,4 +144,86 @@ export default class Player {
                 console.log("Unknown power-up effect!");
         }
     }
+
+    
+    activatePowerUpAI(type, game) {
+        const powerUp = type === "ATK" ? this.atkPowerUp : this.defPowerUp;
+        if (!powerUp) return;
+    
+        console.log(`AI activated ${type} power-up: ${powerUp.symbol}`);
+        this.applyPowerUpEffect(powerUp, game);
+    
+        if (type === "ATK") this.atkPowerUp = null;
+        if (type === "DEF") this.defPowerUp = null;
+    }
+    
+
+
+    evaluatePowerUps(game) {
+        if (this.atkPowerUp) {
+            switch (this.atkPowerUp.symbol) {
+                case "%": // Teleport ball
+                    const ballOnAISide = this.ball.x < this.canvas.width / 4;
+                    const opponentCannotReach = 
+                        Math.abs(game.player1.paddle.y + game.player1.paddle.height / 2 - this.ball.y) > game.player1.paddle.height / 2;
+                    if (ballOnAISide && opponentCannotReach) {
+                        this.activatePowerUpAI("ATK", game);
+                    }
+                    break;
+    
+                case ">": // Speed up ball
+                    if (this.ball.lastTouchedPlayer === this && Math.abs(this.ball.dx) > 2) {
+                        this.activatePowerUpAI("ATK", game);
+                    }
+                    break;
+    
+                case "&": // Reverse ball direction
+                    const ballTooFastForAI = this.ball.dx > 0 && Math.abs(this.ball.y - this.paddle.y) > this.paddle.height / 2;
+                    const ballTooFastForOpponent = this.ball.dx < 0 && 
+                        Math.abs(game.player1.paddle.y + game.player1.paddle.height / 2 - this.ball.y) > game.player1.paddle.height / 2;
+                    if (ballTooFastForAI || ballTooFastForOpponent) {
+                        this.activatePowerUpAI("ATK", game);
+                    }
+                    break;
+    
+                case "-": // Shrink opponent paddle
+                    this.activatePowerUpAI("ATK", game);
+                    break;
+    
+                case "¿": // Reverse opponent controls
+                    this.activatePowerUpAI("ATK", game);
+                    break;
+            }
+        }
+    
+        if (this.defPowerUp) {
+            switch (this.defPowerUp.symbol) {
+                case "|": // Max size paddle
+                    this.activatePowerUpAI("DEF", game);
+                    break;
+    
+                case "@": // Pull ball
+                    const ballOnOpponentSide = this.ball.x > this.canvas.width / 2;
+                    if (ballOnOpponentSide) {
+                        this.activatePowerUpAI("DEF", game);
+                    }
+                    break;
+    
+                case "+": // Paddle strong
+                    this.activatePowerUpAI("DEF", game);
+                    break;
+    
+                case "*": // Slow-mo ball
+                case "=": // Freeze paddles
+                    const ballTooFastForAI = Math.abs(this.ball.y - this.paddle.y) > this.paddle.height / 2;
+                    if (ballTooFastForAI) {
+                        this.activatePowerUpAI("DEF", game);
+                    }
+                    break;
+            }
+        }
+    }
+    
+    
+
 }

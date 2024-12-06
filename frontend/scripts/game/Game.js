@@ -21,7 +21,7 @@ import { atkPowers, defPowers } from "./models/powerups/PowerUp.js";
 
 
 export default class Game {
-    constructor(canvas, player1Details, player2Details, isTournamentMatch = false, powerUpCount = 3) {
+    constructor(canvas, player1Details, player2Details, isTournamentMatch = false, powerUpCount = 4) {
         this.isGameOver = false;
         this.isGamePaused = false;
         this.winner = null;
@@ -79,6 +79,7 @@ export default class Game {
                 player1Paddle,
                 new HumanController(player1Paddle, 'w', 's', this.inputManager)
             );
+
         this.player2 = player2Details.isAI
             ? new Player(
                 player2Details.username,
@@ -114,7 +115,7 @@ export default class Game {
             const randomX = Math.random() * (this.canvas.width - 30 - this.canvas.width/2);
             const randomY = Math.random() * (this.canvas.height - 30);
     
-            const power = new PowerUp(this.ctx, randomX + this.canvas.width/2, randomY, randomType, randomPower.symbol);
+            const power = new PowerUp(this.ctx, randomX + this.canvas.width/4, randomY, randomType, randomPower.symbol);
             this.powerUps.push(power);
             this.renderManager.addRenderable(power);
         }
@@ -141,22 +142,24 @@ export default class Game {
     }
 
     handlePowerUpActivation() {
-        if (!this.player1.controller instanceof AIController) {
-            if (this.inputManager.isKeyPressed('a')) {
-                this.player1.activatePowerUp("ATK", this);
-            }
-            if (this.inputManager.isKeyPressed('d')) {
-                this.player1.activatePowerUp("DEF", this);
-            }
+        if (this.player1.controller.ai === true) {
+            this.player1.evaluatePowerUps(this)
+        } 
+        if (this.player2.controller.ai === true) {
+            this.player2.evaluatePowerUps(this)
         }
-    
-        if (!this.player2.controller instanceof AIController) {
-            if (this.inputManager.isKeyPressed('ArrowLeft')) {
-                this.player2.activatePowerUp("ATK", this);
-            }
-            if (this.inputManager.isKeyPressed('ArrowRight')) {
-                this.player2.activatePowerUp("DEF", this);
-            }
+        if (this.inputManager.isKeyPressed('a')) {
+            this.player1.activatePowerUp("ATK", this);
+        }
+        if (this.inputManager.isKeyPressed('d')) {
+            this.player1.activatePowerUp("DEF", this);
+        }
+
+        if (this.inputManager.isKeyPressed('ArrowLeft')) {
+            this.player2.activatePowerUp("ATK", this);
+        }
+        if (this.inputManager.isKeyPressed('ArrowRight')) {
+            this.player2.activatePowerUp("DEF", this);
         }
     }
     
@@ -250,7 +253,6 @@ export default class Game {
     }
 
     resetGameState() {
-        // this.ball.celebrate(this.ctx);
         setTimeout(() => {
             this.renderManager.resetObjects();
         }, 1000);
