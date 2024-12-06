@@ -95,7 +95,6 @@ html() {
         toggle2faButton(status){
             const TwoFactorAuthButton = this.shadowRoot.getElementById("TwoFactorAuthButton");
             if (!TwoFactorAuthButton) return;
-            console.log('toggling');
             if (status == false) 
                 TwoFactorAuthButton.innerHTML = "Enable 2FA";
             if (status == true)
@@ -105,15 +104,13 @@ html() {
         
         setupEventListeners(){
             const TwoFactorAuthButton = this.shadowRoot.getElementById("TwoFactorAuthButton");
-            get2FAstatus().then((status) => {
-                if (status == 200){ setLocal2FA(false); }//means 2FA is not set up yet
-                if (status == 400){ setLocal2FA(true); }//means 2FA is already enabled
-                console.log('get local 2FA: ', getLocal2FA());
-                if (getLocal2FA() == 'false')
-                    this.toggle2faButton(false);
-                else if(getLocal2FA() == 'true')
-                    this.toggle2faButton(true);
-            })
+            if (!getLocal2FA()){
+                setLocal2FA(false);
+            }
+            if (getLocal2FA() == 'false')
+                this.toggle2faButton(false);
+            else if(getLocal2FA() == 'true')
+                this.toggle2faButton(true);
             TwoFactorAuthButton.addEventListener("mouseover", () => {
                 GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_HOVER, { element: TwoFactorAuthButton});
             });

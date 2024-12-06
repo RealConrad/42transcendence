@@ -136,9 +136,9 @@ class AuthDialog extends HTMLElement {
 	openEnable2fa() {
 		this.enable2FA().then((data)=>{
 			if (data == 200){
-			console.log('enabled 2fa: ', data); 
-			this.shadowRoot.getElementById("sign-in-view").style.display = "none";
-			this.style.display = "block";
+				console.log('enabled 2fa: ', data); 
+				this.shadowRoot.getElementById("sign-in-view").style.display = "none";
+				this.style.display = "block";
 			}
 			else if (data == 400){
 				console.log('not enabling bc already enabled?')
