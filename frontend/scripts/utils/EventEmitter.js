@@ -28,6 +28,13 @@ class EventEmitter {
 
         this.events[event].forEach((listener) => listener(data));
     }
+
+    once(event, listener) {
+        if (!this.events[event]) {
+            this.events[event] = [];
+            this.events[event].push(listener);
+        }
+    }
 }
 
 const GlobalEventEmitter = new EventEmitter();
