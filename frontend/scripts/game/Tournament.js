@@ -72,9 +72,11 @@ export default class Tournament {
             this.currentRoundIndex++;
             this.currentMatchIndex = 0;
             if (this.currentRoundIndex >= this.bracket.length) {
+                // TODO: CREATE API AND SAVE TOURNAMENT MATCHES
                 const champion = this.bracket[this.bracket.length - 1][0].winner;
                 console.log(`${champion.username} won the Tournament!`);
                 GlobalEventEmitter.emit(EVENT_TYPES.GAME_OVER, { winner: champion.username, isTournament: true });
+                console.log(this.bracket);
                 return;
             } else {
                 GlobalEventEmitter.emit(EVENT_TYPES.TOURNAMENT_UPDATE, { rounds: this.bracket });
@@ -118,8 +120,6 @@ export default class Tournament {
                 console.warn("Both players are AI - randomly selecting a winner...");
                 const winner = Math.random() < 0.5 ? match.player1 : match.player2;
                 // TODO: CREATE RANDOM SCORES??
-                match.player1Score = 0;
-                match.player2Score = 0;
                 resolve(winner);
                 return;
             }
@@ -134,8 +134,10 @@ export default class Tournament {
             const checkGameOver = () => {
                 if (game.isGameOver) {
                     const winner = game.getWinner();
-                    match.player1Score = game.player1.score;
-                    match.player2Score = game.player2.score;
+                    match.player1.score = winner.player1Score;
+                    match.player2.score = winner.player2Score;
+                    match.player1Score = winner.player1Score;
+                    match.player2Score = winner.player2Score;
                     resolve(winner);
                 } else {
                     requestAnimationFrame(checkGameOver);

@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 from datetime import timedelta
 import os
+from corsheaders.defaults import default_headers
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -36,6 +37,9 @@ CORS_ORIGIN_WHITELIST = [
 
 CORS_ALLOW_CREDENTIALS = True
 
+CORS_ALLOW_HEADERS = list(default_headers) + [
+    "X-42-Token",
+]
 # Application definition
 
 INSTALLED_APPS = [
@@ -50,6 +54,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'tokens',
+    'remote_tokens',
 ]
 
 MIDDLEWARE = [
@@ -154,3 +159,11 @@ SIMPLE_JWT = {
     'AUTH_HEADER_TYPES': ('Bearer',),
     'USER_ID_CLAIM': 'user_id',
 }
+
+# Environments for 42 API
+
+STATE = os.getenv('STATE')
+CLIENT_ID = os.getenv('CLIENT_ID')
+CLIENT_SECRET = os.getenv('CLIENT_SECRET')
+REDIRECT_URI = os.getenv('REDIRECT_URI')
+AUTHORIZE_42_URL = os.getenv('AUTHORIZE_42_URL')

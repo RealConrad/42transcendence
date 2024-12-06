@@ -2,6 +2,9 @@ import GlobalEventEmitter from "../../utils/EventEmitter.js";
 import {EVENT_TYPES} from "../../utils/constants.js";
 import Game from "../../game/Game.js";
 import Tournament from "../../game/Tournament.js";
+import {getUserName, getUserPicture,getDefaultPicture, setDefaultPicture} from "../../api/api.js";
+import { USER } from "../../utils/constants.js";
+
 
 export class DashboardView extends HTMLElement {
     constructor() {
@@ -16,9 +19,11 @@ export class DashboardView extends HTMLElement {
         this.isTournamentMatch = false;
         this.matchDataForMenuDialog = null;
         this.isGameMenuOpen = false;
+        setDefaultPicture();
     }
 
     connectedCallback() {
+        this.getUserInfo();
         this.loadMenuComponents();
         this.render();
         const styleSheet = this.shadowRoot.getElementById('style-sheet');
@@ -42,24 +47,44 @@ export class DashboardView extends HTMLElement {
             this.resizeObserver.disconnect();
         }
     }
-
+    
     render() {
         this.shadowRoot.innerHTML = this.html();
         this.setupEventListeners();
     }
 
+    getUserInfo(){
+        USER.username = getUserName();
+        USER.profilePicture = getUserPicture();
+        USER.backupProfilePicture = getDefaultPicture();
+        // console.log('USER INFO:')
+        // console.log(USER)
+    }
+    
     html() {
         return `
             <link id="style-sheet" rel="stylesheet" href="../../../styles/style.css">
+            ${USER.username ? `
+            <!--HERE DEACTIVATING BUTTON CLICK AFTER LOGIN-->
+            <style>
+                #login-button{ pointer-events: none }
+            </style> ` : ``}
             <header>
                 <div class="header-top">
                     <span id="player1-display" class="player1_score">Player 1 - 0</span>
-                    <div class="title">PONG</div>
+                        <div class="title">PONG</div>
                     <span id="player2-display" class="player2_score">Player 2 - 0</span>
                 </div>
-                <button id="login-button" class="orange-button">
-                    LOGIN
-                </button>
+            
+            ${!USER.username ?
+            `<button id="login-button" class="orange-button">
+                LOGIN
+            </button>` :
+            `<button id="login-button" class="user-display">
+                <img src="${USER.profilePicture ? `${USER.profilePicture}`: `${USER.backupProfilePicture}`}">
+                <div>${USER.username}</div>
+            </button>`
+            }
             </header>
             <main-menu>
                 <canvas id="gameCanvas"></canvas>
@@ -90,16 +115,16 @@ export class DashboardView extends HTMLElement {
                 </right-menu>
             </main-menu>
             <footer>
-                <div class="footer-container">
-                    <div class="footer-label">Created By</div>
-                    <div class="team">
-                        <a href="https://github.com/RealConrad/" target="_blank" class="teammate teammate1">cwenz</a>
-                        <a href="https://www.github.com/kglebows/" target="_blank" class="teammate teammate2">kglebows</a>
-                        <a href="https://www.github.com/harshkumbhani/" target="_blank" class="teammate teammate3">hkumbhan</a>
-                        <a href="https://github.com/vivilenard/" target="_blank" class="teammate teammate4">vivi</a>
-                        <a href="https://github.com/PetruCazac/" target="_blank" class="teammate teammate5">pcazac</a>
-                    </div>
-                </div>
+            <div class="footer-container">
+            <div class="footer-label">Created By</div>
+            <div class="team">
+            <a href="https://github.com/RealConrad/" target="_blank" class="teammate teammate1">cwenz</a>
+            <a href="https://www.github.com/kglebows/" target="_blank" class="teammate teammate2">kglebows</a>
+            <a href="https://www.github.com/harshkumbhani/" target="_blank" class="teammate teammate3">hkumbhan</a>
+            <a href="https://github.com/vivilenard/" target="_blank" class="teammate teammate4">vivi</a>
+            <a href="https://github.com/PetruCazac/" target="_blank" class="teammate teammate5">pcazac</a>
+            </div>
+            </div>
             </footer>
         `;
     }
@@ -172,7 +197,8 @@ export class DashboardView extends HTMLElement {
             }
         });
         GlobalEventEmitter.on(EVENT_TYPES.RESUME_GAME, () => this.onResumeGame());
-        GlobalEventEmitter.on(EVENT_TYPES.QUIT_GAME, () => this.quitGame())
+        GlobalEventEmitter.on(EVENT_TYPES.QUIT_GAME, () => this.quitGame());
+        GlobalEventEmitter.on(EVENT_TYPES.RELOAD_DASHBOARD, () => this.connectedCallback());
     }
 
     handleKeyDown(event) {
@@ -381,7 +407,7 @@ export class DashboardView extends HTMLElement {
         this.leftPaddle.style.display = "block";
         this.rightPaddle.style.display = "block";
         this.drawMiddleLine();
-        this.shadowRoot.querySelector("#login-button").style.display = "block";
+        this.shadowRoot.querySelector("#login-button").style.display = "flex"; //changed here from block to flex
         this.shadowRoot.querySelector("left-menu").style.display = "grid";
         this.shadowRoot.querySelector("right-menu").style.display = "block";
         this.shadowRoot.querySelector(".player1_score").style.display = "none";
