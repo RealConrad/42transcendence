@@ -22,6 +22,11 @@ export default class CollisionManager {
             ball.speedX *= -1;
             ball.speedY = (ball.y - (paddle.y + paddle.height / 2)) * 0.1;
             ball.move();
+            if (paddle.x < this.game.canvas.width / 2) {
+                ball.lastTouchedPlayer = this.game.player1;
+            } else {
+                ball.lastTouchedPlayer = this.game.player2;
+            }
         }
     }
 

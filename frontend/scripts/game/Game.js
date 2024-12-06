@@ -17,9 +17,11 @@ import InputManager from "./managers/InputManager.js";
 import { apiCall} from "../api/api.js";
 import GlobalEventEmitter from "../utils/EventEmitter.js";
 import PowerUp from "./models/powerups/PowerUp.js";
+import { atkPowers, defPowers } from "./models/powerups/PowerUp.js";
+
 
 export default class Game {
-    constructor(canvas, player1Details, player2Details, isTournamentMatch = false, powerUpCount = 100) {
+    constructor(canvas, player1Details, player2Details, isTournamentMatch = false, powerUpCount = 10) {
         this.isGameOver = false;
         this.isGamePaused = false;
         this.winner = null;
@@ -104,13 +106,15 @@ export default class Game {
     }
 
     createPowerUps(count) {
-        const types = ['%', '>', '&', '¿', '|' , '-' , '@' , '+' , '=' ,'*'];
-        console.log(`Power-up creating ${count} powerups`);
         for (let i = 0; i < count; i++) {
+            const randomType = Math.random() > 0.5 ? "ATK" : "DEF";
+            const powerList = randomType === "ATK" ? atkPowers : defPowers;
+            const randomPower = powerList[Math.floor(Math.random() * powerList.length)];
+    
             const randomX = Math.random() * (this.canvas.width - 30);
             const randomY = Math.random() * (this.canvas.height - 30);
-            const randomType = types[Math.floor(Math.random() * types.length)];
-            const power = new PowerUp(this.ctx, randomX, randomY, randomType);
+    
+            const power = new PowerUp(this.ctx, randomX, randomY, randomType, randomPower.symbol);
             this.powerUps.push(power);
             this.renderManager.addRenderable(power);
         }
@@ -130,13 +134,22 @@ export default class Game {
         this.checkPowerUpCollection();
         this.checkWinCondition();
         this.renderManager.render();
+        this.player1.drawInventory(this.ctx, 20, 20);
+        this.player2.drawInventory(this.ctx, this.canvas.width - 80, 20);
         requestAnimationFrame(this.gameLoop.bind(this));
     }
 
     checkPowerUpCollection() {
         this.powerUps.forEach(powerUp => {
             if (powerUp.isActive && this.checkCollision(this.ball, powerUp)) {
-                powerUp.collectPowerUp(this, this.player1);
+                const lastTouchPlayer = this.ball.lastTouchedPlayer;
+                if (lastTouchPlayer) {
+                    powerUp.collectPowerUp(this, lastTouchPlayer);
+                } else {
+                    console.log("Power-Up collected with no owner, generating new one...");
+                    powerUp.isActive = false;
+                    this.createPowerUps(2);
+                }
             }
         });
     }
