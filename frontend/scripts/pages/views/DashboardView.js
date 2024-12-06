@@ -166,7 +166,7 @@ export class DashboardView extends HTMLElement {
 
         // Listen for
 
-        GlobalEventEmitter.once(EVENT_TYPES.SET_TWOFACTOR, () => {
+        GlobalEventEmitter.replaceOn(EVENT_TYPES.SET_TWOFACTOR, () => {
             authDialogPopup.openEnable2fa();
         });
         GlobalEventEmitter.on(EVENT_TYPES.MATCH_VS_AI, () => {

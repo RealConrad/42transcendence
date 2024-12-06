@@ -1,3 +1,5 @@
+import { EVENT_TYPES } from "./constants.js";
+
 class EventEmitter {
     constructor() {
         this.events = {};
@@ -25,15 +27,13 @@ class EventEmitter {
     // Emit an event with data
     emit(event, data = {}) {
         if (!this.events[event]) return;
-
         this.events[event].forEach((listener) => listener(data));
     }
 
-    once(event, listener) {
-        if (!this.events[event]) {
-            this.events[event] = [];
-            this.events[event].push(listener);
-        }
+    replaceOn(event, listener) {
+        this.events[event] = [];
+        this.events[event].push(listener);
+        console.log('event setup once');
     }
 }
 
