@@ -114,7 +114,7 @@ class Disable2FAView(APIView):
 
         user_id = user.id
         username = user.username
-        mfa_enabled = False
+        user_profile.mfa_enabled = False
         if not user_profile.otp_secret:
             return Response(
                 {"detail": "2FA is already disabled."},
@@ -127,7 +127,7 @@ class Disable2FAView(APIView):
             response = requests.put(update_mfa_url, json={
                 'user_id': user_id,
                 'username': username,
-                'mfa_enabled': mfa_enabled
+                'mfa_enabled': False
             })
             if response.status_code != 200:
                 return Response(
