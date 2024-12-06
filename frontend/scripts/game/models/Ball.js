@@ -93,8 +93,8 @@ export default class Ball extends Renderable {
     reset() {
         this.x = this.initialX;
         this.y = this.initialY;
-        this.speedX = 1 * (Math.random() > 0.5 ? 1 : -1);
-        this.speedY = 1 * (Math.random() > 0.5 ? 1 : -1);
+        this.speedX = 2 * (Math.random() > 0.5 ? 1 : -1);
+        this.speedY = 2 * (Math.random() > 0.5 ? 1 : -1);
         this.trail = []; 
         this.lastTouchedPlayer = null;
     }

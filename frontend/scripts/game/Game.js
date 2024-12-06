@@ -39,7 +39,7 @@ export default class Game {
         this.collisionManager = new CollisionManager(this);
         this.inputManager = new InputManager()
 
-        this.ball = new Ball(this.canvas.width / 2, this.canvas.height / 2, 5, 5, 5);
+        this.ball = new Ball(this.canvas.width / 2, this.canvas.height / 2, 5, 2, 2);
 
         this.Battleground = new Battleground(this.canvas);
 
@@ -131,12 +131,28 @@ export default class Game {
         this.ball.move();
         this.player1.controller.update();
         this.player2.controller.update();
+        this.handlePowerUpActivation();
         this.checkPowerUpCollection();
         this.checkWinCondition();
         this.renderManager.render();
         this.player1.drawInventory(this.ctx, 20, 20);
         this.player2.drawInventory(this.ctx, this.canvas.width - 80, 20);
         requestAnimationFrame(this.gameLoop.bind(this));
+    }
+
+    handlePowerUpActivation() {
+        if (this.inputManager.isKeyPressed('a')) {
+            this.player1.activatePowerUp("ATK", this);
+        }
+        if (this.inputManager.isKeyPressed('d')) {
+            this.player1.activatePowerUp("DEF", this);
+        }
+        if (this.inputManager.isKeyPressed('ArrowLeft')) {
+            this.player2.activatePowerUp("ATK", this);
+        }
+        if (this.inputManager.isKeyPressed('ArrowRight')) {
+            this.player2.activatePowerUp("DEF", this);
+        }
     }
 
     checkPowerUpCollection() {
