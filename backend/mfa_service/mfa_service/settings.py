@@ -150,7 +150,3 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# JWT SECRET key
-
-JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
