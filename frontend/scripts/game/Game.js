@@ -40,7 +40,7 @@ export default class Game {
         this.collisionManager = new CollisionManager(this);
         this.inputManager = new InputManager()
 
-        this.ball = new Ball(this.canvas.width / 2, this.canvas.height / 2, 5, 5, 5);
+        this.ball = new Ball(this.canvas.width / 2, this.canvas.height / 2, 5, 15, 15);
 
         this.Battleground = new Battleground(this.canvas);
 
