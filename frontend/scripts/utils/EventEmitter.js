@@ -31,7 +31,6 @@ class EventEmitter {
     replaceOn(event, listener) {
         this.events[event] = [];
         this.events[event].push(listener);
-        console.log('event setup once');
     }
 }
 
