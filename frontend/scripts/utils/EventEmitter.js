@@ -29,7 +29,7 @@ class EventEmitter {
         if (!this.events[event]) return;
         this.events[event].forEach((listener) => listener(data));
     }
-
+    //so it really only listens once
     replaceOn(event, listener) {
         this.events[event] = [];
         this.events[event].push(listener);

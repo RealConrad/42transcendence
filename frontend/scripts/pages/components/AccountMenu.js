@@ -18,10 +18,8 @@ export class AccountMenu extends HTMLElement {
         if (USER.username){
             this.setupEventListeners();
             this.renderPreviousMatches();
+            this.setupProfilePicture();
         }
-        this.setupProfilePicture();
-        // GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
-
     }
 
     render() {

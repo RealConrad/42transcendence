@@ -203,7 +203,10 @@ export class DashboardView extends HTMLElement {
         });
         GlobalEventEmitter.on(EVENT_TYPES.RESUME_GAME, () => this.onResumeGame());
         GlobalEventEmitter.on(EVENT_TYPES.QUIT_GAME, () => this.quitGame());
-        GlobalEventEmitter.on(EVENT_TYPES.RELOAD_DASHBOARD, () => this.connectedCallback());
+        GlobalEventEmitter.replaceOn(EVENT_TYPES.RELOAD_DASHBOARD, () => {
+            console.log('%creload dashboard', 'color: red')
+            this.connectedCallback()
+        });
     }
 
     handleKeyDown(event) {
