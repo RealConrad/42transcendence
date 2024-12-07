@@ -68,7 +68,8 @@ export class DashboardView extends HTMLElement {
             <!--HERE DEACTIVATING BUTTON CLICK AFTER LOGIN-->
             <style>
                 #login-button{ pointer-events: none }
-            </style> ` : ``}
+            </style>
+            ` : ``}
             <header>
                 <div class="header-top">
                     <span id="player1-display" class="player1_score">Player 1 - 0</span>
@@ -130,7 +131,7 @@ export class DashboardView extends HTMLElement {
     }
 
     loadMenuComponents() {
-        import ("../components/GameMenuDialog.js");
+        import("../components/GameMenuDialog.js");
         import("../components/GameSetupDialog.js");
         import("../components/TournamentSetupDialog.js");
         import("../components/AuthDialog.js");
@@ -164,6 +165,10 @@ export class DashboardView extends HTMLElement {
         });
 
         // Listen for
+
+        GlobalEventEmitter.replaceOn(EVENT_TYPES.SET_TWOFACTOR, () => {
+            authDialogPopup.openEnable2fa();
+        });
         GlobalEventEmitter.on(EVENT_TYPES.MATCH_VS_AI, () => {
             this.openGameSetupDialog("vs AI");
         });
@@ -198,7 +203,10 @@ export class DashboardView extends HTMLElement {
         });
         GlobalEventEmitter.on(EVENT_TYPES.RESUME_GAME, () => this.onResumeGame());
         GlobalEventEmitter.on(EVENT_TYPES.QUIT_GAME, () => this.quitGame());
-        GlobalEventEmitter.on(EVENT_TYPES.RELOAD_DASHBOARD, () => this.connectedCallback());
+        GlobalEventEmitter.replaceOn(EVENT_TYPES.RELOAD_DASHBOARD, () => {
+            console.log('%creload dashboard', 'color: red')
+            this.connectedCallback()
+        });
     }
 
     handleKeyDown(event) {

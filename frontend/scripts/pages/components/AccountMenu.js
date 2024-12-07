@@ -1,4 +1,4 @@
-import {apiCall, getAccessToken, setLocalPicture} from "../../api/api.js";
+import {apiCall, getAccessToken, setLocalPicture, get2FAstatus, getLocal2FA, setLocal2FA, disable2FA} from "../../api/api.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
 import {BASE_AUTH_API_URL, BASE_GAME_API_URL, EVENT_TYPES, USER} from "../../utils/constants.js";
 
@@ -12,13 +12,14 @@ export class AccountMenu extends HTMLElement {
     }
     connectedCallback() {
         this.accessToken = getAccessToken();
-        this.username = USER.username; // TODO: get username from localstorage
-        this.imgUrl = USER.profilePicture; // TODO: get image from localstorage
+        this.username = USER.username;
+        this.imgUrl = USER.profilePicture;
         this.render();
-        this.setupProfilePicture();
-        // GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
-
-        this.renderPreviousMatches();
+        if (this.accessToken){
+            this.setupEventListeners();
+            this.renderPreviousMatches();
+            this.setupProfilePicture();
+        }
     }
 
     render() {
@@ -28,6 +29,8 @@ export class AccountMenu extends HTMLElement {
 html() {
     return `
         <link rel="stylesheet" href="../../../styles/account.css">
+        <!--<link id="style-sheet" rel="stylesheet" href="../../../styles/style.css">-->
+
         ${!this.accessToken ? 
             `
                 <div class="guest-view">
@@ -45,6 +48,9 @@ html() {
                         <div>
                             ${this.username}
                         </div>
+                    </div>
+                    <div>
+                        <button class="orange-2FA-button" id="TwoFactorAuthButton">Enable 2FA</button>
                     </div>
                     <div class="total-match-stats">
                         <div class="matches-won">
@@ -72,13 +78,51 @@ html() {
                     </div>
                 </div>
             `
+            }
+            `;
         }
-    `;
-}
 
+        toggle2faButton(status){
+            const TwoFactorAuthButton = this.shadowRoot.getElementById("TwoFactorAuthButton");
+            if (!TwoFactorAuthButton) return;
+            if (status == false) 
+                TwoFactorAuthButton.innerHTML = "Enable 2FA";
+            if (status == true)
+                TwoFactorAuthButton.innerHTML = "Disable 2FA";
 
-    async renderPreviousMatches() {
-
+        }
+        
+        setupEventListeners(){
+            const TwoFactorAuthButton = this.shadowRoot.getElementById("TwoFactorAuthButton");
+            if (!getLocal2FA()){
+                setLocal2FA(false);
+            }
+            if (getLocal2FA() == 'false')
+                this.toggle2faButton(false);
+            else if(getLocal2FA() == 'true')
+                this.toggle2faButton(true);
+            TwoFactorAuthButton.addEventListener("mouseover", () => {
+                GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_HOVER, { element: TwoFactorAuthButton});
+            });
+            TwoFactorAuthButton.addEventListener("mouseout", () => {
+                GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_UNHOVER, { element: TwoFactorAuthButton});
+            });
+            TwoFactorAuthButton.addEventListener("click", () => {
+                if (getLocal2FA() == 'false'){
+                    GlobalEventEmitter.emit(EVENT_TYPES.SET_TWOFACTOR, { element: TwoFactorAuthButton });
+                }
+                else if (getLocal2FA() == 'true'){
+                    disable2FA().then((success) => {
+                        if (success == true){
+                            this.toggle2faButton(false);
+                            GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
+                        }
+                    })
+                }
+            });
+        }
+        
+        async renderPreviousMatches() {
         const response = await apiCall(`${BASE_GAME_API_URL}/match-history/`, {
             method: "GET",
             headers: {

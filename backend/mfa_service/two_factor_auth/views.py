@@ -127,7 +127,7 @@ class Disable2FAView(APIView):
             response = requests.put(update_mfa_url, json={
                 'user_id': user_id,
                 'username': username,
-                'mfa_enabled': False
+                'mfa_enabled': user_profile.mfa_enabled
             })
             if response.status_code != 200:
                 return Response(
