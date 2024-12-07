@@ -57,8 +57,6 @@ export class DashboardView extends HTMLElement {
         USER.username = getUserName();
         USER.profilePicture = getUserPicture();
         USER.backupProfilePicture = getDefaultPicture();
-        // console.log('USER INFO:')
-        // console.log(USER)
     }
     
     html() {
@@ -204,7 +202,6 @@ export class DashboardView extends HTMLElement {
         GlobalEventEmitter.on(EVENT_TYPES.RESUME_GAME, () => this.onResumeGame());
         GlobalEventEmitter.on(EVENT_TYPES.QUIT_GAME, () => this.quitGame());
         GlobalEventEmitter.replaceOn(EVENT_TYPES.RELOAD_DASHBOARD, () => {
-            console.log('%creload dashboard', 'color: red')
             this.connectedCallback()
         });
     }
@@ -276,12 +273,10 @@ export class DashboardView extends HTMLElement {
         this.ctx.strokeStyle = "white";
         this.ctx.lineWidth = paddleWidth;
         this.ctx.setLineDash([paddleWidth, paddleWidth]);
-
         this.ctx.beginPath();
         this.ctx.moveTo(this.canvas.width / 2, 0);
         this.ctx.lineTo(this.canvas.width / 2, this.canvas.height);
         this.ctx.stroke();
-
         this.ctx.setLineDash([]); // Reset line dash
     }
 
@@ -378,11 +373,10 @@ export class DashboardView extends HTMLElement {
         game.start();
     }
 
-    startTournament(players, powerUpCount = 0) {
+    startTournament(players, powerUpCount) {
         this.hideAllDashboardUI();
         this.isGameRunning = true;
         this.isTournamentMatch = true;
-
         const tournament = new Tournament(players, this.canvas, powerUpCount);
         tournament.start();
     }
@@ -406,20 +400,26 @@ export class DashboardView extends HTMLElement {
         this.shadowRoot.querySelector("#login-button").style.display = "none";
         this.shadowRoot.querySelector("left-menu").style.display = "none";
         this.shadowRoot.querySelector("right-menu").style.display = "none";
-        this.ctx.setLineDash([]);
         this.shadowRoot.querySelector(".player1_score").style.display = "block";
         this.shadowRoot.querySelector(".player2_score").style.display = "block";
     }
 
     showAllDashboardUI() {
+
         this.leftPaddle.style.display = "block";
         this.rightPaddle.style.display = "block";
-        this.drawMiddleLine();
         this.shadowRoot.querySelector("#login-button").style.display = "flex"; //changed here from block to flex
         this.shadowRoot.querySelector("left-menu").style.display = "grid";
         this.shadowRoot.querySelector("right-menu").style.display = "block";
         this.shadowRoot.querySelector(".player1_score").style.display = "none";
         this.shadowRoot.querySelector(".player2_score").style.display = "none";
+        this.canvas.width = this.shadowRoot.host.offsetWidth;
+        this.canvas.height = this.shadowRoot.host.offsetHeight;
+
+        // Use requestAnimationFrame to ensure the browser has painted and the canvas is ready
+        requestAnimationFrame(() => {
+            this.drawMiddleLine();
+        });
     }
 }
 

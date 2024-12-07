@@ -126,9 +126,10 @@ input {
 
 .account-links {
 	margin-top: 10px;
-	font-size: 0.7rem;
+	font-size: 0.9rem;
 	color: #333;
     margin-bottom: 30px;
+	font-family: monospace;
 }
 
 .account-links a {

@@ -19,7 +19,6 @@ import GlobalEventEmitter from "../utils/EventEmitter.js";
 import PowerUp from "./models/powerups/PowerUp.js";
 import { atkPowers, defPowers } from "./models/powerups/PowerUp.js";
 
-
 export default class Game {
     constructor(canvas, player1Details, player2Details, isTournamentMatch = false, powerUpCount = 0) {
         this.isGameOver = false;
@@ -129,18 +128,18 @@ export default class Game {
     gameLoop() {
         if (this.isGameOver || this.isGamePaused) return;
 
-        this.collisionManager.handleCollisions()
+        this.collisionManager.handleCollisions();
         this.ball.move();
         this.player1.controller.update();
         this.player2.controller.update();
         this.handlePowerUpActivation();
+        this.checkWinCondition();
+        this.renderManager.render();
         if (this.powerUpCount > 0) {
             this.checkPowerUpCollection();
             this.player1.drawInventory(this.ctx, 30, this.canvas.height - 60);
             this.player2.drawInventory(this.ctx, this.canvas.width - 160, this.canvas.height - 60);
         }
-        this.checkWinCondition();
-        this.renderManager.render();
         requestAnimationFrame(this.gameLoop.bind(this));
     }
 

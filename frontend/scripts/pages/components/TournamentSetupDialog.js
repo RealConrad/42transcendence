@@ -28,7 +28,7 @@ export class TournamentSetupDialog extends HTMLElement {
                     <div class="heading">Tournament Setup</div>
                     <div id="player-inputs" class="player-inputs">
                         <div class="player-input">
-                            <input type="text" placeholder="Player 1 (You)" disabled value="${this.username} (You)">
+                            <input type="text" placeholder="Player 1 (You)" value="${this.username}">
                         </div>
                         <div class="player-input">
                             <input type="text" placeholder="Player 2">
@@ -62,6 +62,16 @@ export class TournamentSetupDialog extends HTMLElement {
                                 <label for="ai-difficulty-slider-4">Difficulty: <span id="difficulty-value-4">5</span></label>
                                 <input type="range" class="ai-difficulty-slider" id="ai-difficulty-slider-4" min="1" max="10" step="1" value="5" disabled>
                             </div>
+                        </div>
+                    </div>
+                    <div class="player-input" style="padding-top: 20px;">
+                        <label>
+                            <input type="checkbox" id="enable-powerups">
+                            Enable Powerups
+                        </label>
+                        <div class="powerup-count">
+                            <label for="powerup-count-slider">Powerup Count: <span id="powerup-count">4</span></label>
+                            <input type="range" class="powerup-count-slider" id="powerup-count-slider" min="1" max="10" step="1" value="5" disabled>
                         </div>
                     </div>
                     <button id="add-player-button" style="margin-bottom: 20px" class="sign-in-button">Add Player</button>
@@ -223,6 +233,18 @@ export class TournamentSetupDialog extends HTMLElement {
 
         let hasErrors = false;
         let errorMsg = "Error creating tournament. Check player names";
+        const powerupCheckbox = this.shadowRoot.getElementById('enable-powerups');
+        const powerupSlider = this.shadowRoot.getElementById('powerup-count-slider');
+        const powerupCount = this.shadowRoot.getElementById('powerup-count');
+
+        powerupCheckbox.addEventListener("change", () => {
+            powerupSlider.disabled = !powerupCheckbox.checked;
+            if (!powerupCheckbox.checked) powerupCount.textContent = "5";
+        });
+
+        powerupSlider.addEventListener("input", () => {
+            powerupCount.textContent = powerupSlider.value;
+        });
         startTournamentButton.addEventListener("click", () => {
             const players = Array.from(playerInputs.children).map((playerDiv, index) => {
                 const input = playerDiv.querySelector('input[type="text"]');
@@ -251,6 +273,13 @@ export class TournamentSetupDialog extends HTMLElement {
                 return;
             }
 
+            let powerCounts = 0;
+            if (powerupCheckbox.checked) {
+                powerCounts = powerupSlider.value;
+            }
+
+            console.log(powerCounts);
+
             const validPlayers = players.filter((player) => player.username.trim().length > 0);
             if (validPlayers.length < 4 || validPlayers.length % 2 !== 0) {
                 alert("You need at minimum 4 players and an even number of players.");
@@ -262,8 +291,7 @@ export class TournamentSetupDialog extends HTMLElement {
                 alert("Cannot have duplicate usernames");
                 return;
             }
-            console.log("Starting tournament with players:", validPlayers);
-            GlobalEventEmitter.emit(EVENT_TYPES.START_TOURNAMENT, { players: validPlayers });
+            GlobalEventEmitter.emit(EVENT_TYPES.START_TOURNAMENT, { players: validPlayers, powerCounts });
             this.close();
         });
     }

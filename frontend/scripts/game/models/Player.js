@@ -20,7 +20,6 @@ export default class Player {
         this.score = 0;
     }
 
-
     drawInventory(ctx, x, y) {
         const slotSize = 60;
         const padding = 10;
@@ -223,7 +222,4 @@ export default class Player {
             }
         }
     }
-    
-    
-
 }
