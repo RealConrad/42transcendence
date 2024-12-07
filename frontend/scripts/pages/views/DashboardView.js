@@ -264,6 +264,7 @@ export class DashboardView extends HTMLElement {
     }
 
     drawMiddleLine() {
+        console.log("Drawing line...");
         const paddleWidth = this.canvas.width / 128;
         this.ctx.strokeStyle = "white";
         this.ctx.lineWidth = paddleWidth;
@@ -398,20 +399,26 @@ export class DashboardView extends HTMLElement {
         this.shadowRoot.querySelector("#login-button").style.display = "none";
         this.shadowRoot.querySelector("left-menu").style.display = "none";
         this.shadowRoot.querySelector("right-menu").style.display = "none";
-        this.ctx.setLineDash([]);
         this.shadowRoot.querySelector(".player1_score").style.display = "block";
         this.shadowRoot.querySelector(".player2_score").style.display = "block";
     }
 
     showAllDashboardUI() {
+
         this.leftPaddle.style.display = "block";
         this.rightPaddle.style.display = "block";
-        this.drawMiddleLine();
         this.shadowRoot.querySelector("#login-button").style.display = "flex"; //changed here from block to flex
         this.shadowRoot.querySelector("left-menu").style.display = "grid";
         this.shadowRoot.querySelector("right-menu").style.display = "block";
         this.shadowRoot.querySelector(".player1_score").style.display = "none";
         this.shadowRoot.querySelector(".player2_score").style.display = "none";
+        this.canvas.width = this.shadowRoot.host.offsetWidth;
+        this.canvas.height = this.shadowRoot.host.offsetHeight;
+
+        // Use requestAnimationFrame to ensure the browser has painted and the canvas is ready
+        requestAnimationFrame(() => {
+            this.drawMiddleLine();
+        });
     }
 }
 
