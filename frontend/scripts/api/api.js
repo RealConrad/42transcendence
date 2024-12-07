@@ -29,37 +29,32 @@ export const validateInput = (input) => {
 }
 
 export const refreshTokens = async () => {
-    try {
-        const authMethod = localStorage.getItem('authMethod');
-        let refreshUrl;
+    const authMethod = localStorage.getItem('authMethod');
+    let refreshUrl;
 
-        switch (authMethod) {
-            case AUTH_METHODS.JWT:
-                refreshUrl = `${BASE_JWT_API_URL}/refresh/`;
-                break;
+    switch (authMethod) {
+        case AUTH_METHODS.JWT:
+            refreshUrl = `${BASE_JWT_API_URL}/refresh/`;
+            break;
 
-            case AUTH_METHODS.FORTY_42:
-                refreshUrl = `${BASE_OAUTH_JWT_API_URL}/refresh/`;
-                break;
+        case AUTH_METHODS.FORTY_42:
+            refreshUrl = `${BASE_OAUTH_JWT_API_URL}/refresh/`;
+            break;
 
-            default:
-                throw new Error("Authentication method not set");
-        }
-
-        const response = await fetch(refreshUrl, {
-            method: "POST",
-            credentials: 'include',
-        });
-        if (!response.ok) {
-            console.log("Error refreshing token from backend:", response.json());
-            throw new Error("Token refresh failed");
-        }
-        const data = await response.json();
-        setAccessToken(data.access_token);
-    } catch (error) {
-        deleteUser();
-        GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
+        default:
+            throw new Error("Authentication method not set");
     }
+
+    const response = await fetch(refreshUrl, {
+        method: "POST",
+        credentials: 'include',
+    });
+    if (!response.ok) {
+        console.log("Error refreshing token from backend:", response.json());
+        throw new Error("Token refresh failed");
+    }
+    const data = await response.json();
+    setAccessToken(data.access_token);
 }
 
 window.onload = async () => {
@@ -75,6 +70,8 @@ window.onload = async () => {
         }
     } else {
         // TODO: DO NOT LOG
+        deleteUser();
+        GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
         console.log("Already have access token");
     }
 }
