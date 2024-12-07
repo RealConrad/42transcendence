@@ -6,6 +6,7 @@ export default class HumanController extends Controller {
         this.upKey = upKey;
         this.downKey = downKey;
         this.inputManager = inputManager;
+        this.ai = false;
     }
 
     update() {

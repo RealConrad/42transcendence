@@ -1,4 +1,4 @@
-import {setAccessToken, apiCall, setAuthMethod, setLocalUsername,
+import {setAccessToken, apiCall, setLocalUsername, setDefaultPicture,
 	setLocalPicture, setLocal2FA} from "../../api/api.js";
 import {BASE_AUTH_API_URL, BASE_MFA_API_URL, EVENT_TYPES, FORM_ERROR_MESSAGES} from "../../utils/constants.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
@@ -271,7 +271,7 @@ class AuthDialog extends HTMLElement {
 		//TODO: Change sign in view and auth button query to enable 2fa button
 		this.shadowRoot.getElementById("sign-in-view").querySelector(".auth-button").addEventListener("click", (e) => {
 			e.preventDefault();
-			// this.enable2FA();
+			// this.enable2FA(); // Here for testing purpose
 			this.authorize42();
 		});
 
@@ -345,11 +345,10 @@ class AuthDialog extends HTMLElement {
 			}
 		}).then((data) => {
 			console.log(data);
-			// localStorage.setItem("Username", data.username);
 			localStorage.setItem('authMethod', 'JWT');
 			setLocalUsername(username);
 			setAccessToken(data.access_token);
-			setAuthMethod('JWT');
+			setDefaultPicture();
 			GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
 			this.close();
 		}).catch(err => console.log(err));
@@ -383,15 +382,25 @@ class AuthDialog extends HTMLElement {
 			setLocalUsername(username);
 			// USER.username = username;
 			if (data.mfa_enable_flag) {
+    			this.tempAccessToken = data.access_token;
 				this.shadowRoot.getElementById("sign-in-view").style.display = "none"
 				this.shadowRoot.getElementById("otp-view").style.display = "block";
 			} else {
 				this.close();
 				GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
 			}
-			// console.log('user logged in: ' , USER.loggedIn);
 		}).catch(err => console.error(err));
 	}
+
+	completeLogin(data) {
+		setAccessToken(data.access_token || this.tempAccessToken); // Use the stored token
+		setDefaultPicture();
+		setLocalUsername(data.username);
+		this.tempAccessToken = null; // Clear the temporary token
+		GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
+		this.close();
+	}
+
 
 	async authorize42()  {
 		const response = await fetch(`${BASE_AUTH_API_URL}/authorize/`, {
@@ -446,7 +455,16 @@ class AuthDialog extends HTMLElement {
 				otp_code: otpCode,
 			}),
 		})
-			.then((response) => response.json())
+			.then((response) => {
+			if (response.ok) {
+				return response.json();
+			} else {
+				return response.json().then((err) => {
+					console.error("Response not 200");
+					throw new Error(JSON.stringify(err));
+				})
+			}
+		})
 			.then((data) => {
 				console.log("OTP Verified Successfully!", data);
 				this.close();
@@ -515,7 +533,6 @@ export async function handleCallback() {
 					setLocalPicture(data.profile_picture);
 					localStorage.setItem('authMethod', '42OAuth');
 					console.log(`Welcome, ${data.username}!`);
-					setAuthMethod('42OAuth');
 					setAccessToken(data.access_token);
 					Router.navigateTo("/");
 				} else {

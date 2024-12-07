@@ -11,20 +11,6 @@ const AUTH_METHODS = {
     FORTY_42: '42OAuth',
 }
 
-let authMethod = AUTH_METHODS.JWT; // Default authentication method
-
-const setAuthMethod = (method) => {
-    if (Object.values(AUTH_METHODS).includes(method)) {
-        authMethod = method;
-    } else {
-        console.error('Invalid authentication method');
-    }
-};
-
-const getAuthMethod = () => authMethod;
-
-export { AUTH_METHODS, setAuthMethod, getAuthMethod };
-
 export const setAccessToken = (token) => {
     accessToken = token;
 }
@@ -148,8 +134,10 @@ export const apiCall = async (url, options = {}) => {
         ...options.headers,
         Authorization: `Bearer ${getAccessToken()}`,
     };
-    
-    if (authMethod === AUTH_METHODS.FORTY_42) {
+
+    console.log("access_token:", getAccessToken());
+
+    if (authMethod === '42OAuth') {
         options.headers['X-42-Token'] = 'true';
     }
     const response = await fetch(url, options);
@@ -158,6 +146,11 @@ export const apiCall = async (url, options = {}) => {
         console.warn("Access token expired, refreshing...");
         await refreshTokens();
         options.headers.Authorization = `Bearer ${getAccessToken()}`;
+        console.log("access_token:", getAccessToken());
+
+        if (authMethod === '42OAuth') {
+            options.headers['X-42-Token'] = 'true';
+        }
         return fetch(url, options);
     }
     if (response.status == 400){

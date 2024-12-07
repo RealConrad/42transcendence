@@ -178,3 +178,10 @@
     color: #555;
     font-weight: bold;
 }
+
+.tournaments {
+    color: white;
+    font-weight: bold; /* Optional: Makes the text bold */
+    font-size: 1.2em;  /* Optional: Adjusts the font size */
+    padding-top: 50px;
+}

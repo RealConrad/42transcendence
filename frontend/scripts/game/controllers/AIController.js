@@ -13,6 +13,7 @@ export default class AIController extends Controller{
         };
         this.startSnapshot();
         this.difficulty = difficulty;
+        this.ai = true;
     }
 
     startSnapshot() {
@@ -26,7 +27,7 @@ export default class AIController extends Controller{
         }, 1000);
     }
 
-    predictBallPosition(difficulty = 1) {
+    predictBallPosition(difficulty = 3) {
         if (!this.lastSnapshot) return this.ball.y;
 
         let predictedX = this.lastSnapshot.x;
