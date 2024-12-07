@@ -31,7 +31,7 @@ export class TournamentSetupDialog extends HTMLElement {
                             <input type="text" placeholder="Player 1 (You)" value="${this.username}">
                         </div>
                         <div class="player-input">
-                            <input type="text" placeholder="Player 2">
+                            <input type="text" placeholder="Player 2" value="Player 2">
                             <label>
                                 <input type="checkbox" id="ai-checkbox-2">
                                 AI
@@ -42,7 +42,7 @@ export class TournamentSetupDialog extends HTMLElement {
                             </div>
                         </div>
                         <div class="player-input">
-                            <input type="text" placeholder="Player 3">
+                            <input type="text" placeholder="Player 3" value="Player 3">
                             <label>
                                 <input type="checkbox" id="ai-checkbox-3">
                                 AI
@@ -53,7 +53,7 @@ export class TournamentSetupDialog extends HTMLElement {
                             </div>
                         </div>
                         <div class="player-input">
-                            <input type="text" placeholder="Player 4">
+                            <input type="text" placeholder="Player 4" value="Player 4">
                             <label>
                                 <input type="checkbox" id="ai-checkbox-4">
                                 AI
@@ -102,7 +102,7 @@ export class TournamentSetupDialog extends HTMLElement {
             const slider = this.shadowRoot.getElementById(`ai-difficulty-slider-${i}`);
             const difficultyValue = this.shadowRoot.getElementById(`difficulty-value-${i}`);
 
-            input.value = '';
+            input.value = `Player ${i}`;
             checkbox.checked = false;
             slider.value = '5';
             slider.disabled = true;
@@ -129,12 +129,10 @@ export class TournamentSetupDialog extends HTMLElement {
                 console.warn(`Missing elements for Player ${i}. Skipping setup.`);
                 continue;
             }
-
             checkbox.addEventListener("change", () => {
                 slider.disabled = !checkbox.checked;
                 if (!checkbox.checked) difficultyValue.textContent = "5";
             });
-
             slider.addEventListener("input", () => {
                 difficultyValue.textContent = slider.value;
             });
@@ -163,6 +161,7 @@ export class TournamentSetupDialog extends HTMLElement {
             const input = document.createElement("input");
             input.type = "text";
             input.placeholder = `Player ${playerIndex}`;
+            input.value = `Player ${playerIndex}`;
 
             // AI Checkbox
             const label = document.createElement("label");
@@ -260,6 +259,7 @@ export class TournamentSetupDialog extends HTMLElement {
                         username,
                         isAI: checkbox ? checkbox.checked : false,
                         aiDifficulty: (checkbox && checkbox.checked) ? slider.value : null,
+                        id: index,
                     };
                 } catch (err) {
                     hasErrors = true;
@@ -277,8 +277,6 @@ export class TournamentSetupDialog extends HTMLElement {
             if (powerupCheckbox.checked) {
                 powerCounts = powerupSlider.value;
             }
-
-            console.log(powerCounts);
 
             const validPlayers = players.filter((player) => player.username.trim().length > 0);
             if (validPlayers.length < 4 || validPlayers.length % 2 !== 0) {
