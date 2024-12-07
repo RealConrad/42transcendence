@@ -15,7 +15,7 @@ export class AccountMenu extends HTMLElement {
         this.username = USER.username;
         this.imgUrl = USER.profilePicture;
         this.render();
-        if (USER.username){
+        if (this.accessToken){
             this.setupEventListeners();
             this.renderPreviousMatches();
             this.setupProfilePicture();

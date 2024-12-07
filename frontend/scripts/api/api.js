@@ -135,7 +135,7 @@ export const apiCall = async (url, options = {}) => {
         Authorization: `Bearer ${getAccessToken()}`,
     };
 
-    console.log("access_token:", getAccessToken());
+    // console.log("access_token:", getAccessToken());
 
     if (authMethod === '42OAuth') {
         options.headers['X-42-Token'] = 'true';
