@@ -25,7 +25,6 @@ export const setDefaultPicture = async () => {
     if (!getDefaultPicture()){
         await fetchDogPicture().then((url)=>{
             localStorage.setItem('DefaultPicture', url);
-            // console.log('set default picture: ', url);
         });
     }
 }
@@ -93,26 +92,25 @@ export const refreshTokens = async () => {
             throw new Error("Token refresh failed");
         }
         const data = await response.json();
-        console.info("Refreshed tokens");
-        console.log("new_access_token: ", data.access_token);
         setAccessToken(data.access_token);
     } catch (error) {
-        console.log("Failed to refresh tokens,", error);
-        deleteUser();       //added
+        deleteUser();
         GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
     }
 }
 
 window.onload = async () => {
+    // TODO: DO NOT LOG
     console.log("Page refreshed, trying to get new tokens....");
     if (!accessToken) {
         try {
-            console.log("")
             await refreshTokens();
         } catch (error) {
+            // TODO: LOG USER OUT
             console.error("Unable to refresh tokens on page load: ", error);
         }
     } else {
+        // TODO: DO NOT LOG
         console.log("Already have access token");
     }
 }
@@ -125,7 +123,6 @@ window.onload = async () => {
  */
 export const apiCall = async (url, options = {}) => {
     const authMethod = localStorage.getItem('authMethod');
-
     if (!accessToken) {
         await refreshTokens();
     }
@@ -134,8 +131,6 @@ export const apiCall = async (url, options = {}) => {
         ...options.headers,
         Authorization: `Bearer ${getAccessToken()}`,
     };
-
-    // console.log("access_token:", getAccessToken());
 
     if (authMethod === '42OAuth') {
         options.headers['X-42-Token'] = 'true';
@@ -146,14 +141,15 @@ export const apiCall = async (url, options = {}) => {
         console.warn("Access token expired, refreshing...");
         await refreshTokens();
         options.headers.Authorization = `Bearer ${getAccessToken()}`;
-        console.log("access_token:", getAccessToken());
 
         if (authMethod === '42OAuth') {
             options.headers['X-42-Token'] = 'true';
         }
         return fetch(url, options);
     }
-    if (response.status == 400){
+    // TODO: WHY IS THIS A THING? 400 INDICATES A USER ERROR WITH DATA, NOT SERVER ERROR!
+    // ERROR CODE 400 ALSO CAN INDICATE OTHER ERRORS, NOT JUST 2FA!
+    if (response.status === 400){
         console.log("400: 2FA is already enabled");
         return response;
     }
@@ -173,14 +169,8 @@ export const fetchDogPicture = async () => {
         if (!response.ok) {
             throw new Error("Network response was not ok");
         }
-        
         const data = await response.json(); // Wait for the JSON parsing
-        // console.log('data: ');
-        // console.log(data);
-        let url = data.message;
-        console.log('fetching pic: ', url);
-        return url;
-        // dogImage.src = data.message; // `message` contains the image URL
+        return data.message;
     } catch (error) {
         console.error("There was a problem with the fetch operation:", error);
         return null;
@@ -205,13 +195,12 @@ export const disable2FA = async () => {
         },
     })
         .then((response) => response.json())
-        .then((data) => {
-            // this.close();
+        .then(() => {
+            // TODO: TOAST
             setLocal2FA(false);
-            console.log("2FA disabled successfully!", data);
             return true;
         }) .catch((error) => {
-            console.error("Failed to disable 2FA");
+            // TODO: TOAST 'error'
             return false;
     })
 }
