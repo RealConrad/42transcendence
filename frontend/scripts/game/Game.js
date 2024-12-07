@@ -134,13 +134,14 @@ export default class Game {
         this.player1.controller.update();
         this.player2.controller.update();
         this.handlePowerUpActivation();
+        this.checkWinCondition();
+        this.renderManager.render();
         if (this.powerUpCount > 0) {
             this.checkPowerUpCollection();
+            console.log("Drawing...");
             this.player1.drawInventory(this.ctx, 30, this.canvas.height - 60);
             this.player2.drawInventory(this.ctx, this.canvas.width - 160, this.canvas.height - 60);
         }
-        this.checkWinCondition();
-        this.renderManager.render();
         requestAnimationFrame(this.gameLoop.bind(this));
     }
 
