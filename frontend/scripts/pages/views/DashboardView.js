@@ -370,11 +370,11 @@ export class DashboardView extends HTMLElement {
         game.start();
     }
 
-    startTournament(players, powerUpCount = 0) {
+    startTournament(players, powerUpCount) {
         this.hideAllDashboardUI();
         this.isGameRunning = true;
         this.isTournamentMatch = true;
-
+        console.log("POWERUP COUNTS,", powerUpCount);
         const tournament = new Tournament(players, this.canvas, powerUpCount);
         tournament.start();
     }
