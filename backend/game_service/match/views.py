@@ -1,13 +1,16 @@
 from multiprocessing.context import AuthenticationError
 from rest_framework import serializers
-from rest_framework.generics import CreateAPIView, ListAPIView
+from rest_framework.generics import CreateAPIView, ListAPIView, get_object_or_404
 from rest_framework.response import Response
 from rest_framework.permissions import BasePermission
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from match.models import Match
-from match.serializers import MatchSerializer
+from .models import Match, UserProfile
+from .serializers import UserProfileSerializer, MatchSerializer
 import logging
+from rest_framework.status import HTTP_400_BAD_REQUEST
+from rest_framework.views import APIView
+
 
 logger = logging.getLogger(__name__)
 
@@ -17,18 +20,67 @@ class SaveMatchView(CreateAPIView):
 
     def perform_create(self, serializer):
         try:
-            user_id = self.request.user.id
-            serializer.save(user_id=user_id)
+            user = self.request.user
+            match = serializer.save(user=user)
+
+            player1_userprofile = UserProfile.objects.get(user=user)
+            if match.winner == match.player1_username:
+                player1_userprofile.total_matches_won += 1
+            else:
+                player1_userprofile.total_matches_lost += 1
+            player1_userprofile.save()
+            logger.info(f"Match successfully saved for user {user.username}")
         except serializers.ValidationError as e:
             raise
         except Exception as e:
             logger.error(f"Unexpected Error: {e}")
             raise
 
+class UpdateTournamentStatusView(APIView):
+    """
+    Updates tournament stats for the user
+    """
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        action = request.data.get('action')
+        profile = get_object_or_404(UserProfile, user=request.user)
+
+        if action == 'played':
+            profile.increment_tournaments_played()
+        elif action == 'won':
+            profile.increment_tournaments_won()
+            profile.increment_tournaments_played()
+        else:
+            return Response({"detail": "Invalid action"}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = UserProfileSerializer(profile)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class MatchHistoryView(ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = MatchSerializer
 
     def get_queryset(self):
-        user_id = self.request.user.id
-        return Match.objects.filter(user_id=user_id)
+        return Match.objects.filter(user=self.request.user)
+
+    def list(self, request, *args, **kwargs):
+        profile = get_object_or_404(UserProfile, user=request.user)
+        profile_serializer = UserProfileSerializer(profile)
+
+        queryset = self.get_queryset()
+        serializer = self.get_serializer(queryset, many=True)
+
+        total_matches = {
+            "wins": profile.total_matches_won,
+            "losses": profile.total_matches_lost,
+        }
+
+        response_data = {
+            "total_matches": total_matches,
+            "tournaments": profile_serializer.data,
+            "games": serializer.data
+        }
+
+        return Response(response_data, status=status.HTTP_200_OK)

@@ -190,6 +190,9 @@ export default class Game {
 
     cleanup() {
         // TODO: Clean up event listeners
+        GlobalEventEmitter.off(EVENT_TYPES.PAUSE_GAME, this.pauseGame);
+        GlobalEventEmitter.off(EVENT_TYPES.RESUME_GAME, this.resumeGame);
+        GlobalEventEmitter.off(EVENT_TYPES.QUIT_GAME, this.quitGame);
     }
 
     checkWinCondition() {
@@ -203,8 +206,8 @@ export default class Game {
                     isAI: this.player1.controller instanceof AIController,
                     difficulty: this.player1.controller instanceof AIController ? this.player1AIDiff : null
                 };
-                if (!this.isTournamentMatch)
-                    this.saveMatch();
+                // if (!this.isTournamentMatch)
+                //     this.saveMatch();
 
             } else if (this.player2.score === this.maxScore) {
                 this.winner = {
@@ -268,25 +271,29 @@ export default class Game {
     }
 
     async saveMatch() {
-        const payload = {
-            "player1_username": this.player1.username,
-            "player2_username": this.player2.username,
-            "player1_score": this.player1.score,
-            "player2_score": this.player2.score,
-        }
-        const response = await apiCall(`${BASE_GAME_API_URL}/save-match/`, {
-            method: 'POST',
-            headers: {
-                "Content-Type": "application/json",
-            },
-            credentials: 'include',
-            body: JSON.stringify(payload)
-        });
-        if (response.ok) {
-            await response.json();
-            console.log("Saved match");
-        } else {
-            console.error("Failed to save match")
+        try {
+            const payload = {
+                "player1_username": this.player1.username,
+                "player2_username": this.player2.username,
+                "player1_score": this.player1.score,
+                "player2_score": this.player2.score,
+            };
+            const response = await apiCall(`${BASE_GAME_API_URL}/save-match/`, {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                credentials: 'include',
+                body: JSON.stringify(payload)
+            });
+            if (response.ok) {
+                await response.json();
+                console.log("Saved match");
+            } else {
+                console.error("Failed to save match");
+            }
+        } catch (error) {
+            console.log("error while saving match:", error);
         }
     }
 }
