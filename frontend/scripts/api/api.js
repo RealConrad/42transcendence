@@ -147,12 +147,6 @@ export const apiCall = async (url, options = {}) => {
         }
         return fetch(url, options);
     }
-    // TODO: WHY IS THIS A THING? 400 INDICATES A USER ERROR WITH DATA, NOT SERVER ERROR!
-    // ERROR CODE 400 ALSO CAN INDICATE OTHER ERRORS, NOT JUST 2FA!
-    if (response.status === 400){
-        console.log("400: 2FA is already enabled");
-        return response;
-    }
     if (!response.ok) {
         const error = await response.json();
         console.error(`API Error: ${response.status}`, error);
