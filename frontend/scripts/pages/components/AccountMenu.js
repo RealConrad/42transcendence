@@ -78,7 +78,6 @@ html() {
 
 
     async renderPreviousMatches() {
-
         const response = await apiCall(`${BASE_GAME_API_URL}/match-history/`, {
             method: "GET",
             headers: {
@@ -89,10 +88,7 @@ html() {
         if (!response.ok) {
             throw new Error(`Error fetching match history`);
         }
-
-        // Parsing the JSON response
         const data = await response.json();
-
 
         const totalMatchWins = data.total_matches.wins;
         const totalMatchLosses = data.total_matches.losses;
