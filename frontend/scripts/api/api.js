@@ -1,8 +1,6 @@
-import {BASE_JWT_API_URL, BASE_MFA_API_URL} from "../utils/constants.js";
-import {BASE_OAUTH_JWT_API_URL} from "../utils/constants.js";
-
-import { USER, EVENT_TYPES } from "../utils/constants.js";
+import {BASE_GAME_API_URL, BASE_JWT_API_URL, BASE_MFA_API_URL, BASE_OAUTH_JWT_API_URL, EVENT_TYPES, USER} from "../utils/constants.js";
 import GlobalEventEmitter from "../utils/EventEmitter.js";
+import GlobalCacheManager from "../utils/CacheManager.js";
 
 let accessToken = null;
 
@@ -10,41 +8,6 @@ const AUTH_METHODS = {
     JWT: 'JWT', //normal
     FORTY_42: '42OAuth',
 }
-
-export const setAccessToken = (token) => {
-    accessToken = token;
-}
-
-export const setLocalUsername = (username) => {
-    localStorage.setItem('username', username);
-}
-export const setLocalPicture = (url) => {
-    localStorage.setItem('ProfilePicture', url);
-}
-export const setDefaultPicture = async () => {
-    if (!getDefaultPicture()){
-        await fetchDogPicture().then((url)=>{
-            localStorage.setItem('DefaultPicture', url);
-        });
-    }
-}
-export const setLocal2FA = async (value) => {
-    localStorage.setItem('2FA', value);
-}
-export const getUserName = () => {
-    return localStorage.getItem("username");
-}
-export const getUserPicture = () => {
-    return localStorage.getItem("ProfilePicture");
-}
-export const getDefaultPicture = () => {
-    return localStorage.getItem("DefaultPicture");
-}
-export const getLocal2FA = () => {
-    return localStorage.getItem("2FA");
-}
-
-export const getAccessToken = () => accessToken;
 
 export const validateInput = (input) => {
     const sanitized = input.trim();
@@ -105,6 +68,7 @@ window.onload = async () => {
     if (!accessToken) {
         try {
             await refreshTokens();
+            await GlobalCacheManager.initialize("matches", fetchMatchHistory);
         } catch (error) {
             // TODO: LOG USER OUT
             console.error("Unable to refresh tokens on page load: ", error);
@@ -154,6 +118,48 @@ export const apiCall = async (url, options = {}) => {
     }
     return response;
 }
+
+export const fetchMatchHistory = async () => {
+    const response = await apiCall(`${BASE_GAME_API_URL}/match-history/`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error(`Error fetching match history`);
+    }
+    return response.json();
+}
+
+// SETTERS
+export const setAccessToken = (token) => {
+    accessToken = token;
+}
+export const setLocalUsername = (username) => {
+    localStorage.setItem('username', username);
+}
+export const setLocalPicture = (url) => {
+    localStorage.setItem('ProfilePicture', url);
+}
+export const setDefaultPicture = async () => {
+    if (!getDefaultPicture()){
+        await fetchDogPicture().then((url)=>{
+            localStorage.setItem('DefaultPicture', url);
+        });
+    }
+}
+export const setLocal2FA = async (value) => {
+    localStorage.setItem('2FA', value);
+}
+
+// GETTERS
+export const getUserName = () => localStorage.getItem("username");
+export const getUserPicture = () => localStorage.getItem("ProfilePicture");
+export const getDefaultPicture = () => localStorage.getItem("DefaultPicture");
+export const getLocal2FA = () => localStorage.getItem("2FA");
+export const getAccessToken = () => accessToken;
 
 export const fetchDogPicture = async () => {
     const apiURL = "https://dog.ceo/api/breeds/image/random";
