@@ -20,4 +20,4 @@ window.addEventListener('DOMContentLoaded', () => {
     document.addEventListener("mousemove", (event) => {
         GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_MOVE, { x: event.clientX, y: event.clientY });
     });
-})
+});

@@ -3,7 +3,7 @@ import GlobalEventEmitter from "../utils/EventEmitter.js";
 import {EVENT_TYPES} from "../utils/constants.js";
 
 export default class Tournament {
-    constructor(players, canvas) {
+    constructor(players, canvas, powerUpCount) {
         if (players.length < 4) {
             throw new Error("Tournament must have at least 4 players");
         }
@@ -13,6 +13,7 @@ export default class Tournament {
         this.currentRoundIndex = 0;
         this.currentMatchIndex = 0;
         this.isTournamentOver = false;
+        this.powerUpCount = powerUpCount;
         GlobalEventEmitter.on(EVENT_TYPES.QUIT_GAME, this.quitTournament.bind(this));
     }
 
@@ -129,6 +130,7 @@ export default class Tournament {
                 match.player1,
                 match.player2,
                 true,
+                this.powerUpCount,
             );
 
             const checkGameOver = () => {

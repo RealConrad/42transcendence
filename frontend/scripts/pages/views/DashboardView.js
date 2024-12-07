@@ -173,12 +173,12 @@ export class DashboardView extends HTMLElement {
         GlobalEventEmitter.on(EVENT_TYPES.MATCH_TOURNAMENT, () => {
             tournamentSetupDialog.open();
         });
-        GlobalEventEmitter.on(EVENT_TYPES.START_MATCH, ({ player1Name, player2Name, matchType, AIDifficulty}) => {
-            this.startGame(player1Name, player2Name, matchType !== "local", AIDifficulty);
+        GlobalEventEmitter.on(EVENT_TYPES.START_MATCH, ({ player1Name, player2Name, matchType, AIDifficulty, powerUpCount }) => {
+            this.startGame(player1Name, player2Name, matchType !== "local", AIDifficulty, powerUpCount);
         });
-        GlobalEventEmitter.on(EVENT_TYPES.START_TOURNAMENT, ({ players: players}) => {
+        GlobalEventEmitter.on(EVENT_TYPES.START_TOURNAMENT, ({ players: players, powerCounts}) => {
             tournamentSetupDialog.close();
-            this.startTournament(players);
+            this.startTournament(players, powerCounts);
         });
         GlobalEventEmitter.on(EVENT_TYPES.QUIT_MATCH, () => {
             this.endGame();
@@ -350,7 +350,7 @@ export class DashboardView extends HTMLElement {
         }
     }
 
-    startGame(player1Name, player2Name, vsAI, aiDifficulty = 5) {
+    startGame(player1Name, player2Name, vsAI, aiDifficulty = 5, powerUpCount) {
         this.hideAllDashboardUI();
         this.isGameRunning = true;
         this.isTournamentMatch = false;
@@ -366,16 +366,16 @@ export class DashboardView extends HTMLElement {
             aiDifficulty: aiDifficulty,
         };
         this.updateScores(player1Name, player2Name, 0, 0);
-        const game = new Game(this.canvas, player1, player2);
+        const game = new Game(this.canvas, player1, player2, false, powerUpCount);
         game.start();
     }
 
-    startTournament(players) {
+    startTournament(players, powerUpCount = 0) {
         this.hideAllDashboardUI();
         this.isGameRunning = true;
         this.isTournamentMatch = true;
 
-        const tournament = new Tournament(players, this.canvas);
+        const tournament = new Tournament(players, this.canvas, powerUpCount);
         tournament.start();
     }
 
