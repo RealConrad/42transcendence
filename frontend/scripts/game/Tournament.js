@@ -11,7 +11,6 @@ export default class Tournament {
         }
         this.canvas = canvas;
         this.players = players; // Array of { username, isAI, aiDifficulty, id }
-        console.log(players);
         this.bracket = []; // Array of rounds, each round is an array of matches
         this.currentRoundIndex = 0;
         this.currentMatchIndex = 0;

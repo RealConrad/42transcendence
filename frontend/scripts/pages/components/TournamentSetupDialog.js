@@ -283,6 +283,11 @@ export class TournamentSetupDialog extends HTMLElement {
                 alert("You need at minimum 4 players and an even number of players.");
                 return;
             }
+            // Credit: https://stackoverflow.com/questions/30924280/what-is-the-best-way-to-determine-if-a-given-number-is-a-power-of-two
+            if (Math.log2(validPlayers.length) % 1 !== 0) {
+                alert("Total number of players should be a power of 2");
+                return;
+            }
             const username = validPlayers.map(player => player.username.toLowerCase());
             const uniqueNames = new Set(username);
             if (uniqueNames.size !== username.length) {
