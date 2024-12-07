@@ -21,7 +21,7 @@ import { atkPowers, defPowers } from "./models/powerups/PowerUp.js";
 
 
 export default class Game {
-    constructor(canvas, player1Details, player2Details, isTournamentMatch = false, powerUpCount = 4) {
+    constructor(canvas, player1Details, player2Details, isTournamentMatch = false, powerUpCount = 0) {
         this.isGameOver = false;
         this.isGamePaused = false;
         this.winner = null;
@@ -29,6 +29,7 @@ export default class Game {
         this.isTournamentMatch = isTournamentMatch;
         this.player1AIDiff = player1Details.aiDifficulty;
         this.player2AIDiff = player2Details.aiDifficulty;
+        this.powerUpCount = powerUpCount;
 
         // Setup canvas
         this.canvas = canvas;
@@ -39,15 +40,15 @@ export default class Game {
         this.collisionManager = new CollisionManager(this);
         this.inputManager = new InputManager()
 
-        this.ball = new Ball(this.canvas.width / 2, this.canvas.height / 2, 5, 2, 2);
+        this.ball = new Ball(this.canvas.width / 2, this.canvas.height / 2, 5, 5, 5);
 
         this.Battleground = new Battleground(this.canvas);
 
 
         // Setup powerups
-        if (powerUpCount > 0) {
+        if (this.powerUpCount > 0) {
             this.powerUps = [];
-            this.createPowerUps(powerUpCount);
+            this.createPowerUps(this.powerUpCount);
         }
 
         // Setup player models and controllers
@@ -133,11 +134,13 @@ export default class Game {
         this.player1.controller.update();
         this.player2.controller.update();
         this.handlePowerUpActivation();
-        this.checkPowerUpCollection();
+        if (this.powerUpCount > 0) {
+            this.checkPowerUpCollection();
+            this.player1.drawInventory(this.ctx, 30, this.canvas.height - 60);
+            this.player2.drawInventory(this.ctx, this.canvas.width - 160, this.canvas.height - 60);
+        }
         this.checkWinCondition();
         this.renderManager.render();
-        this.player1.drawInventory(this.ctx, 30, this.canvas.height - 60);
-        this.player2.drawInventory(this.ctx, this.canvas.width - 160, this.canvas.height - 60);
         requestAnimationFrame(this.gameLoop.bind(this));
     }
 
@@ -206,9 +209,6 @@ export default class Game {
                     isAI: this.player1.controller instanceof AIController,
                     difficulty: this.player1.controller instanceof AIController ? this.player1AIDiff : null
                 };
-                // if (!this.isTournamentMatch)
-                //     this.saveMatch();
-
             } else if (this.player2.score === this.maxScore) {
                 this.winner = {
                     player1Score: this.player1.score,
@@ -217,7 +217,6 @@ export default class Game {
                     isAI: this.player2.controller instanceof AIController,
                     difficulty: this.player2.controller instanceof AIController ? this.player2AIDiff : null
                 };
-
             }
             if (!this.isTournamentMatch) {
                  GlobalEventEmitter.emit(EVENT_TYPES.GAME_OVER, {
@@ -289,6 +288,8 @@ export default class Game {
             if (response.ok) {
                 await response.json();
                 console.log("Saved match");
+
+
             } else {
                 console.error("Failed to save match");
             }
