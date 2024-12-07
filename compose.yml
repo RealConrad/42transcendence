@@ -153,6 +153,44 @@ services:
     networks:
       - transcendence
 
+  # FRIENDS SERVICE
+  friendsdb:
+    image: postgres:13
+    container_name: friendsdb
+    restart: always
+    environment:
+      POSTGRES_DB: ${FRIENDS_POSTGRES_DB}
+      POSTGRES_USER: ${FRIENDS_POSTGRES_USER}
+      POSTGRES_PASSWORD: ${FRIENDS_POSTGRES_PASSWORD}
+    env_file:
+      - .env
+    volumes:
+      - friends_postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5436:5432"
+    networks:
+      - transcendence
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U admin -d ${FRIENDS_POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  friendsservice:
+    build: ./backend/friends_service
+    container_name: friendsservice
+    image: friendsservice
+    restart: always
+    depends_on:
+      friendsdb:
+        condition: service_healthy
+    env_file:
+      - .env
+    ports:
+      - "8004:8004"
+    networks:
+      - transcendence
+
   nginx:
     image: nginx:latest
     container_name: nginx
@@ -175,3 +213,5 @@ volumes:
     name: transcendence_game_postgres_data
   jwt_postgres_data:
     name: transcendence_jwt_postgres_data
+  friends_postgres_data:
+    name: transcendence_friends_postgres_data
