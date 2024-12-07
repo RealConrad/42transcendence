@@ -14,10 +14,11 @@ import RenderManager from "./managers/RenderManager.js";
 import CollisionManager from "./managers/CollisionManager.js";
 import AIController from "./controllers/AIController.js";
 import InputManager from "./managers/InputManager.js";
-import { apiCall} from "../api/api.js";
+import {apiCall, fetchMatchHistory} from "../api/api.js";
 import GlobalEventEmitter from "../utils/EventEmitter.js";
 import PowerUp from "./models/powerups/PowerUp.js";
 import { atkPowers, defPowers } from "./models/powerups/PowerUp.js";
+import GlobalCacheManager from "../utils/CacheManager.js";
 
 export default class Game {
     constructor(canvas, player1Details, player2Details, isTournamentMatch = false, powerUpCount = 0) {
@@ -286,13 +287,21 @@ export default class Game {
             });
             if (response.ok) {
                 await response.json();
+                // TODO: Toast
                 console.log("Saved match");
-
-
+                try {
+                    const updatedMatchHistory = await fetchMatchHistory();
+                    GlobalCacheManager.set("matches", updatedMatchHistory);
+                } catch (error) {
+                    // TODO: Toast
+                    console.log("Failed to update match history after saving: ", error);
+                }
             } else {
+                // TODO: Toast
                 console.error("Failed to save match");
             }
         } catch (error) {
+            // TODO: Toast
             console.log("error while saving match:", error);
         }
     }
