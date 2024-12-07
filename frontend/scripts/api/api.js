@@ -1,4 +1,4 @@
-import {BASE_JWT_API_URL} from "../utils/constants.js";
+import {BASE_JWT_API_URL, BASE_MFA_API_URL} from "../utils/constants.js";
 import {BASE_OAUTH_JWT_API_URL} from "../utils/constants.js";
 
 import { USER, EVENT_TYPES } from "../utils/constants.js";
@@ -29,7 +29,9 @@ export const setDefaultPicture = async () => {
         });
     }
 }
-
+export const setLocal2FA = async (value) => {
+    localStorage.setItem('2FA', value);
+}
 export const getUserName = () => {
     return localStorage.getItem("username");
 }
@@ -38,6 +40,9 @@ export const getUserPicture = () => {
 }
 export const getDefaultPicture = () => {
     return localStorage.getItem("DefaultPicture");
+}
+export const getLocal2FA = () => {
+    return localStorage.getItem("2FA");
 }
 
 export const getAccessToken = () => accessToken;
@@ -94,6 +99,7 @@ export const refreshTokens = async () => {
     } catch (error) {
         console.log("Failed to refresh tokens,", error);
         deleteUser();       //added
+        GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
     }
 }
 
@@ -129,7 +135,7 @@ export const apiCall = async (url, options = {}) => {
         Authorization: `Bearer ${getAccessToken()}`,
     };
 
-    console.log("access_token:", getAccessToken());
+    // console.log("access_token:", getAccessToken());
 
     if (authMethod === '42OAuth') {
         options.headers['X-42-Token'] = 'true';
@@ -146,6 +152,10 @@ export const apiCall = async (url, options = {}) => {
             options.headers['X-42-Token'] = 'true';
         }
         return fetch(url, options);
+    }
+    if (response.status == 400){
+        console.log("400: 2FA is already enabled");
+        return response;
     }
     if (!response.ok) {
         const error = await response.json();
@@ -175,6 +185,35 @@ export const fetchDogPicture = async () => {
         console.error("There was a problem with the fetch operation:", error);
         return null;
     }
+}
+
+export const get2FAstatus = async () => {
+    let response = await apiCall(`${BASE_MFA_API_URL}/enable/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+    })
+    return response.status;
+}
+
+export const disable2FA = async () => {
+    return apiCall(`${BASE_MFA_API_URL}/disable/`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            // this.close();
+            setLocal2FA(false);
+            console.log("2FA disabled successfully!", data);
+            return true;
+        }) .catch((error) => {
+            console.error("Failed to disable 2FA");
+            return false;
+    })
 }
 
 function deleteUser(){
