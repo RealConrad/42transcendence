@@ -8,7 +8,9 @@ export default class Paddle extends Renderable {
         this.initialY = y;
         this.width = width;
         this.height = height;
+        this.initialHeight = height;
         this.speed = speed;
+        this.initialSpeed = speed;
 		this.canvas = canvas;
         // change in y velocity
         this.dy = 0;
@@ -30,5 +32,7 @@ export default class Paddle extends Renderable {
 
     reset() {
         this.y = this.initialY;
+        this.height = this.initialHeight;
+        this.speed = this.initialSpeed;
     }
 }
