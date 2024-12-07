@@ -72,11 +72,13 @@ export default class Game {
         this.player1 = player1Details.isAI
             ? new Player(
                 player1Details.username,
+                player1Details.id,
                 player1Paddle,
                 new AIController(player1Paddle, this.ball, player1Details.aiDifficulty, this.canvas)
             )
             : new Player(
                 player1Details.username,
+                player1Details.id,
                 player1Paddle,
                 new HumanController(player1Paddle, 'w', 's', this.inputManager)
             );
@@ -84,11 +86,13 @@ export default class Game {
         this.player2 = player2Details.isAI
             ? new Player(
                 player2Details.username,
+                player2Details.id,
                 player2Paddle,
                 new AIController(player2Paddle, this.ball, player2Details.aiDifficulty, this.canvas)
             )
             : new Player(
                 player2Details.username,
+                player2Details.id,
                 player2Paddle,
                 new HumanController(player2Paddle, 'ArrowUp', 'ArrowDown', this.inputManager)
             );
@@ -206,6 +210,7 @@ export default class Game {
                     player1Score: this.player1.score,
                     player2Score: this.player2.score,
                     username: this.player1.username,
+                    id: this.player1.id,
                     isAI: this.player1.controller instanceof AIController,
                     difficulty: this.player1.controller instanceof AIController ? this.player1AIDiff : null
                 };
@@ -214,6 +219,7 @@ export default class Game {
                     player1Score: this.player1.score,
                     player2Score: this.player2.score,
                     username: this.player2.username,
+                    id: this.player2.id,
                     isAI: this.player2.controller instanceof AIController,
                     difficulty: this.player2.controller instanceof AIController ? this.player2AIDiff : null
                 };
@@ -286,7 +292,7 @@ export default class Game {
                 body: JSON.stringify(payload)
             });
             if (response.ok) {
-                await response.json();
+                    await response.json();
                 // TODO: Toast
                 console.log("Saved match");
                 try {

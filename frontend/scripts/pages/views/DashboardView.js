@@ -362,11 +362,13 @@ export class DashboardView extends HTMLElement {
             username: player1Name,
             isAI: false,
             aiDifficulty: null,
+            id: 0,
         };
         const player2 = {
             username: player2Name,
             isAI: vsAI,
             aiDifficulty: aiDifficulty,
+            id: 1,
         };
         this.updateScores(player1Name, player2Name, 0, 0);
         const game = new Game(this.canvas, player1, player2, false, powerUpCount);
