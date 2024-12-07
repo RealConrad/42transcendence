@@ -1,11 +1,12 @@
 export default class Player {
-    constructor(username, paddle, controller) {
+    constructor(username, id, paddle, controller) {
         this.username = username;
         this.score = 0;
         this.paddle = paddle;
         this.controller = controller;
         this.atkPowerUp = null;
         this.defPowerUp = null;
+        this.id = id;
         this.ai = controller.ai;
         this.ball = controller.ball;
         this.canvas = controller.canvas;
