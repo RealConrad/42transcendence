@@ -57,8 +57,6 @@ export class DashboardView extends HTMLElement {
         USER.username = getUserName();
         USER.profilePicture = getUserPicture();
         USER.backupProfilePicture = getDefaultPicture();
-        // console.log('USER INFO:')
-        // console.log(USER)
     }
     
     html() {
@@ -204,7 +202,6 @@ export class DashboardView extends HTMLElement {
         GlobalEventEmitter.on(EVENT_TYPES.RESUME_GAME, () => this.onResumeGame());
         GlobalEventEmitter.on(EVENT_TYPES.QUIT_GAME, () => this.quitGame());
         GlobalEventEmitter.replaceOn(EVENT_TYPES.RELOAD_DASHBOARD, () => {
-            console.log('%creload dashboard', 'color: red')
             this.connectedCallback()
         });
     }
@@ -272,17 +269,14 @@ export class DashboardView extends HTMLElement {
     }
 
     drawMiddleLine() {
-        console.log("Drawing line...");
         const paddleWidth = this.canvas.width / 128;
         this.ctx.strokeStyle = "white";
         this.ctx.lineWidth = paddleWidth;
         this.ctx.setLineDash([paddleWidth, paddleWidth]);
-
         this.ctx.beginPath();
         this.ctx.moveTo(this.canvas.width / 2, 0);
         this.ctx.lineTo(this.canvas.width / 2, this.canvas.height);
         this.ctx.stroke();
-
         this.ctx.setLineDash([]); // Reset line dash
     }
 
@@ -383,7 +377,6 @@ export class DashboardView extends HTMLElement {
         this.hideAllDashboardUI();
         this.isGameRunning = true;
         this.isTournamentMatch = true;
-        console.log("POWERUP COUNTS,", powerUpCount);
         const tournament = new Tournament(players, this.canvas, powerUpCount);
         tournament.start();
     }
