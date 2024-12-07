@@ -16,9 +16,12 @@ import AIController from "./controllers/AIController.js";
 import InputManager from "./managers/InputManager.js";
 import { apiCall} from "../api/api.js";
 import GlobalEventEmitter from "../utils/EventEmitter.js";
+import PowerUp from "./models/powerups/PowerUp.js";
+import { atkPowers, defPowers } from "./models/powerups/PowerUp.js";
+
 
 export default class Game {
-    constructor(canvas, player1Details, player2Details, isTournamentMatch = false) {
+    constructor(canvas, player1Details, player2Details, isTournamentMatch = false, powerUpCount = 4) {
         this.isGameOver = false;
         this.isGamePaused = false;
         this.winner = null;
@@ -36,10 +39,17 @@ export default class Game {
         this.collisionManager = new CollisionManager(this);
         this.inputManager = new InputManager()
 
-        this.ball = new Ball(this.canvas.width / 2, this.canvas.height / 2, 5, 5, 5);
+        this.ball = new Ball(this.canvas.width / 2, this.canvas.height / 2, 5, 2, 2);
 
         this.Battleground = new Battleground(this.canvas);
-        
+
+
+        // Setup powerups
+        if (powerUpCount > 0) {
+            this.powerUps = [];
+            this.createPowerUps(powerUpCount);
+        }
+
         // Setup player models and controllers
         const player1Paddle = new Paddle(
             0,
@@ -69,6 +79,7 @@ export default class Game {
                 player1Paddle,
                 new HumanController(player1Paddle, 'w', 's', this.inputManager)
             );
+
         this.player2 = player2Details.isAI
             ? new Player(
                 player2Details.username,
@@ -95,6 +106,21 @@ export default class Game {
         this.updatePlayerScore();
     }
 
+    createPowerUps(count) {
+        for (let i = 0; i < count; i++) {
+            const randomType = Math.random() > 0.5 ? "ATK" : "DEF";
+            const powerList = randomType === "ATK" ? atkPowers : defPowers;
+            const randomPower = powerList[Math.floor(Math.random() * powerList.length)];
+    
+            const randomX = Math.random() * (this.canvas.width - 30 - this.canvas.width/2);
+            const randomY = Math.random() * (this.canvas.height - 30);
+    
+            const power = new PowerUp(this.ctx, randomX + this.canvas.width/4, randomY, randomType, randomPower.symbol);
+            this.powerUps.push(power);
+            this.renderManager.addRenderable(power);
+        }
+    }
+
     start() {
         requestAnimationFrame(this.gameLoop.bind(this));
     }
@@ -106,9 +132,60 @@ export default class Game {
         this.ball.move();
         this.player1.controller.update();
         this.player2.controller.update();
+        this.handlePowerUpActivation();
+        this.checkPowerUpCollection();
         this.checkWinCondition();
         this.renderManager.render();
+        this.player1.drawInventory(this.ctx, 30, this.canvas.height - 60);
+        this.player2.drawInventory(this.ctx, this.canvas.width - 160, this.canvas.height - 60);
         requestAnimationFrame(this.gameLoop.bind(this));
+    }
+
+    handlePowerUpActivation() {
+        if (this.player1.controller.ai === true) {
+            this.player1.evaluatePowerUps(this)
+        } 
+        if (this.player2.controller.ai === true) {
+            this.player2.evaluatePowerUps(this)
+        }
+        if (this.inputManager.isKeyPressed('a')) {
+            this.player1.activatePowerUp("ATK", this);
+        }
+        if (this.inputManager.isKeyPressed('d')) {
+            this.player1.activatePowerUp("DEF", this);
+        }
+
+        if (this.inputManager.isKeyPressed('ArrowLeft')) {
+            this.player2.activatePowerUp("ATK", this);
+        }
+        if (this.inputManager.isKeyPressed('ArrowRight')) {
+            this.player2.activatePowerUp("DEF", this);
+        }
+    }
+    
+
+    checkPowerUpCollection() {
+        this.powerUps.forEach(powerUp => {
+            if (powerUp.isActive && this.checkCollision(this.ball, powerUp)) {
+                const lastTouchPlayer = this.ball.lastTouchedPlayer;
+                if (lastTouchPlayer) {
+                    powerUp.collectPowerUp(this, lastTouchPlayer);
+                } else {
+                    console.log("Power-Up collected with no owner, generating new one...");
+                    powerUp.isActive = false;
+                    this.createPowerUps(2);
+                }
+            }
+        });
+    }
+    
+    checkCollision(ball, powerUp) {
+        return (
+            ball.x < powerUp.x + powerUp.size &&
+            ball.x + ball.radius > powerUp.x &&
+            ball.y < powerUp.y + powerUp.size &&
+            ball.y + ball.radius > powerUp.y
+        );
     }
 
     cleanup() {
@@ -179,7 +256,6 @@ export default class Game {
     }
 
     resetGameState() {
-        // this.ball.celebrate(this.ctx);
         setTimeout(() => {
             this.renderManager.resetObjects();
         }, 1000);
