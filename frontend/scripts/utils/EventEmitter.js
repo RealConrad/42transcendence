@@ -1,5 +1,3 @@
-import { EVENT_TYPES } from "./constants.js";
-
 class EventEmitter {
     constructor() {
         this.events = {};
