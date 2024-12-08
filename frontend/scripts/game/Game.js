@@ -133,18 +133,19 @@ export default class Game {
     gameLoop() {
         if (this.isGameOver || this.isGamePaused) return;
 
+        console.log("game loop...");
         this.collisionManager.handleCollisions();
         this.ball.move();
         this.player1.controller.update();
         this.player2.controller.update();
         this.handlePowerUpActivation();
-        this.checkWinCondition();
         this.renderManager.render();
         if (this.powerUpCount > 0) {
             this.checkPowerUpCollection();
             this.player1.drawInventory(this.ctx, 30, this.canvas.height - 60);
             this.player2.drawInventory(this.ctx, this.canvas.width - 160, this.canvas.height - 60);
         }
+        this.checkWinCondition();
         requestAnimationFrame(this.gameLoop.bind(this));
     }
 
@@ -204,6 +205,7 @@ export default class Game {
 
     checkWinCondition() {
         if (this.player1.score === this.maxScore || this.player2.score === this.maxScore) {
+            console.log("GAME OVER!");
             this.isGameOver = true;
              if (this.player1.score === this.maxScore) {
                 this.winner = {

@@ -107,9 +107,9 @@
     flex-direction: column;
     margin-left: 30px;
     gap: 10px;
-    margin-top: 50px;
+    margin-top: 20px;
     width: 90%;
-    max-height: 500px;
+    max-height: 400px;
     overflow-y: auto;
     border: 1px solid #22211F;
     border-radius: 10px;
