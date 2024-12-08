@@ -1,8 +1,11 @@
-import {setAccessToken, apiCall, setLocalUsername, setDefaultPicture,
-	setLocalPicture, setLocal2FA} from "../../api/api.js";
+import {
+	setAccessToken, apiCall, setLocalUsername, setDefaultPicture,
+	setLocalPicture, setLocal2FA, fetchMatchHistory, fetchFriends
+} from "../../api/api.js";
 import {BASE_AUTH_API_URL, BASE_MFA_API_URL, EVENT_TYPES, FORM_ERROR_MESSAGES} from "../../utils/constants.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
 import {Router} from '../../Router.js'
+import GlobalCacheManager from "../../utils/CacheManager.js";
 
 class AuthDialog extends HTMLElement {
 	constructor() {
@@ -378,9 +381,8 @@ class AuthDialog extends HTMLElement {
 			console.log("LOGGED IN!");
 			localStorage.setItem('authMethod', 'JWT');
 			setAccessToken(data.access_token);
-			// setDefaultPicture();
+
 			setLocalUsername(username);
-			// USER.username = username;
 			if (data.mfa_enable_flag) {
     			this.tempAccessToken = data.access_token;
 				this.shadowRoot.getElementById("sign-in-view").style.display = "none"
@@ -389,7 +391,10 @@ class AuthDialog extends HTMLElement {
 				this.close();
 				GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
 			}
-		}).catch(err => console.error(err));
+		})
+			.then(() => GlobalCacheManager.initialize("matches", fetchMatchHistory))
+			.then(() => GlobalCacheManager.initialize("friends", fetchFriends))
+			.catch(err => console.error(err));
 	}
 
 	completeLogin(data) {
@@ -536,9 +541,11 @@ export async function handleCallback() {
 					setAccessToken(data.access_token);
 					Router.navigateTo("/");
 				} else {
+					Router.navigateTo("/");
 					console.error("Error from backed 42 OAuth API");
 				}
 			} catch (error) {
+				Router.navigateTo("/");
 				console.error("Error during callback handling:", error);
 			}
 		} else {

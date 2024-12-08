@@ -1,10 +1,6 @@
 import requests
 from django.contrib.auth.models import User
-from django.apps import apps
 from match.models import UserProfile
-from types import SimpleNamespace
-from rest_framework.exceptions import AuthenticationFailed
-from rest_framework.authentication import BaseAuthentication
 from rest_framework import exceptions, authentication
 
 class CustomJWTAuthentication(authentication.BaseAuthentication):
@@ -22,10 +18,9 @@ class CustomJWTAuthentication(authentication.BaseAuthentication):
         token_data = self.validate_token_with_service(access_token, self.JWT)
 
         username = token_data.get("username")
-        user_id = token_data.get("user_id")
+        # user_id = token_data.get("user_id")
 
         user, created = User.objects.get_or_create(
-            id=user_id,
             username=username
         )
         UserProfile.objects.get_or_create(user=user)

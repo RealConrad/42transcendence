@@ -30,7 +30,6 @@ export class AccountMenu extends HTMLElement {
     html() {
         return `
             <link rel="stylesheet" href="../../../styles/account.css">
-            <!--<link id="style-sheet" rel="stylesheet" href="../../../styles/style.css">-->
     
             ${!this.accessToken ? 
                 `

@@ -1,4 +1,12 @@
-import {BASE_GAME_API_URL, BASE_JWT_API_URL, BASE_MFA_API_URL, BASE_OAUTH_JWT_API_URL, EVENT_TYPES, USER} from "../utils/constants.js";
+import {
+    BASE_FRIENDS_API_URL,
+    BASE_GAME_API_URL,
+    BASE_JWT_API_URL,
+    BASE_MFA_API_URL,
+    BASE_OAUTH_JWT_API_URL,
+    EVENT_TYPES,
+    USER
+} from "../utils/constants.js";
 import GlobalEventEmitter from "../utils/EventEmitter.js";
 import GlobalCacheManager from "../utils/CacheManager.js";
 
@@ -63,7 +71,9 @@ window.onload = async () => {
     if (!accessToken) {
         try {
             await refreshTokens();
+            console.log(accessToken);
             await GlobalCacheManager.initialize("matches", fetchMatchHistory);
+            await GlobalCacheManager.initialize("friends", fetchFriends);
         } catch (error) {
             // TODO: LOG USER OUT
             console.error("Unable to refresh tokens on page load: ", error);
@@ -128,6 +138,22 @@ export const fetchMatchHistory = async () => {
         throw new Error(`Error fetching match history`);
     }
     return response.json();
+}
+
+export const fetchFriends = async () => {
+    try {
+        // TODO: Change url
+        const response = await apiCall(`${BASE_FRIENDS_API_URL}/get-friends/`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+        return response.json();
+    } catch (error) {
+        // TODO: toast
+        console.error(error);
+    }
 }
 
 // SETTERS

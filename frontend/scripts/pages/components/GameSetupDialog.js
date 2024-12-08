@@ -1,6 +1,6 @@
 import {EVENT_TYPES} from "../../utils/constants.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
-import {getAccessToken} from "../../api/api.js";
+import {getAccessToken, validateInput} from "../../api/api.js";
 
 export class GameSetupDialog extends HTMLElement {
     constructor() {
@@ -124,7 +124,9 @@ export class GameSetupDialog extends HTMLElement {
                 ? this.shadowRoot.querySelector("#player2-name").value.trim()
                 : "AI";
 
-            if (player1Name && player2Name) {
+            try {
+                validateInput(player1Name);
+                validateInput(player2Name);
                 let powerUpCount = 0;
                 if (checkbox.checked)
                     powerUpCount = slider.value;
@@ -132,8 +134,9 @@ export class GameSetupDialog extends HTMLElement {
                 const AIDifficulty = AIDifficultySlider ? AIDifficultySlider.value : null;
                 GlobalEventEmitter.emit(EVENT_TYPES.START_MATCH, { player1Name, player2Name, matchType, AIDifficulty, powerUpCount });
                 this.close();
-            } else {
-                alert("Enter all player names");
+            } catch (error) {
+                // TODO: TOAST
+                alert(error);
             }
         });
     }

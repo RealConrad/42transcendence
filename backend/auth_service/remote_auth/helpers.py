@@ -1,7 +1,7 @@
 from django.conf import settings
 from urllib.parse import urlencode
 import requests
-from authentication.models import CustomUser
+from rest_framework.exceptions import ValidationError
 from .serializers import RemoteUserSerializer
 from urllib.parse import  unquote
 
@@ -40,4 +40,4 @@ def create_user_from_token_data(token_data):
 
         return user
     else:
-        raise Exception("Failed to fetch user data from 42 API")
+        raise ValidationError("Failed to fetch user data from 42 API")
