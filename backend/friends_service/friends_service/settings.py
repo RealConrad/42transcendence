@@ -39,6 +39,10 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
     "X-42-Token",
 ]
 
+# Media Stuff
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Application definition
 
