@@ -2,7 +2,7 @@ export const PADDLE_SPEED = 10;
 export const PADDLE_HEIGHT = 100;
 export const PADDLE_WIDTH = 10;
 
-export const MAX_SCORE = 1000;
+export const MAX_SCORE = 10;
 
 export const FORM_ERROR_MESSAGES = {
     usernameRequired: "Username is required",
@@ -31,7 +31,8 @@ export const EVENT_TYPES = {
     QUIT_GAME: "quit_game",
     GAME_OVER: "game_over",
     RELOAD_DASHBOARD: "reload_dashboard",
-
+    SET_TWOFACTOR: "enable_twofactor",
+    UNSET_TWOFACTOR: "disable_twofactor",
 }
 
 export const USER = {
@@ -45,3 +46,4 @@ export const BASE_GAME_API_URL = "http://127.0.0.1:8003/api/game"
 export const BASE_MFA_API_URL = "http://127.0.0.1:8001/api/2fa"
 export const BASE_JWT_API_URL = "http://127.0.0.1:8002/api/token"
 export const BASE_OAUTH_JWT_API_URL = "http://127.0.0.1:8002/api/oauth_token"
+export const BASE_FRIENDS_API_URL = "http://127.0.0.1:8004/api/friends"

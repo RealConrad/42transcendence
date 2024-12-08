@@ -1,18 +1,21 @@
 import Game from "./Game.js"
 import GlobalEventEmitter from "../utils/EventEmitter.js";
-import {EVENT_TYPES} from "../utils/constants.js";
+import {BASE_GAME_API_URL, EVENT_TYPES} from "../utils/constants.js";
+import {apiCall, fetchMatchHistory} from "../api/api.js";
+import GlobalCacheManager from "../utils/CacheManager.js";
 
 export default class Tournament {
-    constructor(players, canvas) {
+    constructor(players, canvas, powerUpCount) {
         if (players.length < 4) {
             throw new Error("Tournament must have at least 4 players");
         }
         this.canvas = canvas;
-        this.players = players; // Array of { username, isAI, aiDifficulty }
+        this.players = players; // Array of { username, isAI, aiDifficulty, id }
         this.bracket = []; // Array of rounds, each round is an array of matches
         this.currentRoundIndex = 0;
         this.currentMatchIndex = 0;
         this.isTournamentOver = false;
+        this.powerUpCount = powerUpCount;
         GlobalEventEmitter.on(EVENT_TYPES.QUIT_GAME, this.quitTournament.bind(this));
     }
 
@@ -72,11 +75,25 @@ export default class Tournament {
             this.currentRoundIndex++;
             this.currentMatchIndex = 0;
             if (this.currentRoundIndex >= this.bracket.length) {
-                // TODO: CREATE API AND SAVE TOURNAMENT MATCHES
                 const champion = this.bracket[this.bracket.length - 1][0].winner;
+                console.log(champion);
+                await apiCall(`${BASE_GAME_API_URL}/save-tournament/`, {
+                    method: 'PUT',
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        'action': champion.id === 0 ? 'won' : 'played'
+                    })
+                });
+                try {
+                    const updatedMatchHistory = await fetchMatchHistory();
+                    GlobalCacheManager.set("matches", updatedMatchHistory);
+                } catch (error) {
+                    console.error(error);
+                }
                 console.log(`${champion.username} won the Tournament!`);
                 GlobalEventEmitter.emit(EVENT_TYPES.GAME_OVER, { winner: champion.username, isTournament: true });
-                console.log(this.bracket);
                 return;
             } else {
                 GlobalEventEmitter.emit(EVENT_TYPES.TOURNAMENT_UPDATE, { rounds: this.bracket });
@@ -129,6 +146,7 @@ export default class Tournament {
                 match.player1,
                 match.player2,
                 true,
+                this.powerUpCount,
             );
 
             const checkGameOver = () => {

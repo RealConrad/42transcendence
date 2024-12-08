@@ -57,8 +57,6 @@ export class DashboardView extends HTMLElement {
         USER.username = getUserName();
         USER.profilePicture = getUserPicture();
         USER.backupProfilePicture = getDefaultPicture();
-        // console.log('USER INFO:')
-        // console.log(USER)
     }
     
     html() {
@@ -68,7 +66,8 @@ export class DashboardView extends HTMLElement {
             <!--HERE DEACTIVATING BUTTON CLICK AFTER LOGIN-->
             <style>
                 #login-button{ pointer-events: none }
-            </style> ` : ``}
+            </style>
+            ` : ``}
             <header>
                 <div class="header-top">
                     <span id="player1-display" class="player1_score">Player 1 - 0</span>
@@ -105,9 +104,13 @@ export class DashboardView extends HTMLElement {
                         <button>Account</button>
                         <span class="button-description">Who are you anyway?</span>
                     </div>
-                    <div class="menu-option" style="grid-row-start: 4;">
+                    <div class="menu-option">
                         <button>About</button>
                         <span class="button-description">ft_transcendence at 42 Heilbronn</span>
+                    </div>
+                    <div class="menu-option" style="grid-row-start: 5;">
+                        <button>Friends</button>
+                        <span class="button-description">you have friends??</span>
                     </div>
                 </left-menu>
                 <right-menu>
@@ -130,7 +133,8 @@ export class DashboardView extends HTMLElement {
     }
 
     loadMenuComponents() {
-        import ("../components/GameMenuDialog.js");
+        import("../components/GameMenuDialog.js");
+        import("../components/FriendsMenu.js");
         import("../components/GameSetupDialog.js");
         import("../components/TournamentSetupDialog.js");
         import("../components/AuthDialog.js");
@@ -164,6 +168,10 @@ export class DashboardView extends HTMLElement {
         });
 
         // Listen for
+
+        GlobalEventEmitter.replaceOn(EVENT_TYPES.SET_TWOFACTOR, () => {
+            authDialogPopup.openEnable2fa();
+        });
         GlobalEventEmitter.on(EVENT_TYPES.MATCH_VS_AI, () => {
             this.openGameSetupDialog("vs AI");
         });
@@ -173,12 +181,12 @@ export class DashboardView extends HTMLElement {
         GlobalEventEmitter.on(EVENT_TYPES.MATCH_TOURNAMENT, () => {
             tournamentSetupDialog.open();
         });
-        GlobalEventEmitter.on(EVENT_TYPES.START_MATCH, ({ player1Name, player2Name, matchType, AIDifficulty}) => {
-            this.startGame(player1Name, player2Name, matchType !== "local", AIDifficulty);
+        GlobalEventEmitter.on(EVENT_TYPES.START_MATCH, ({ player1Name, player2Name, matchType, AIDifficulty, powerUpCount }) => {
+            this.startGame(player1Name, player2Name, matchType !== "local", AIDifficulty, powerUpCount);
         });
-        GlobalEventEmitter.on(EVENT_TYPES.START_TOURNAMENT, ({ players: players}) => {
+        GlobalEventEmitter.on(EVENT_TYPES.START_TOURNAMENT, ({ players: players, powerCounts}) => {
             tournamentSetupDialog.close();
-            this.startTournament(players);
+            this.startTournament(players, powerCounts);
         });
         GlobalEventEmitter.on(EVENT_TYPES.QUIT_MATCH, () => {
             this.endGame();
@@ -198,7 +206,9 @@ export class DashboardView extends HTMLElement {
         });
         GlobalEventEmitter.on(EVENT_TYPES.RESUME_GAME, () => this.onResumeGame());
         GlobalEventEmitter.on(EVENT_TYPES.QUIT_GAME, () => this.quitGame());
-        GlobalEventEmitter.on(EVENT_TYPES.RELOAD_DASHBOARD, () => this.connectedCallback());
+        GlobalEventEmitter.replaceOn(EVENT_TYPES.RELOAD_DASHBOARD, () => {
+            this.connectedCallback()
+        });
     }
 
     handleKeyDown(event) {
@@ -268,12 +278,10 @@ export class DashboardView extends HTMLElement {
         this.ctx.strokeStyle = "white";
         this.ctx.lineWidth = paddleWidth;
         this.ctx.setLineDash([paddleWidth, paddleWidth]);
-
         this.ctx.beginPath();
         this.ctx.moveTo(this.canvas.width / 2, 0);
         this.ctx.lineTo(this.canvas.width / 2, this.canvas.height);
         this.ctx.stroke();
-
         this.ctx.setLineDash([]); // Reset line dash
     }
 
@@ -331,6 +339,7 @@ export class DashboardView extends HTMLElement {
             "Play": "play-menu",
             "Account": "account-menu",
             "About": "about-menu",
+            "Friends": "friends-menu",
         };
 
         leftMenu.addEventListener("mouseover", (event) => {
@@ -350,7 +359,7 @@ export class DashboardView extends HTMLElement {
         }
     }
 
-    startGame(player1Name, player2Name, vsAI, aiDifficulty = 5) {
+    startGame(player1Name, player2Name, vsAI, aiDifficulty = 5, powerUpCount) {
         this.hideAllDashboardUI();
         this.isGameRunning = true;
         this.isTournamentMatch = false;
@@ -359,23 +368,24 @@ export class DashboardView extends HTMLElement {
             username: player1Name,
             isAI: false,
             aiDifficulty: null,
+            id: 0,
         };
         const player2 = {
             username: player2Name,
             isAI: vsAI,
             aiDifficulty: aiDifficulty,
+            id: 1,
         };
         this.updateScores(player1Name, player2Name, 0, 0);
-        const game = new Game(this.canvas, player1, player2);
+        const game = new Game(this.canvas, player1, player2, false, powerUpCount);
         game.start();
     }
 
-    startTournament(players) {
+    startTournament(players, powerUpCount) {
         this.hideAllDashboardUI();
         this.isGameRunning = true;
         this.isTournamentMatch = true;
-
-        const tournament = new Tournament(players, this.canvas);
+        const tournament = new Tournament(players, this.canvas, powerUpCount);
         tournament.start();
     }
 
@@ -398,20 +408,26 @@ export class DashboardView extends HTMLElement {
         this.shadowRoot.querySelector("#login-button").style.display = "none";
         this.shadowRoot.querySelector("left-menu").style.display = "none";
         this.shadowRoot.querySelector("right-menu").style.display = "none";
-        this.ctx.setLineDash([]);
         this.shadowRoot.querySelector(".player1_score").style.display = "block";
         this.shadowRoot.querySelector(".player2_score").style.display = "block";
     }
 
     showAllDashboardUI() {
+
         this.leftPaddle.style.display = "block";
         this.rightPaddle.style.display = "block";
-        this.drawMiddleLine();
         this.shadowRoot.querySelector("#login-button").style.display = "flex"; //changed here from block to flex
         this.shadowRoot.querySelector("left-menu").style.display = "grid";
         this.shadowRoot.querySelector("right-menu").style.display = "block";
         this.shadowRoot.querySelector(".player1_score").style.display = "none";
         this.shadowRoot.querySelector(".player2_score").style.display = "none";
+        this.canvas.width = this.shadowRoot.host.offsetWidth;
+        this.canvas.height = this.shadowRoot.host.offsetHeight;
+
+        // Use requestAnimationFrame to ensure the browser has painted and the canvas is ready
+        requestAnimationFrame(() => {
+            this.drawMiddleLine();
+        });
     }
 }
 

@@ -1,6 +1,6 @@
 import {EVENT_TYPES} from "../../utils/constants.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
-import {getAccessToken} from "../../api/api.js";
+import {getAccessToken, validateInput} from "../../api/api.js";
 
 export class GameSetupDialog extends HTMLElement {
     constructor() {
@@ -43,6 +43,16 @@ export class GameSetupDialog extends HTMLElement {
                                 `
                         }
                     </div>
+                    <div class="player-input" style="padding-top: 20px;">
+                        <label>
+                            <input type="checkbox" id="enable-powerups">
+                            Enable Powerups
+                        </label>
+                        <div class="powerup-count">
+                            <label for="powerup-count-slider">Powerup Count: <span id="powerup-count">4</span></label>
+                            <input type="range" class="powerup-count-slider" id="powerup-count-slider" min="1" max="10" step="1" value="4" disabled>
+                        </div>
+                    </div>
                     <button id="start-game-button" style="margin-bottom: 20px" class="sign-in-button">Start Game</button>
                     <button id="close-dialog-button" class="sign-in-button">Cancel</button>
                 </div>
@@ -73,6 +83,10 @@ export class GameSetupDialog extends HTMLElement {
         const closeButton = this.shadowRoot.getElementById("close-dialog-button");
         const startButton = this.shadowRoot.getElementById("start-game-button");
 
+        const checkbox = this.shadowRoot.getElementById('enable-powerups');
+        const slider = this.shadowRoot.getElementById('powerup-count-slider');
+        const difficultyValue = this.shadowRoot.getElementById('powerup-count');
+
         if (overlay) {
             overlay.addEventListener("click", (e) => {
                 if (e.target.id === "overlay") {
@@ -81,12 +95,21 @@ export class GameSetupDialog extends HTMLElement {
             });
         }
 
+        checkbox.addEventListener("change", () => {
+            slider.disabled = !checkbox.checked;
+            if (!checkbox.checked) difficultyValue.textContent = "5";
+        });
+
+        slider.addEventListener("input", () => {
+            difficultyValue.textContent = slider.value;
+        });
+
         const AIDifficultySlider = this.shadowRoot.querySelector("#ai-difficulty-slider");
         if (AIDifficultySlider) {
             AIDifficultySlider.addEventListener('change', () => {
                 const difficultyValue = this.shadowRoot.querySelector("#difficulty-value");
                 difficultyValue.textContent = AIDifficultySlider.value;
-            })
+            });
 
         }
         closeButton.addEventListener("click", () => {
@@ -101,13 +124,19 @@ export class GameSetupDialog extends HTMLElement {
                 ? this.shadowRoot.querySelector("#player2-name").value.trim()
                 : "AI";
 
-            if (player1Name && player2Name) {
+            try {
+                validateInput(player1Name);
+                validateInput(player2Name);
+                let powerUpCount = 0;
+                if (checkbox.checked)
+                    powerUpCount = slider.value;
                 const matchType = this.matchType;
                 const AIDifficulty = AIDifficultySlider ? AIDifficultySlider.value : null;
-                GlobalEventEmitter.emit(EVENT_TYPES.START_MATCH, { player1Name, player2Name, matchType, AIDifficulty  });
+                GlobalEventEmitter.emit(EVENT_TYPES.START_MATCH, { player1Name, player2Name, matchType, AIDifficulty, powerUpCount });
                 this.close();
-            } else {
-                alert("Enter all player names");
+            } catch (error) {
+                // TODO: TOAST
+                alert(error);
             }
         });
     }

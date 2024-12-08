@@ -1,8 +1,14 @@
-import {BASE_JWT_API_URL} from "../utils/constants.js";
-import {BASE_OAUTH_JWT_API_URL} from "../utils/constants.js";
-
-import { USER, EVENT_TYPES } from "../utils/constants.js";
+import {
+    BASE_FRIENDS_API_URL,
+    BASE_GAME_API_URL,
+    BASE_JWT_API_URL,
+    BASE_MFA_API_URL,
+    BASE_OAUTH_JWT_API_URL,
+    EVENT_TYPES,
+    USER
+} from "../utils/constants.js";
 import GlobalEventEmitter from "../utils/EventEmitter.js";
+import GlobalCacheManager from "../utils/CacheManager.js";
 
 let accessToken = null;
 
@@ -10,37 +16,6 @@ const AUTH_METHODS = {
     JWT: 'JWT', //normal
     FORTY_42: '42OAuth',
 }
-
-export const setAccessToken = (token) => {
-    accessToken = token;
-}
-
-export const setLocalUsername = (username) => {
-    localStorage.setItem('username', username);
-}
-export const setLocalPicture = (url) => {
-    localStorage.setItem('ProfilePicture', url);
-}
-export const setDefaultPicture = async () => {
-    if (!getDefaultPicture()){
-        await fetchDogPicture().then((url)=>{
-            localStorage.setItem('DefaultPicture', url);
-            // console.log('set default picture: ', url);
-        });
-    }
-}
-
-export const getUserName = () => {
-    return localStorage.getItem("username");
-}
-export const getUserPicture = () => {
-    return localStorage.getItem("ProfilePicture");
-}
-export const getDefaultPicture = () => {
-    return localStorage.getItem("DefaultPicture");
-}
-
-export const getAccessToken = () => accessToken;
 
 export const validateInput = (input) => {
     const sanitized = input.trim();
@@ -62,51 +37,51 @@ export const validateInput = (input) => {
 }
 
 export const refreshTokens = async () => {
-    try {
-        const authMethod = localStorage.getItem('authMethod');
-        let refreshUrl;
+    const authMethod = localStorage.getItem('authMethod');
+    let refreshUrl;
 
-        switch (authMethod) {
-            case AUTH_METHODS.JWT:
-                refreshUrl = `${BASE_JWT_API_URL}/refresh/`;
-                break;
+    switch (authMethod) {
+        case AUTH_METHODS.JWT:
+            refreshUrl = `${BASE_JWT_API_URL}/refresh/`;
+            break;
 
-            case AUTH_METHODS.FORTY_42:
-                refreshUrl = `${BASE_OAUTH_JWT_API_URL}/refresh/`;
-                break;
+        case AUTH_METHODS.FORTY_42:
+            refreshUrl = `${BASE_OAUTH_JWT_API_URL}/refresh/`;
+            break;
 
-            default:
-                throw new Error("Authentication method not set");
-        }
-
-        const response = await fetch(refreshUrl, {
-            method: "POST",
-            credentials: 'include',
-        });
-        if (!response.ok) {
-            console.log("Error refreshing token from backend:", response.json());
-            throw new Error("Token refresh failed");
-        }
-        const data = await response.json();
-        console.info("Refreshed tokens");
-        console.log("new_access_token: ", data.access_token);
-        setAccessToken(data.access_token);
-    } catch (error) {
-        console.log("Failed to refresh tokens,", error);
-        deleteUser();       //added
+        default:
+            throw new Error("Authentication method not set");
     }
+
+    const response = await fetch(refreshUrl, {
+        method: "POST",
+        credentials: 'include',
+    });
+    if (!response.ok) {
+        console.log("Error refreshing token from backend:", response.json());
+        throw new Error("Token refresh failed");
+    }
+    const data = await response.json();
+    setAccessToken(data.access_token);
 }
 
 window.onload = async () => {
+    // TODO: DO NOT LOG
     console.log("Page refreshed, trying to get new tokens....");
     if (!accessToken) {
         try {
-            console.log("")
             await refreshTokens();
+            console.log(accessToken);
+            await GlobalCacheManager.initialize("matches", fetchMatchHistory);
+            await GlobalCacheManager.initialize("friends", fetchFriends);
         } catch (error) {
+            // TODO: LOG USER OUT
             console.error("Unable to refresh tokens on page load: ", error);
         }
     } else {
+        // TODO: DO NOT LOG
+        deleteUser();
+        GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
         console.log("Already have access token");
     }
 }
@@ -119,7 +94,6 @@ window.onload = async () => {
  */
 export const apiCall = async (url, options = {}) => {
     const authMethod = localStorage.getItem('authMethod');
-
     if (!accessToken) {
         await refreshTokens();
     }
@@ -128,8 +102,6 @@ export const apiCall = async (url, options = {}) => {
         ...options.headers,
         Authorization: `Bearer ${getAccessToken()}`,
     };
-
-    console.log("access_token:", getAccessToken());
 
     if (authMethod === '42OAuth') {
         options.headers['X-42-Token'] = 'true';
@@ -140,7 +112,6 @@ export const apiCall = async (url, options = {}) => {
         console.warn("Access token expired, refreshing...");
         await refreshTokens();
         options.headers.Authorization = `Bearer ${getAccessToken()}`;
-        console.log("access_token:", getAccessToken());
 
         if (authMethod === '42OAuth') {
             options.headers['X-42-Token'] = 'true';
@@ -155,6 +126,64 @@ export const apiCall = async (url, options = {}) => {
     return response;
 }
 
+export const fetchMatchHistory = async () => {
+    const response = await apiCall(`${BASE_GAME_API_URL}/match-history/`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+
+    if (!response.ok) {
+        throw new Error(`Error fetching match history`);
+    }
+    return response.json();
+}
+
+export const fetchFriends = async () => {
+    try {
+        // TODO: Change url
+        const response = await apiCall(`${BASE_FRIENDS_API_URL}/get-friends/`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+        })
+        return response.json();
+    } catch (error) {
+        // TODO: toast
+        console.error(error);
+    }
+}
+
+// SETTERS
+export const setAccessToken = (token) => {
+    accessToken = token;
+}
+export const setLocalUsername = (username) => {
+    localStorage.setItem('username', username);
+}
+export const setLocalPicture = (url) => {
+    localStorage.setItem('ProfilePicture', url);
+}
+export const setDefaultPicture = async () => {
+    if (!getDefaultPicture()){
+        await fetchDogPicture().then((url)=>{
+            localStorage.setItem('DefaultPicture', url);
+        });
+    }
+}
+export const setLocal2FA = async (value) => {
+    localStorage.setItem('2FA', value);
+}
+
+// GETTERS
+export const getUserName = () => localStorage.getItem("username");
+export const getUserPicture = () => localStorage.getItem("ProfilePicture");
+export const getDefaultPicture = () => localStorage.getItem("DefaultPicture");
+export const getLocal2FA = () => localStorage.getItem("2FA");
+export const getAccessToken = () => accessToken;
+
 export const fetchDogPicture = async () => {
     const apiURL = "https://dog.ceo/api/breeds/image/random";
 
@@ -163,18 +192,40 @@ export const fetchDogPicture = async () => {
         if (!response.ok) {
             throw new Error("Network response was not ok");
         }
-        
         const data = await response.json(); // Wait for the JSON parsing
-        // console.log('data: ');
-        // console.log(data);
-        let url = data.message;
-        console.log('fetching pic: ', url);
-        return url;
-        // dogImage.src = data.message; // `message` contains the image URL
+        return data.message;
     } catch (error) {
         console.error("There was a problem with the fetch operation:", error);
         return null;
     }
+}
+
+export const get2FAstatus = async () => {
+    let response = await apiCall(`${BASE_MFA_API_URL}/enable/`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+    })
+    return response.status;
+}
+
+export const disable2FA = async () => {
+    return apiCall(`${BASE_MFA_API_URL}/disable/`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+    })
+        .then((response) => response.json())
+        .then(() => {
+            // TODO: TOAST
+            setLocal2FA(false);
+            return true;
+        }) .catch((error) => {
+            // TODO: TOAST 'error'
+            return false;
+    })
 }
 
 function deleteUser(){

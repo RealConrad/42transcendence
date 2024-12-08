@@ -1,11 +1,12 @@
 export default class Player {
-    constructor(username, paddle, controller) {
+    constructor(username, id, paddle, controller) {
         this.username = username;
         this.score = 0;
         this.paddle = paddle;
         this.controller = controller;
         this.atkPowerUp = null;
         this.defPowerUp = null;
+        this.id = id;
         this.ai = controller.ai;
         this.ball = controller.ball;
         this.canvas = controller.canvas;
@@ -19,7 +20,6 @@ export default class Player {
     resetScore() {
         this.score = 0;
     }
-
 
     drawInventory(ctx, x, y) {
         const slotSize = 60;
@@ -223,7 +223,4 @@ export default class Player {
             }
         }
     }
-    
-    
-
 }

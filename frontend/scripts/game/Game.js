@@ -14,11 +14,11 @@ import RenderManager from "./managers/RenderManager.js";
 import CollisionManager from "./managers/CollisionManager.js";
 import AIController from "./controllers/AIController.js";
 import InputManager from "./managers/InputManager.js";
-import { apiCall} from "../api/api.js";
+import {apiCall, fetchMatchHistory} from "../api/api.js";
 import GlobalEventEmitter from "../utils/EventEmitter.js";
 import PowerUp from "./models/powerups/PowerUp.js";
 import { atkPowers, defPowers } from "./models/powerups/PowerUp.js";
-
+import GlobalCacheManager from "../utils/CacheManager.js";
 
 export default class Game {
     constructor(canvas, player1Details, player2Details, isTournamentMatch = false, powerUpCount = 0) {
@@ -40,7 +40,7 @@ export default class Game {
         this.collisionManager = new CollisionManager(this);
         this.inputManager = new InputManager()
 
-        this.ball = new Ball(this.canvas.width / 2, this.canvas.height / 2, 5, 5, 5);
+        this.ball = new Ball(this.canvas.width / 2, this.canvas.height / 2, 5, 15, 15);
 
         this.Battleground = new Battleground(this.canvas);
 
@@ -72,11 +72,13 @@ export default class Game {
         this.player1 = player1Details.isAI
             ? new Player(
                 player1Details.username,
+                player1Details.id,
                 player1Paddle,
                 new AIController(player1Paddle, this.ball, player1Details.aiDifficulty, this.canvas)
             )
             : new Player(
                 player1Details.username,
+                player1Details.id,
                 player1Paddle,
                 new HumanController(player1Paddle, 'w', 's', this.inputManager)
             );
@@ -84,11 +86,13 @@ export default class Game {
         this.player2 = player2Details.isAI
             ? new Player(
                 player2Details.username,
+                player2Details.id,
                 player2Paddle,
                 new AIController(player2Paddle, this.ball, player2Details.aiDifficulty, this.canvas)
             )
             : new Player(
                 player2Details.username,
+                player2Details.id,
                 player2Paddle,
                 new HumanController(player2Paddle, 'ArrowUp', 'ArrowDown', this.inputManager)
             );
@@ -129,18 +133,18 @@ export default class Game {
     gameLoop() {
         if (this.isGameOver || this.isGamePaused) return;
 
-        this.collisionManager.handleCollisions()
+        this.collisionManager.handleCollisions();
         this.ball.move();
         this.player1.controller.update();
         this.player2.controller.update();
         this.handlePowerUpActivation();
+        this.checkWinCondition();
+        this.renderManager.render();
         if (this.powerUpCount > 0) {
             this.checkPowerUpCollection();
             this.player1.drawInventory(this.ctx, 30, this.canvas.height - 60);
             this.player2.drawInventory(this.ctx, this.canvas.width - 160, this.canvas.height - 60);
         }
-        this.checkWinCondition();
-        this.renderManager.render();
         requestAnimationFrame(this.gameLoop.bind(this));
     }
 
@@ -206,6 +210,7 @@ export default class Game {
                     player1Score: this.player1.score,
                     player2Score: this.player2.score,
                     username: this.player1.username,
+                    id: this.player1.id,
                     isAI: this.player1.controller instanceof AIController,
                     difficulty: this.player1.controller instanceof AIController ? this.player1AIDiff : null
                 };
@@ -214,6 +219,7 @@ export default class Game {
                     player1Score: this.player1.score,
                     player2Score: this.player2.score,
                     username: this.player2.username,
+                    id: this.player2.id,
                     isAI: this.player2.controller instanceof AIController,
                     difficulty: this.player2.controller instanceof AIController ? this.player2AIDiff : null
                 };
@@ -286,14 +292,22 @@ export default class Game {
                 body: JSON.stringify(payload)
             });
             if (response.ok) {
-                await response.json();
+                    await response.json();
+                // TODO: Toast
                 console.log("Saved match");
-
-
+                try {
+                    const updatedMatchHistory = await fetchMatchHistory();
+                    GlobalCacheManager.set("matches", updatedMatchHistory);
+                } catch (error) {
+                    // TODO: Toast
+                    console.log("Failed to update match history after saving: ", error);
+                }
             } else {
+                // TODO: Toast
                 console.error("Failed to save match");
             }
         } catch (error) {
+            // TODO: Toast
             console.log("error while saving match:", error);
         }
     }

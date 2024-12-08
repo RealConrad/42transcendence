@@ -283,7 +283,7 @@ auth-dialog {
 
 .orange-button {
   position: absolute;
-  right: 100px;
+  right: 50px;
   top: 30px;
   background: var(--background-yellow);
   color: black;
@@ -296,20 +296,19 @@ auth-dialog {
   position: absolute;
   display: flex;
   align-items: center;
-  /* justify-content: space-around; */
-  gap: 30px;
-  right: 100px;
+  gap: 15px;
+  right: 50px;
   top: 30px;
   background: var(--background-yellow);
   color: black;
-  padding: 15px 15px;
+  padding: 10px 10px;
   border-radius: 8px;
   font-size: 20px;
 }
 
 .user-display img{
-  height: 70px;
-  width: 70px;
+  height: 50px;
+  width: 50px;
   border-radius: 50%; /* This makes the image a circle */
   object-fit: cover; /* Ensures the image covers the area without distortion */
   display: block; /* Optional: Removes inline-block spacing */
@@ -329,3 +328,4 @@ auth-dialog {
     display: none; /* Hide header and footer */
   }
 }
+
