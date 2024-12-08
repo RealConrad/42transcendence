@@ -104,9 +104,13 @@ export class DashboardView extends HTMLElement {
                         <button>Account</button>
                         <span class="button-description">Who are you anyway?</span>
                     </div>
-                    <div class="menu-option" style="grid-row-start: 4;">
+                    <div class="menu-option">
                         <button>About</button>
                         <span class="button-description">ft_transcendence at 42 Heilbronn</span>
+                    </div>
+                    <div class="menu-option" style="grid-row-start: 5;">
+                        <button>Friends</button>
+                        <span class="button-description">you have friends??</span>
                     </div>
                 </left-menu>
                 <right-menu>
@@ -130,6 +134,7 @@ export class DashboardView extends HTMLElement {
 
     loadMenuComponents() {
         import("../components/GameMenuDialog.js");
+        import("../components/FriendsMenu.js");
         import("../components/GameSetupDialog.js");
         import("../components/TournamentSetupDialog.js");
         import("../components/AuthDialog.js");
@@ -334,6 +339,7 @@ export class DashboardView extends HTMLElement {
             "Play": "play-menu",
             "Account": "account-menu",
             "About": "about-menu",
+            "Friends": "friends-menu",
         };
 
         leftMenu.addEventListener("mouseover", (event) => {
