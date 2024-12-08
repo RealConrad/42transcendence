@@ -70,7 +70,6 @@ export class FriendsMenu extends HTMLElement {
                     'username': input.value
                 }),
             });
-            console.log("HELLO");
             const updatedFriendList = await fetchMatchHistory();
             GlobalCacheManager.set("matches", updatedFriendList);
             this.render();
