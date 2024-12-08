@@ -1,6 +1,6 @@
 import requests
 from django.contrib.auth.models import User
-from .models import Friendship
+from .models import Friendship, UserProfile
 from rest_framework import exceptions, authentication
 
 
@@ -21,7 +21,7 @@ class JWTAuthentication(authentication.BaseAuthentication):
         username = token_data.get("username")
 
         user, created = User.objects.get_or_create(username=username)
-
+        UserProfile.objects.get_or_create(user=user)
         request.token_data = token_data
         return user, None
 
@@ -32,7 +32,7 @@ class JWTAuthentication(authentication.BaseAuthentication):
         username = token_data.get("username")
 
         user, created = User.objects.get_or_create(username=username)
-
+        UserProfile.objects.get_or_create(user=user)
         request.token_data = token_data
         return user, None
 

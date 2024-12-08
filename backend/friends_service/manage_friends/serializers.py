@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Friendship, FriendRequest
+from .models import Friendship, FriendRequest, UserProfile
 from .utils import check_user_in_auth_database
 from django.contrib.auth.models import User
 
@@ -34,6 +34,7 @@ class FriendRequestSerializer(serializers.ModelSerializer):
 
         # Check for receiver in the local db if not create him
         receiver, _ = User.objects.get_or_create(username=receiver_username)
+        UserProfile.objects.get_or_create(user=receiver)
 
         if FriendRequest.objects.filter(sender=sender, receiver=receiver ,status="pending").exists():
             raise serializers.ValidationError("A pending friend request already exists for this user.")
