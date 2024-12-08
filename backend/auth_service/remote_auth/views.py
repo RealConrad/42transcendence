@@ -83,7 +83,7 @@ class CallbackAPI(APIView):
                     {'detail': 'Failed to fetch user data from 42 API'},
                     status=HTTP_400_BAD_REQUEST)
 
-        except requests.HTTPError as http_err:
+        except requests.HTTPError:
             return Response(
                 {'detail': 'Failed to exchange code for token'},
                 status=HTTP_400_BAD_REQUEST

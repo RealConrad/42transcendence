@@ -541,9 +541,11 @@ export async function handleCallback() {
 					setAccessToken(data.access_token);
 					Router.navigateTo("/");
 				} else {
+					Router.navigateTo("/");
 					console.error("Error from backed 42 OAuth API");
 				}
 			} catch (error) {
+				Router.navigateTo("/");
 				console.error("Error during callback handling:", error);
 			}
 		} else {

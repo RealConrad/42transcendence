@@ -1,5 +1,6 @@
 from authentication.models import CustomUser
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 class RemoteUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -10,8 +11,8 @@ class RemoteUserSerializer(serializers.ModelSerializer):
         """
         Create or update a user with the given username and profile_picture_url
         """
-        user, created = CustomUser.objects.get_or_create(username=username)
-        if profile_picture_url:
-            user.profile_picture_url = profile_picture_url
-            user.save()
+        if CustomUser.objects.filter(username=username).exists():
+            raise ValidationError("detail: A user with this username already exists")
+        user = CustomUser(username=username, profile_picture_url=profile_picture_url)
+        user.save()
         return user
