@@ -2,6 +2,7 @@ import requests
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK
 from .models import CustomUser
 from .serializers import RegisterSerializer, LoginSerializer
 from .authentication import JWTAuthentication
@@ -201,3 +202,38 @@ class GetUserData(generics.GenericAPIView):
         }, status=status.HTTP_200_OK)
 
         return response
+
+class CheckUserExistence(generics.GenericAPIView):
+    """
+    Generic View to check if a user exits or not, if yes return username and user id
+    """
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        receiver_username = request.data.get('username')
+
+        if not receiver_username:
+            return Response(
+                {"detail": "Username required"},
+                status = HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            reciever = CustomUser.objects.get(username=receiver_username)
+
+            return Response(
+                {"does_exist": True, "username": reciever.username},
+                status=HTTP_200_OK
+            )
+        except CustomUser.DoesNotExist:
+            return Response(
+                {"detail": f"User '{receiver_username}' does not exist.",
+                 "does_exist": False},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"detail": f"An error occurred: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
