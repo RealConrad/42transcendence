@@ -28,10 +28,11 @@ def create_user_from_token_data(token_data):
 
     user_data = response.json()
     username = user_data.get('login')
+    email = user_data.get('email')
     profile_picture_url = user_data.get('image', {}).get('link', None)
 
     if profile_picture_url and profile_picture_url.startswith("https%3A"):
         profile_picture_url = unquote(profile_picture_url)
 
     serializer = RemoteUserSerializer()
-    return serializer.save_user(username=username, profile_picture_url=profile_picture_url)
+    return serializer.save_user(username=username, profile_picture_url=profile_picture_url, email=email)
