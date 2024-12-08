@@ -1,6 +1,6 @@
 import {
 	setAccessToken, apiCall, setLocalUsername, setDefaultPicture,
-	setLocalPicture, setLocal2FA, fetchMatchHistory, fetchFriends
+	setLocalPicture, setLocal2FA, fetchMatchHistory, fetchFriends, showToast
 } from "../../api/api.js";
 import {BASE_AUTH_API_URL, BASE_MFA_API_URL, EVENT_TYPES, FORM_ERROR_MESSAGES} from "../../utils/constants.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
@@ -347,14 +347,17 @@ class AuthDialog extends HTMLElement {
 				})
 			}
 		}).then((data) => {
-			console.log(data);
 			localStorage.setItem('authMethod', 'JWT');
 			setLocalUsername(username);
 			setAccessToken(data.access_token);
 			setDefaultPicture();
 			GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
 			this.close();
-		}).catch(err => console.log(err));
+			showToast('Registered successfully', 'success');
+		}).catch(err => {
+			showToast(err, 'danger');
+			console.log(err);
+		});
 	}
 
 	login(username, password) {
@@ -381,7 +384,7 @@ class AuthDialog extends HTMLElement {
 			console.log("LOGGED IN!");
 			localStorage.setItem('authMethod', 'JWT');
 			setAccessToken(data.access_token);
-
+			showToast('Successfully logged in!', 'success');
 			setLocalUsername(username);
 			if (data.mfa_enable_flag) {
     			this.tempAccessToken = data.access_token;
@@ -393,7 +396,7 @@ class AuthDialog extends HTMLElement {
 			}
 		})
 			.then(() => GlobalCacheManager.initialize("matches", fetchMatchHistory))
-			.then(() => GlobalCacheManager.initialize("friends", fetchFriends))
+			// .then(() => GlobalCacheManager.initialize("friends", fetchFriends))
 			.catch(err => console.error(err));
 	}
 

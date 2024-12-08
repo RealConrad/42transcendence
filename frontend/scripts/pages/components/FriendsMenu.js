@@ -1,6 +1,6 @@
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
 import {BASE_FRIENDS_API_URL, EVENT_TYPES} from "../../utils/constants.js";
-import {apiCall, fetchMatchHistory, getAccessToken, validateInput} from "../../api/api.js";
+import {apiCall, fetchMatchHistory, getAccessToken, showToast, validateInput} from "../../api/api.js";
 import GlobalCacheManager from "../../utils/CacheManager.js";
 
 export class FriendsMenu extends HTMLElement {
@@ -61,7 +61,7 @@ export class FriendsMenu extends HTMLElement {
         const input = this.shadowRoot.querySelector('input');
         try {
             validateInput(input.value);
-            await apiCall(`${BASE_FRIENDS_API_URL}/add/`, {
+            const response = await apiCall(`${BASE_FRIENDS_API_URL}/add/`, {
                 method: "POST",
                 header: {
                     "Content-Type": "application/json"
@@ -70,11 +70,15 @@ export class FriendsMenu extends HTMLElement {
                     'username': input.value
                 }),
             });
+            if (!response.ok) {
+                throw new Error(response.json());
+            }
+            showToast('Sent friend invite', 'success');
             const updatedFriendList = await fetchMatchHistory();
             GlobalCacheManager.set("matches", updatedFriendList);
             this.render();
         } catch (error) {
-            // TODO: toast
+            showToast('Error when sending friend invite', 'danger');
             console.error(error);
         }
     }

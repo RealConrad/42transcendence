@@ -14,7 +14,7 @@ import RenderManager from "./managers/RenderManager.js";
 import CollisionManager from "./managers/CollisionManager.js";
 import AIController from "./controllers/AIController.js";
 import InputManager from "./managers/InputManager.js";
-import {apiCall, fetchMatchHistory} from "../api/api.js";
+import {apiCall, fetchMatchHistory, showToast} from "../api/api.js";
 import GlobalEventEmitter from "../utils/EventEmitter.js";
 import PowerUp from "./models/powerups/PowerUp.js";
 import { atkPowers, defPowers } from "./models/powerups/PowerUp.js";
@@ -43,7 +43,6 @@ export default class Game {
         this.ball = new Ball(this.canvas.width / 2, this.canvas.height / 2, 5, 15, 15);
 
         this.Battleground = new Battleground(this.canvas);
-
 
         // Setup powerups
         if (this.powerUpCount > 0) {
@@ -290,21 +289,18 @@ export default class Game {
             });
             if (response.ok) {
                 await response.json();
-                // TODO: Toast
+                showToast('Match saved successfully!', 'success');
                 try {
                     const updatedMatchHistory = await fetchMatchHistory();
                     GlobalCacheManager.set("matches", updatedMatchHistory);
                 } catch (error) {
-                    // TODO: Toast
-                    console.log("Failed to update match history after saving: ", error);
+                    showToast(`Failed to update match history after saving`, 'danger');
                 }
             } else {
-                // TODO: Toast
-                console.error("Failed to save match");
+                showToast('Failed to save match', 'danger');
             }
         } catch (error) {
-            // TODO: Toast
-            console.log("error while saving match:", error);
+            showToast(`Failed to save match`, 'danger');
         }
     }
 }

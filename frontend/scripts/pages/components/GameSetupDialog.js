@@ -1,6 +1,6 @@
 import {EVENT_TYPES} from "../../utils/constants.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
-import {getAccessToken, validateInput} from "../../api/api.js";
+import {getAccessToken, showToast, validateInput} from "../../api/api.js";
 
 export class GameSetupDialog extends HTMLElement {
     constructor() {
@@ -135,8 +135,7 @@ export class GameSetupDialog extends HTMLElement {
                 GlobalEventEmitter.emit(EVENT_TYPES.START_MATCH, { player1Name, player2Name, matchType, AIDifficulty, powerUpCount });
                 this.close();
             } catch (error) {
-                // TODO: TOAST
-                alert(error);
+                showToast(error, 'danger');
             }
         });
     }

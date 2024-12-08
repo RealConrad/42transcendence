@@ -66,23 +66,17 @@ export const refreshTokens = async () => {
 }
 
 window.onload = async () => {
-    // TODO: DO NOT LOG
     console.log("Page refreshed, trying to get new tokens....");
     if (!accessToken) {
         try {
             await refreshTokens();
-            console.log(accessToken);
             await GlobalCacheManager.initialize("matches", fetchMatchHistory);
-            await GlobalCacheManager.initialize("friends", fetchFriends);
+            // await GlobalCacheManager.initialize("friends", fetchFriends);
         } catch (error) {
-            // TODO: LOG USER OUT
             deleteUser();
-            // console.error("Unable to refresh tokens on page load: ", error);
         }
     } else {
-        // TODO: DO NOT LOG
         GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
-        console.log("Already have access token");
     }
 }
 
@@ -135,6 +129,7 @@ export const fetchMatchHistory = async () => {
     });
 
     if (!response.ok) {
+        showToast('Error when fetching match history', 'danger');
         throw new Error(`Error fetching match history`);
     }
     return response.json();
@@ -142,7 +137,6 @@ export const fetchMatchHistory = async () => {
 
 export const fetchFriends = async () => {
     try {
-        // TODO: Change url
         const response = await apiCall(`${BASE_FRIENDS_API_URL}/get-friends/`, {
             method: "GET",
             headers: {
@@ -151,7 +145,7 @@ export const fetchFriends = async () => {
         })
         return response.json();
     } catch (error) {
-        // TODO: toast
+        showToast('Error when fetching friends', 'danger');
         console.error(error);
     }
 }
@@ -219,11 +213,9 @@ export const disable2FA = async () => {
     })
         .then((response) => response.json())
         .then(() => {
-            // TODO: TOAST
             setLocal2FA(false);
             return true;
         }) .catch((error) => {
-            // TODO: TOAST 'error'
             return false;
     })
 }
@@ -245,7 +237,7 @@ export const logout = async () => {
 
         if (response.ok) {
             deleteUser();
-            console.log("User successfully logged out");
+            showToast('Logged out', 'success');
             GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
         } else {
             const error = await response.json();
@@ -263,4 +255,18 @@ export const deleteUser = () => {
     USER.profilePicture = null;
     USER.backupProfilePicture = null;
     localStorage.clear();
+}
+
+export const showToast = (message, type = 'info') => {
+    document.querySelector('.toast-body').textContent = message;
+
+    const toastElement = document.querySelector('.toast');
+    toastElement.classList.remove('bg-success', 'bg-danger', 'bg-warning', 'bg-info');
+    toastElement.classList.add(`bg-${type}`);
+
+    const toast = new bootstrap.Toast(toastElement, {
+        autohide: true,
+        delay: 4000,
+    });
+    toast.show();
 }
