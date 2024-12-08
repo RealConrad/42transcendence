@@ -133,7 +133,6 @@ export default class Game {
     gameLoop() {
         if (this.isGameOver || this.isGamePaused) return;
 
-        console.log("game loop...");
         this.collisionManager.handleCollisions();
         this.ball.move();
         this.player1.controller.update();
@@ -179,7 +178,6 @@ export default class Game {
                 if (lastTouchPlayer) {
                     powerUp.collectPowerUp(this, lastTouchPlayer);
                 } else {
-                    console.log("Power-Up collected with no owner, generating new one...");
                     powerUp.isActive = false;
                     this.createPowerUps(2);
                 }
@@ -205,7 +203,6 @@ export default class Game {
 
     checkWinCondition() {
         if (this.player1.score === this.maxScore || this.player2.score === this.maxScore) {
-            console.log("GAME OVER!");
             this.isGameOver = true;
              if (this.player1.score === this.maxScore) {
                 this.winner = {
@@ -263,9 +260,7 @@ export default class Game {
     }
 
     resetGameState() {
-        setTimeout(() => {
-            this.renderManager.resetObjects();
-        }, 1000);
+        this.renderManager.resetObjects();
     }
 
     updatePlayerScore() {
@@ -294,9 +289,8 @@ export default class Game {
                 body: JSON.stringify(payload)
             });
             if (response.ok) {
-                    await response.json();
+                await response.json();
                 // TODO: Toast
-                console.log("Saved match");
                 try {
                     const updatedMatchHistory = await fetchMatchHistory();
                     GlobalCacheManager.set("matches", updatedMatchHistory);
