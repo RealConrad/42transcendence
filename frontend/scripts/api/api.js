@@ -229,6 +229,11 @@ export const disable2FA = async () => {
 }
 
 export const logout = async () => {
+    const authMethod = localStorage.getItem('authMethod');
+    if (authMethod === "42OAuth") {
+        deleteUser();
+        return;
+    }
     try {
         const response = await fetch(`${BASE_JWT_API_URL}/logout/`, {
             method: 'POST',
