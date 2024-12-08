@@ -141,8 +141,8 @@ class GetFriendsListView(generics.GenericAPIView):
                 response_data.append({
                     "username": friend.username,
                     "status": "friends",
-                    "profile_picture": profile_picture_url,
-                    "is_online": "online" if friend.profile.is_online else "offline"
+                    "profilePicture": profile_picture_url,
+                    "online": "online" if friend.profile.online else "offline"
                 })
             # friends_usernames = [friend.username for friend in friends]
 
@@ -158,8 +158,8 @@ class GetFriendsListView(generics.GenericAPIView):
                 response_data.append({
                     "username": receiver.username,
                     "status": "pending",
-                    "profile_picture": profile_picture_url,
-                    "is_online": "online" if receiver.profile.is_online else "offline"
+                    "profilePicture": profile_picture_url,
+                    "online": "online" if receiver.profile.online else "offline"
                 })
 
             # 3. Waiting Friend Requests Received
@@ -174,8 +174,8 @@ class GetFriendsListView(generics.GenericAPIView):
                 response_data.append({
                     "username": sender.username,
                     "status": "waiting",
-                    "profile_picture": profile_picture_url,
-                    "is_online": "online" if sender.profile.is_online else "offline"
+                    "profilePicture": profile_picture_url,
+                    "online": "online" if sender.profile.online else "offline"
                 })
 
             return Response(response_data , status=status.HTTP_200_OK)
