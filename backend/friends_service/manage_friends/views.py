@@ -123,31 +123,63 @@ class GetFriendsListView(generics.GenericAPIView):
         user = request.user
 
         try:
+            response_data = []
+
+            # 1. Friends List
             try:
                 friendship = Friendship.objects.get(user=user)
                 friends = friendship.friends.all()
-                friends_usernames = [friend.username for friend in friends]
             except Friendship.DoesNotExist:
-                friends_usernames = []
+                friends = []
 
+            for friend in friends:
+                profile_picture_url = (
+                    request.build_absolute_uri(friend.profile.profile_picture.url)
+                    if friend.profile.profile_picture and hasattr(friend.profile.profile_picture, 'url')
+                    else request.build_absolute_uri('/media/profile_pictures/default.png')  # Default image URL
+                )
+                response_data.append({
+                    "username": friend.username,
+                    "status": "friends",
+                    "profile_picture": profile_picture_url,
+                    "is_online": "online" if friend.profile.is_online else "offline"
+                })
+            # friends_usernames = [friend.username for friend in friends]
 
-            sent_requests = FriendRequest.objects.filter(
-                sender=user, status="pending"
-            ).values_list('receiver__username', flat=True)
+            # 2. Pending Friends Request Sent
+            sent_requests = FriendRequest.objects.filter(sender=user, status="pending")
+            for sent_request in sent_requests:
+                receiver = sent_request.receiver
+                profile_picture_url = (
+                    request.build_absolute_uri(receiver.profile.profile_picture.url)
+                    if receiver.profile.profile_picture and hasattr(receiver.profile.profile_picture, 'url')
+                    else request.build_absolute_uri('/media/profile_pictures/default.png')  # Default image URL
+                )
+                response_data.append({
+                    "username": receiver.username,
+                    "status": "pending",
+                    "profile_picture": profile_picture_url,
+                    "is_online": "online" if receiver.profile.is_online else "offline"
+                })
 
-            received_requests = FriendRequest.objects.filter(
-                receiver=user, status="pending"
-            ).values_list('sender__username', flat=True)
+            # 3. Waiting Friend Requests Received
+            received_requests = FriendRequest.objects.filter(receiver=user, status="pending")
+            for received_request in received_requests:
+                sender = received_request.sender
+                profile_picture_url = (
+                    request.build_absolute_uri(sender.profile.profile_picture.url)
+                    if sender.profile.profile_picture and hasattr(sender.profile.profile_picture, 'url')
+                    else request.build_absolute_uri('/media/profile_pictures/default.png')  # Default image URL
+                )
+                response_data.append({
+                    "username": sender.username,
+                    "status": "waiting",
+                    "profile_picture": profile_picture_url,
+                    "is_online": "online" if sender.profile.is_online else "offline"
+                })
 
+            return Response(response_data , status=status.HTTP_200_OK)
 
-            return Response(
-                {
-                    "friends": friends_usernames,
-                    "pending": list(sent_requests),
-                    "waiting": list(received_requests)
-                },
-                status=status.HTTP_200_OK
-            )
         except Exception as e:
             return Response(
                 {"detail": f"Internal Server Error: {str(e)}"},
