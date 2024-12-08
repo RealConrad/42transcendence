@@ -72,8 +72,8 @@ window.onload = async () => {
         try {
             await refreshTokens();
             console.log(accessToken);
-            // await GlobalCacheManager.initialize("matches", fetchMatchHistory);
-            // await GlobalCacheManager.initialize("friends", fetchFriends);
+            await GlobalCacheManager.initialize("matches", fetchMatchHistory);
+            await GlobalCacheManager.initialize("friends", fetchFriends);
         } catch (error) {
             // TODO: LOG USER OUT
             console.error("Unable to refresh tokens on page load: ", error);
