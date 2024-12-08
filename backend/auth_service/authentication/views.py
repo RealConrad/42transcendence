@@ -220,7 +220,7 @@ class UpdateDisplayName(generics.GenericAPIView):
         new_display_name = request.data.get('displayname')
         if not new_display_name:
             return Response(
-                { "detail": "Missing display name in the body"},
+                { "detail": "Missing 'displayname' in the request body."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -228,7 +228,7 @@ class UpdateDisplayName(generics.GenericAPIView):
         user.save()
 
         response = Response({
-            "detail": "User data",
+            "detail": "Display name updated successfully.",
             "username": user.username,
             "displayname": user.displayname
         }, status=status.HTTP_200_OK)
