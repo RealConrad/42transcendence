@@ -56,17 +56,21 @@
     color: red;
 }
 
+.flex-container {
+    display: flex;
+    gap: 20px;
+    margin-top: 50px;
+    margin-bottom: 50px;
+}
 
 .orange-2FA-button{
     all: unset;
-    pointer-events: auto;
     display: block;
 	background: var(--background-yellow);
 	color: black;
 	padding: 10px;
 	border-radius: 8px;
 	font-size: 20px;
-    margin: 50px;
 }
 
 

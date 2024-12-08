@@ -76,11 +76,11 @@ window.onload = async () => {
             await GlobalCacheManager.initialize("friends", fetchFriends);
         } catch (error) {
             // TODO: LOG USER OUT
-            console.error("Unable to refresh tokens on page load: ", error);
+            deleteUser();
+            // console.error("Unable to refresh tokens on page load: ", error);
         }
     } else {
         // TODO: DO NOT LOG
-        deleteUser();
         GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
         console.log("Already have access token");
     }
@@ -228,7 +228,31 @@ export const disable2FA = async () => {
     })
 }
 
-function deleteUser(){
+export const logout = async () => {
+    try {
+        const response = await fetch(`${BASE_JWT_API_URL}/logout/`, {
+            method: 'POST',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (response.ok) {
+            deleteUser();
+            console.log("User successfully logged out");
+            GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
+        } else {
+            const error = await response.json();
+            console.error("Failed to logout", error);
+        }
+    } catch (error) {
+        console.error("Error during logout", error);
+    }
+};
+
+
+export const deleteUser = () => {
     accessToken = null;
     USER.username = null;
     USER.profilePicture = null;

@@ -1,6 +1,15 @@
-import {apiCall, getAccessToken, setLocalPicture, get2FAstatus, getLocal2FA, setLocal2FA, disable2FA} from "../../api/api.js";
+import {
+    apiCall,
+    getAccessToken,
+    setLocalPicture,
+    get2FAstatus,
+    getLocal2FA,
+    setLocal2FA,
+    disable2FA,
+    logout
+} from "../../api/api.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
-import {BASE_AUTH_API_URL, BASE_GAME_API_URL, EVENT_TYPES, USER} from "../../utils/constants.js";
+import {BASE_AUTH_API_URL, EVENT_TYPES, USER} from "../../utils/constants.js";
 import GlobalCacheManager from "../../utils/CacheManager.js";
 
 export class AccountMenu extends HTMLElement {
@@ -49,8 +58,9 @@ export class AccountMenu extends HTMLElement {
                                 ${this.username}
                             </div>
                         </div>
-                        <div>
+                        <div class="flex-container">
                             <button class="orange-2FA-button" id="TwoFactorAuthButton">Enable 2FA</button>
+                            <button class="orange-2FA-button" id="logout">Logout</button>
                         </div>
                         <div class="total-match-stats">
                             <div class="matches-won">
@@ -94,6 +104,7 @@ export class AccountMenu extends HTMLElement {
 
     setupEventListeners(){
         const TwoFactorAuthButton = this.shadowRoot.getElementById("TwoFactorAuthButton");
+        const logoutButton = this.shadowRoot.getElementById("logout");
         if (!getLocal2FA()){
             setLocal2FA(false);
         }
@@ -107,6 +118,17 @@ export class AccountMenu extends HTMLElement {
         TwoFactorAuthButton.addEventListener("mouseout", () => {
             GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_UNHOVER, { element: TwoFactorAuthButton});
         });
+        logoutButton.addEventListener("mouseover", () => {
+            GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_HOVER, { element: logoutButton});
+        });
+        logoutButton.addEventListener("mouseout", () => {
+            GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_UNHOVER, { element: logoutButton});
+        });
+
+        logoutButton.addEventListener('click', () => {
+            logout();
+        })
+
         TwoFactorAuthButton.addEventListener("click", () => {
             if (getLocal2FA() == 'false'){
                 GlobalEventEmitter.emit(EVENT_TYPES.SET_TWOFACTOR, { element: TwoFactorAuthButton });
