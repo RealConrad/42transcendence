@@ -1,11 +1,10 @@
-import requests
-from django.shortcuts import render
-from .models import FriendRequest, Friendship
+from rest_framework.status import HTTP_500_INTERNAL_SERVER_ERROR, HTTP_400_BAD_REQUEST
+from .models import FriendRequest, Friendship, UserProfile
 from django.contrib.auth.models import User
 from .serializers import FriendRequestSerializer, FriendshipSerializer
 from rest_framework import generics, status
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.exceptions import ValidationError, APIException, NotFound
 
 # Create your views here.
@@ -133,11 +132,12 @@ class GetFriendsListView(generics.GenericAPIView):
                 friends = []
 
             for friend in friends:
-                profile_picture_url = (
-                    request.build_absolute_uri(friend.profile.profile_picture.url)
-                    if friend.profile.profile_picture and hasattr(friend.profile.profile_picture, 'url')
-                    else request.build_absolute_uri('/media/profile_pictures/default.png')  # Default image URL
-                )
+                if not friend.profile.profile_picture_url:
+                    profile_picture_url = (
+                        request.build_absolute_uri(friend.profile.profile_picture.url)
+                    )
+                else:
+                    profile_picture_url = friend.profile.profile_picture_url
                 response_data.append({
                     "username": friend.username,
                     "status": "friends",
@@ -150,11 +150,12 @@ class GetFriendsListView(generics.GenericAPIView):
             sent_requests = FriendRequest.objects.filter(sender=user, status="pending")
             for sent_request in sent_requests:
                 receiver = sent_request.receiver
-                profile_picture_url = (
-                    request.build_absolute_uri(receiver.profile.profile_picture.url)
-                    if receiver.profile.profile_picture and hasattr(receiver.profile.profile_picture, 'url')
-                    else request.build_absolute_uri('/media/profile_pictures/default.png')  # Default image URL
-                )
+                if not receiver.profile.profile_picture_url:
+                    profile_picture_url = (
+                        request.build_absolute_uri(receiver.profile.profile_picture.url)
+                    )
+                else:
+                    profile_picture_url = receiver.profile.profile_picture_url
                 response_data.append({
                     "username": receiver.username,
                     "status": "pending",
@@ -166,11 +167,12 @@ class GetFriendsListView(generics.GenericAPIView):
             received_requests = FriendRequest.objects.filter(receiver=user, status="pending")
             for received_request in received_requests:
                 sender = received_request.sender
-                profile_picture_url = (
-                    request.build_absolute_uri(sender.profile.profile_picture.url)
-                    if sender.profile.profile_picture and hasattr(sender.profile.profile_picture, 'url')
-                    else request.build_absolute_uri('/media/profile_pictures/default.png')  # Default image URL
-                )
+                if not sender.profile.profile_picture_url:
+                    profile_picture_url = (
+                        request.build_absolute_uri(sender.profile.profile_picture.url)
+                    )
+                else:
+                    profile_picture_url = sender.profile.profile_picture_url
                 response_data.append({
                     "username": sender.username,
                     "status": "waiting",
@@ -185,3 +187,27 @@ class GetFriendsListView(generics.GenericAPIView):
                 {"detail": f"Internal Server Error: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+class UpdateProfilePictureAPIView(generics.GenericAPIView):
+    """
+    Updates user profile pic url
+    """
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+
+        user = request.user
+        profile_picture_url = request.data.get('profile_picture_url', None)
+        if not profile_picture_url:
+            return Response(
+                {"detail": "No reference to new profile picture found"},
+                status=HTTP_400_BAD_REQUEST
+            )
+        user_profile, created = UserProfile.objects.get_or_create(user=user)
+        user_profile.profile_picture_url = profile_picture_url
+        user_profile.save()
+
+        return Response({
+            "username": user.username,
+            "profile_picture_url": user_profile.profile_picture_url
+        }, status=status.HTTP_200_OK)
