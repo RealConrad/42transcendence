@@ -9,6 +9,7 @@ from .authentication import JWTAuthentication
 
 JWT_SERVICE_URL = 'http://jwtservice:8002/api/token/generate-tokens/'
 JWT_VERIFY_URL = 'http://jwtservice:8002/api/token/verify/'
+FRIENDS_SERVICE_URl = 'http://friendsservice:8004/api/friends/update-profile-pic-url'
 
 class RegisterView(generics.CreateAPIView):
     permission_classes = [AllowAny]
@@ -170,10 +171,33 @@ class SaveProfilePicture(generics.GenericAPIView):
             else None
         )
 
+        self.update_friends_service(request, profile_picture_url)
+
         return Response({
             'detail': "Profile picture uploaded successfully",
              'profile_picture': profile_picture_url
         }, status=status.HTTP_200_OK )
+
+    def update_friends_service(self, request, profile_picture_url):
+        """
+        Updates profile picture url in the friends service
+        """
+
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": request.headers.get("Authorization")
+        }
+
+        if "X-42-Token" in request.headers:
+            headers['X-42-Token'] = request.headers.get('X-42-Token')
+
+        payload = {
+            "profile_picture_url": profile_picture_url,
+        }
+
+        response = requests.put(FRIENDS_SERVICE_URl, json=payload, headers=headers)
+        response.raise_for_status()
+
 
 
 class GetUserData(generics.GenericAPIView):
