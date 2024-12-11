@@ -25,7 +25,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "ee5n49s2swmwwc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {
@@ -91,7 +91,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "ee5n49s2swmwwc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {
@@ -180,7 +180,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "ee5n49s2swmwwc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {
@@ -242,7 +242,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "ee5n49s2swmwwc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {
@@ -304,7 +304,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "ee5n49s2swmwwc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {
@@ -356,13 +356,13 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "ee5n49s2swmwwc"
+              "uid": "prometheus"
             },
             "editorMode": "code",
             "exemplar": false,
-            "expr": "container_memory_usage_bytes{image!=\"\"}",
+            "expr": "container_memory_usage_bytes{image!=\"\"} by (container)",
             "hide": false,
-            "instant": false,
+            "instant": true,
             "interval": "",
             "legendFormat": "{{name}}",
             "range": true,
@@ -376,7 +376,7 @@
       {
         "datasource": {
           "type": "prometheus",
-          "uid": "ee5n49s2swmwwc"
+          "uid": "prometheus"
         },
         "fieldConfig": {
           "defaults": {
@@ -461,7 +461,7 @@
           {
             "datasource": {
               "type": "prometheus",
-              "uid": "ee5n49s2swmwwc"
+              "uid": "prometheus"
             },
             "editorMode": "code",
             "exemplar": false,

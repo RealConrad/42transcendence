@@ -179,18 +179,26 @@ services:
     networks:
       - transcendence
 
+  alertmanager:
+    image: prom/alertmanager
+    volumes:
+      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    ports:
+      - "9093:9093"
+
+
   grafana:
-    image: grafana/grafana
+    image: grafana/grafana-oss
     container_name: grafana
     env_file:
       - .env
+    depends_on:
+      - prometheus
     volumes:
-      - ./grafana/grafana_data:/var/lib/grafana
       - ./grafana/config/grafana.ini:/etc/grafana/grafana.ini:ro
-      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
-      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
-      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
-      - ./grafana/logs:/var/log/grafana
+      - ./grafana/config/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ./grafana/dashboards/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml
+      - ./grafana/dashboards/Container_Monitoring_Dashboard.json:/etc/grafana/dashboards/Container_Monitoring_Dashboard.json
     ports:
       - "3000:3000"
     networks:

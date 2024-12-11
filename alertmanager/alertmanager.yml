@@ -1,0 +1,10 @@
+global:
+  resolve_timeout: 5m
+
+route:
+  receiver: 'grafana'
+
+receivers:
+  - name: 'grafana'
+    webhook_configs:
+      - url: 'http://grafana:3000/api/prom/alerts'
