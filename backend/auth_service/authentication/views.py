@@ -36,7 +36,8 @@ class RegisterView(generics.CreateAPIView):
                     "detail": "User registered successfully",
                     "username": user.username,
                     "user_id": user.id,
-                    "access_token": access_token
+                    "access_token": access_token,
+                    "displayname": user.displayname
                 }, status=status.HTTP_201_CREATED)
 
                 response.set_cookie(
@@ -89,6 +90,7 @@ class LoginView(generics.GenericAPIView):
                     "mfa_enable_flag": user.mfa_enabled,
                     "logged_in": user.logged_in,
                     "profile_picture": profile_picture_url,
+                    "displayname": user.displayname
                 }, status=status.HTTP_200_OK)
 
                 response.set_cookie(
@@ -198,6 +200,37 @@ class GetUserData(generics.GenericAPIView):
             "mfa_enable_flag": user.mfa_enabled,
             "logged_in": user.logged_in,
             "profile_picture": profile_picture_url,
+            "displayname": user.displayname
+        }, status=status.HTTP_200_OK)
+
+        return response
+
+
+class UpdateDisplayName(generics.GenericAPIView):
+    """
+    Generic View to update display name for the user
+    """
+
+    permission_classes = [AllowAny]
+    authentication_classes = [JWTAuthentication]
+
+    def put(self, request, *args, **kwargs):
+        user = request.user
+
+        new_display_name = request.data.get('displayname')
+        if not new_display_name:
+            return Response(
+                { "detail": "Missing 'displayname' in the request body."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user.displayname = new_display_name
+        user.save()
+
+        response = Response({
+            "detail": "Display name updated successfully.",
+            "username": user.username,
+            "displayname": user.displayname
         }, status=status.HTTP_200_OK)
 
         return response

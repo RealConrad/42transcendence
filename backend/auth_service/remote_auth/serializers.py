@@ -13,6 +13,6 @@ class RemoteUserSerializer(serializers.ModelSerializer):
         """
         if CustomUser.objects.filter(username=username).exists():
             raise ValidationError("detail: A user with this username already exists")
-        user = CustomUser(username=username, profile_picture_url=profile_picture_url)
+        user = CustomUser(username=username, profile_picture_url=profile_picture_url, displayname=username)
         user.save()
         return user
