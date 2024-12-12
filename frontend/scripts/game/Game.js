@@ -14,7 +14,7 @@ import RenderManager from "./managers/RenderManager.js";
 import CollisionManager from "./managers/CollisionManager.js";
 import AIController from "./controllers/AIController.js";
 import InputManager from "./managers/InputManager.js";
-import {apiCall, fetchMatchHistory} from "../api/api.js";
+import {apiCall, fetchMatchHistory, showToast} from "../api/api.js";
 import GlobalEventEmitter from "../utils/EventEmitter.js";
 import PowerUp from "./models/powerups/PowerUp.js";
 import { atkPowers, defPowers } from "./models/powerups/PowerUp.js";
@@ -43,7 +43,6 @@ export default class Game {
         this.ball = new Ball(this.canvas.width / 2, this.canvas.height / 2, 5, 15, 15);
 
         this.Battleground = new Battleground(this.canvas);
-
 
         // Setup powerups
         if (this.powerUpCount > 0) {
@@ -138,13 +137,13 @@ export default class Game {
         this.player1.controller.update();
         this.player2.controller.update();
         this.handlePowerUpActivation();
-        this.checkWinCondition();
         this.renderManager.render();
         if (this.powerUpCount > 0) {
             this.checkPowerUpCollection();
             this.player1.drawInventory(this.ctx, 30, this.canvas.height - 60);
             this.player2.drawInventory(this.ctx, this.canvas.width - 160, this.canvas.height - 60);
         }
+        this.checkWinCondition();
         requestAnimationFrame(this.gameLoop.bind(this));
     }
 
@@ -178,7 +177,6 @@ export default class Game {
                 if (lastTouchPlayer) {
                     powerUp.collectPowerUp(this, lastTouchPlayer);
                 } else {
-                    console.log("Power-Up collected with no owner, generating new one...");
                     powerUp.isActive = false;
                     this.createPowerUps(2);
                 }
@@ -261,9 +259,7 @@ export default class Game {
     }
 
     resetGameState() {
-        setTimeout(() => {
-            this.renderManager.resetObjects();
-        }, 1000);
+        this.renderManager.resetObjects();
     }
 
     updatePlayerScore() {
@@ -292,23 +288,19 @@ export default class Game {
                 body: JSON.stringify(payload)
             });
             if (response.ok) {
-                    await response.json();
-                // TODO: Toast
-                console.log("Saved match");
+                await response.json();
+                showToast('Match saved successfully!', 'success');
                 try {
                     const updatedMatchHistory = await fetchMatchHistory();
                     GlobalCacheManager.set("matches", updatedMatchHistory);
                 } catch (error) {
-                    // TODO: Toast
-                    console.log("Failed to update match history after saving: ", error);
+                    showToast(`Failed to update match history after saving`, 'danger');
                 }
             } else {
-                // TODO: Toast
-                console.error("Failed to save match");
+                showToast('Failed to save match', 'danger');
             }
         } catch (error) {
-            // TODO: Toast
-            console.log("error while saving match:", error);
+            showToast(`Failed to save match`, 'danger');
         }
     }
 }
