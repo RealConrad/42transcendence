@@ -174,8 +174,8 @@ html() {
                 try {
                     validateInput(newDisplayName);
                     console.log(newDisplayName);
-                    const response = await apiCall(`${BASE_AUTH_API_URL}/update_username/`, {
-                        method: "POST",
+                    const response = await apiCall(`${BASE_AUTH_API_URL}/update_displayname/`, {
+                        method: "PUT",
                         headers: {
                             "Content-Type": "application/json",
                         },
