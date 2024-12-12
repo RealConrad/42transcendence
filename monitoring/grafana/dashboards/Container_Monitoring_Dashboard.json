@@ -360,7 +360,7 @@
             },
             "editorMode": "code",
             "exemplar": false,
-            "expr": "container_memory_usage_bytes{image!=\"\"} by (container)",
+            "expr": "container_memory_usage_bytes{image!=\"\"}",
             "hide": false,
             "instant": true,
             "interval": "",

@@ -171,20 +171,25 @@ services:
     image: prom/prometheus
     container_name: prometheus
     volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-      - ./prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
-      - ./prometheus/prometheus-data:/prometheus
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/prometheus/alert_rules.yml:/etc/prometheus/alert_rules.yml:ro
+      - prometheus-data:/prometheus
     ports:
-      - "9090:9090"
+      - "127.0.0.1:9090:9090"
     networks:
       - transcendence
 
   alertmanager:
     image: prom/alertmanager
+    env_file:
+      - .env
     volumes:
-      - ./alertmanager/alertmanager.yml:/etc/alertmanager/alertmanager.yml
-    ports:
-      - "9093:9093"
+      - ./monitoring/alertmanager/config.sh:/config.sh
+    # ports:
+    #   - "9093:9093"
+    networks:
+        - transcendence
+    entrypoint: ["sh", "/config.sh"]
 
 
   grafana:
@@ -195,12 +200,12 @@ services:
     depends_on:
       - prometheus
     volumes:
-      - ./grafana/config/grafana.ini:/etc/grafana/grafana.ini:ro
-      - ./grafana/config/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
-      - ./grafana/dashboards/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml
-      - ./grafana/dashboards/Container_Monitoring_Dashboard.json:/etc/grafana/dashboards/Container_Monitoring_Dashboard.json
+      - ./monitoring/grafana/config/grafana.ini:/etc/grafana/grafana.ini:ro
+      - ./monitoring/grafana/config/datasources.yml:/etc/grafana/provisioning/datasources/datasources.yml
+      - ./monitoring/grafana/dashboards/dashboards.yml:/etc/grafana/provisioning/dashboards/dashboards.yml
+      - ./monitoring/grafana/dashboards/Container_Monitoring_Dashboard.json:/etc/grafana/dashboards/Container_Monitoring_Dashboard.json
     ports:
-      - "3000:3000"
+      - "127.0.0.1:3000:3000"
     networks:
       - transcendence
 
@@ -208,12 +213,12 @@ services:
     image: gcr.io/cadvisor/cadvisor:latest
     container_name: cadvisor
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     volumes:
-        - /:/rootfs:ro # Gets information about the host
-        - /sys:/sys:ro # Gets information from the host about the container ressource usage
-        - /var/run/docker.sock:/var/run/docker.sock:ro # Gets information from the docker daemon
-        - /var/lib/docker/:/var/lib/docker:ro # Gets metadata information from the docker daemon
+        - /:/rootfs:ro
+        - /sys:/sys:ro
+        - /var/run/docker.sock:/var/run/docker.sock:ro
+        - /var/lib/docker/:/var/lib/docker:ro
     networks:
       - transcendence
 
