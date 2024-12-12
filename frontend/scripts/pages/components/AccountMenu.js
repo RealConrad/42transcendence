@@ -179,7 +179,7 @@ html() {
                         headers: {
                             "Content-Type": "application/json",
                         },
-                        body: JSON.stringify({ displayName: newDisplayName }),
+                        body: JSON.stringify({ displayname: newDisplayName }),
                     });
 
                     if (response.ok) {
