@@ -25,7 +25,126 @@ export class FriendsMenu extends HTMLElement {
 
     html() {
         return `
-            <link rel="stylesheet" href="../../../styles/friends.css">
+            <style>
+                .flex-container {
+                    display: flex;
+                    gap: 20px;
+                    margin-bottom: 10px;
+                    width: 100%;
+                }
+
+                .container {
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100%;
+                    width: 80%;
+                    margin: 10px auto;
+                    text-align: center;
+                    position: relative;
+                }
+
+                .guest-view {
+                    display: grid;
+                    align-items: center;
+                    color: white;
+                    height: 100%;
+                    text-align: center;
+                }
+
+                button {
+                    all: unset;
+                }
+
+                .container, .flex-container, .friends-list {
+                    box-sizing: border-box;
+                }
+
+                .orange-button-no-absolute {
+                    background: var(--background-yellow);
+                    color: black;
+                    padding: 10px;
+                    border-radius: 8px;
+                    font-size: 20px;
+                }
+
+                button {
+                    all: unset;
+                }
+
+                .input-field {
+                    flex: 1;
+                    padding: 10px;
+                    font-size: 1rem;
+                    border: 1px solid #ccc;
+                    border-radius: 5px;
+                }
+
+                input {
+                    outline: none;
+                }
+
+                .friends-list {
+                    margin-top: 20px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                    width: 100%;
+                    border: 1px solid #22211F;
+                    border-radius: 10px;
+                    background-color: #030714;
+                    padding: 20px;
+                    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                }
+
+                .user-item {
+                    display: flex;
+                    align-items: center;
+                    gap: 10px;
+                }
+
+                .profile-container {
+                    position: relative;
+                    width: 40px;
+                    height: 40px;
+                }
+
+                .profile-picture {
+                    width: 100%;
+                    height: 100%;
+                    border-radius: 50%;
+                    object-fit: cover;
+                }
+
+                .status-dot {
+                    position: absolute;
+                    bottom: 0;
+                    right: 0;
+                    width: 12px;
+                    height: 12px;
+                    border-radius: 50%;
+                    border: 2px solid #fff;
+                }
+
+                .green {
+                    background-color: green;
+                }
+
+                .grey {
+                    background-color: darkgray;
+                }
+
+                .username {
+                    font-size: 1rem;
+                    color: white;
+                }
+
+                .pending {
+                    font-size: 0.6rem;
+                    color: gray;
+                }
+            </style>
             <link id="style-sheet2" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
             ${getAccessToken() ? `
                 <div class="container">

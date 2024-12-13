@@ -18,7 +18,120 @@ export class AboutMenu extends HTMLElement {
 
     html() {
         return `
-            <link rel="stylesheet" href="../../../styles/about.css">
+            <style>
+                    p {
+                        margin-left: 40px;
+                    }
+
+                    a {
+                        all: unset
+                    }
+
+                    .container {
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                        align-items: center;
+                        height: 100%;
+                        width: 100%;
+                        text-align: center;
+                        position: relative;
+                    }
+
+
+                    .heading {
+                        font-size: 2rem;
+                        margin: 10px;
+                        color: white;
+                    }
+
+                    .subheading {
+                        font-size: 1.2rem;
+                        padding-top: 25px;
+                        color: #C7C4BF;
+                    }
+
+                    .description {
+                        color: darkgray;
+                    }
+
+                    @keyframes spin-clockwise {
+                    to {
+                        transform: rotate(360deg);
+                    }
+                    }
+
+                    @keyframes spin-anti-clockwise {
+                    to {
+                        transform: rotate(-360deg);
+                    }
+                    }
+
+                    .circle-container {
+                        color: white;
+                        width: 500px;
+                        height: 500px;
+                        display: grid;
+                        place-items: center;
+                        position: relative; /* Required for absolute children */
+                    }
+
+                    .name-container {
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                        align-items: center;
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        text-align: center;
+                    }
+
+                    .highlight {
+                        color: #FFCB13;
+                    }
+
+                    .user {
+                        transition: transform 0.3s ease, color 0.3s ease;
+                    }
+
+                    .user:hover {
+                        transform: scale(1.2);
+                    }
+
+                    .text-ring {
+                        color: lightgray;
+                        position: absolute;
+                        width: 100%;
+                        height: 100%;
+                        display: grid;
+                        place-items: center;
+                        font-weight: bold;
+                        font-family: monospace;
+                        text-transform: uppercase;
+                        animation: spin-clockwise 30s linear infinite;
+                        transform-origin: center;
+                    }
+
+                    .inner-ring {
+                        animation: spin-anti-clockwise 40s linear infinite;
+                    }
+
+                    .text-ring [style*=--index] {
+                        --inner-angle: calc((360 / var(--total)) * 1deg);
+                        --radius: calc((var(--character-width, 1) / sin(var(--inner-angle))) * -1ch);
+                        font-size: calc(var(--font-size, 2) * 1rem);
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        transform-origin: 50% 50%;
+                        transform:
+                        translate(-50%, -50%)
+                        rotate(calc(var(--inner-angle) * var(--index)))
+                        translateY(var(--radius));
+                    }
+                </style>
             <div class="container">
                 <div class="heading">ft_transcendence</div>
                 <div class="subheading">Final Project at 42 Heilbronn</div>
