@@ -48,11 +48,13 @@ export class AboutMenu extends HTMLElement {
                     .subheading {
                         font-size: 1.2rem;
                         padding-top: 25px;
+                        font-family: Inter;
                         color: #C7C4BF;
                     }
 
                     .description {
                         color: darkgray;
+                        font-family: Inter;
                     }
 
                     @keyframes spin-clockwise {

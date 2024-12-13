@@ -104,13 +104,13 @@ export class DashboardView extends HTMLElement {
                         <button>Account</button>
                         <span class="button-description">Who are you anyway?</span>
                     </div>
-                    <div class="menu-option">
-                        <button>About</button>
-                        <span class="button-description">ft_transcendence at 42 Heilbronn</span>
+                    <div class="menu-option" style="grid-row-start: 4;">
+                        <button>Friends</button>
+                        <span class="button-description">You have them, right?..</span>
                     </div>
                     <div class="menu-option" style="grid-row-start: 5;">
-                        <button>Friends</button>
-                        <span class="button-description">you have friends??</span>
+                        <button>About</button>
+                        <span class="button-description">ft_transcendence at 42 Heilbronn</span>
                     </div>
                 </left-menu>
                 <right-menu>
