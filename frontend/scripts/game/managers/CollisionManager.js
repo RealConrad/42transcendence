@@ -16,8 +16,8 @@ export default class CollisionManager {
     checkPaddleCollision(paddle) {
         const ball = this.game.ball;
         if (
-            ball.x - ball.radius <= paddle.x + paddle.width &&
-            ball.x + ball.radius > paddle.x &&
+            ((ball.x - ball.radius <= paddle.x + paddle.width && paddle.x < this.game.canvas.width / 2) ||
+            (ball.x + ball.radius > paddle.x && paddle.x >= this.game.canvas.width / 2)) &&
             ball.y - ball.radius < paddle.y + paddle.height &&
             ball.y + ball.radius > paddle.y
         ) {
