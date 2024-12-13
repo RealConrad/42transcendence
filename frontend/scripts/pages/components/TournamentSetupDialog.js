@@ -1,4 +1,4 @@
-import {validateInput} from "../../api/api.js";
+import {showToast, validateInput} from "../../api/api.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
 import {EVENT_TYPES} from "../../utils/constants.js";
 
@@ -269,7 +269,7 @@ export class TournamentSetupDialog extends HTMLElement {
             });
 
             if (hasErrors) {
-                alert(errorMsg);
+                showToast(errorMsg, 'danger');
                 return;
             }
 
@@ -280,18 +280,18 @@ export class TournamentSetupDialog extends HTMLElement {
 
             const validPlayers = players.filter((player) => player.username.trim().length > 0);
             if (validPlayers.length < 4 || validPlayers.length % 2 !== 0) {
-                alert("You need at minimum 4 players and an even number of players.");
+                showToast("You need at minimum 4 players and an even number of players.", 'danger');
                 return;
             }
             // Credit: https://stackoverflow.com/questions/30924280/what-is-the-best-way-to-determine-if-a-given-number-is-a-power-of-two
             if (Math.log2(validPlayers.length) % 1 !== 0) {
-                alert("Total number of players should be a power of 2");
+                showToast("Total number of players should be a power of 2", 'danger');
                 return;
             }
             const username = validPlayers.map(player => player.username.toLowerCase());
             const uniqueNames = new Set(username);
             if (uniqueNames.size !== username.length) {
-                alert("Cannot have duplicate usernames");
+                showToast("Cannot have duplicate usernames", 'danger');
                 return;
             }
             GlobalEventEmitter.emit(EVENT_TYPES.START_TOURNAMENT, { players: validPlayers, powerCounts });

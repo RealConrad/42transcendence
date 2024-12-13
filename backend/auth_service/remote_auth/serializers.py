@@ -16,6 +16,6 @@ class RemoteUserSerializer(serializers.ModelSerializer):
 
         if CustomUser.objects.filter(username=username).exists():
             raise serializers.ValidationError("User with this username already exists")
-        user = CustomUser(username=username, profile_picture_url=profile_picture_url, email=email)
+        user = CustomUser(username=username, profile_picture_url=profile_picture_url, email=email, displayname=username)
         user.save()
         return user

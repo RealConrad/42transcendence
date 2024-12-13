@@ -66,6 +66,7 @@ class CallbackAPI(APIView):
                     'profile_picture': user.profile_picture_url,
                     'access_token': access_token,
                     'refresh_token': refresh_token,
+                    'displayname': user.displayname
                 },
                 status=HTTP_200_OK
             )
