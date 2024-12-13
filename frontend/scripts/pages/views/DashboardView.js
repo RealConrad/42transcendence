@@ -19,6 +19,7 @@ export class DashboardView extends HTMLElement {
         this.isTournamentMatch = false;
         this.matchDataForMenuDialog = null;
         this.isGameMenuOpen = false;
+        this.menuComponents = {}; 
         setDefaultPicture();
     }
 
@@ -353,11 +354,20 @@ export class DashboardView extends HTMLElement {
 
     updateRightMenuContent(container, menuTag) {
         if (menuTag) {
-            container.innerHTML = "";
-            const menuComponent = document.createElement(menuTag);
-            container.appendChild(menuComponent);
+            if (!this.menuComponents[menuTag]) {
+                const menuComponent = document.createElement(menuTag);
+                this.menuComponents[menuTag] = menuComponent;
+                container.appendChild(menuComponent);
+            }
+    
+            Object.values(this.menuComponents).forEach(component => {
+                component.style.display = "none";
+            });
+    
+            this.menuComponents[menuTag].style.display = "block";
         }
     }
+    
 
     startGame(player1Name, player2Name, vsAI, aiDifficulty = 5, powerUpCount) {
         this.hideAllDashboardUI();

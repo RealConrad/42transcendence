@@ -2,6 +2,8 @@ export class HowToMenu extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({mode: 'open'})
+        this.preloadedImage = new Image();
+        this.preloadedImage.src = "../../../styles/keys.png";
     }
     connectedCallback() {
         this.render();
@@ -154,7 +156,7 @@ export class HowToMenu extends HTMLElement {
                     </div>
                 </div>
                 <div class="controls">
-                    <img src="../../../styles/keys.png" alt="Controls" style="max-height: 100%; max-width: 60%; height: auto; width: auto; pointer-events: none;" />
+                    <img src="${this.preloadedImage.src}" alt="Controls" style="max-height: 100%; max-width: 60%; height: auto; width: auto; pointer-events: none;" />
                 </div>
             </div>
         `
