@@ -168,15 +168,15 @@ export class HowToMenu extends HTMLElement {
             { symbol: ">", title: "Run Ball, Run!", desc: "Increase the ball speed by x3 until a point gets scored." },
             { symbol: "&", title: "No U!", desc: "Reverses the direction of the ball and<br>increase its speed x2 until a point gets scored." },
             { symbol: "-", title: "Honey, I Shrunk the Paddle", desc: "Halves the size of opponent's paddle until he loses a point." },
-            { symbol: "¿", title: "Down is the new Up", desc: "Reverses up and down keys of an opponent until<br>a point is scored or 5 seconds." }
+            { symbol: "¿", title: "Down is the new Up", desc: "Reverses up and down keys of an opponent until<br>a point is scored." }
         ];
 
         const defPowers = [
-            { symbol: "|", title: "You Shall Not Pass!", desc: "Your paddle becomes the max size for 2 seconds or<br>until it deflects the ball with 2x speed for remaining time." },
-            { symbol: "@", title: "Get Over Here!", desc: "Pull the ball to your paddle, stick it for 1s and<br>shoot straight with 4x speed for 1 second." },
+            { symbol: "|", title: "You Shall Not Pass!", desc: "Your paddle becomes 4x bigger and ball becomes 2x slower <br>until point scored." },
+            { symbol: "@", title: "Get Over Here!", desc: "Pull the ball to your paddle and increase its speed 2x<br>until point scored." },
             { symbol: "+", title: "Paddle STRONG!", desc: "Your paddle doubles in size until point scored." },
-            { symbol: "*", title: "Slow-Mo", desc: "The ball slows down for 2 seconds or until hits a paddle and<br>increases speed x2 for a duration of slow-mo part." },
-            { symbol: "=", title: "For Justice!", desc: "Teleports paddles of both players to a ball position and<br>freezes them in place for 1 second." }
+            { symbol: "*", title: "Slow-Mo", desc: "The ball slows down to minimum speed." },
+            { symbol: "=", title: "For Justice!", desc: "Teleports paddles of both players to the ball position." }
         ];
 
         const atkContainer = this.shadowRoot.querySelector(".atk-powers");

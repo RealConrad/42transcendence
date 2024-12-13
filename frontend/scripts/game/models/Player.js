@@ -101,8 +101,8 @@ export default class Player {
                 game.ball.speedY *= 3;
                 break;
             case "&": // "No U!"
-                game.ball.speedX = -game.ball.speedX;
-                game.ball.speedY = -game.ball.speedY;
+                game.ball.speedX = -game.ball.speedX * 2;
+                game.ball.speedY = -game.ball.speedY * 2;
                 break;
             case "-": // "Honey, I Shrunk the Paddle"
                 if (this === game.player1) game.player2.paddle.height /= 2;
@@ -114,8 +114,8 @@ export default class Player {
                 break;
             case "|": // "You Shall Not Pass!"
                 this.paddle.height *= 4;
-                game.ball.speedX *= 2;
-                game.ball.speedY *= 2;
+                game.ball.speedX /= 2;
+                game.ball.speedY /= 2;
                 break;
             case "@": // "Get Over Here!"
                 const paddleCenterX = this.paddle.x + this.paddle.width / 2;
@@ -125,7 +125,7 @@ export default class Player {
                 const vectorLength = Math.sqrt(vectorX ** 2 + vectorY ** 2);
                 const normalizedX = vectorX / vectorLength;
                 const normalizedY = vectorY / vectorLength;
-                const newSpeed = Math.sqrt(game.ball.speedX ** 2 + game.ball.speedY ** 2) * 4;
+                const newSpeed = Math.sqrt(game.ball.speedX ** 2 + game.ball.speedY ** 2) * 2;
                 game.ball.speedX = normalizedX * newSpeed;
                 game.ball.speedY = normalizedY * newSpeed;
                 break;
@@ -133,8 +133,9 @@ export default class Player {
                 this.paddle.height *= 2;
                 break;
             case "*": // "Slow-Mo"
-                game.ball.speedX /= 3;
-                game.ball.speedY /= 3;
+                const normal = Math.sqrt(game.ball.speedX ** 2 + game.ball.speedY ** 2);
+                game.ball.speedX = game.ball.speedX / normal;
+                game.ball.speedY = game.ball.speedY / normal;
                 break;
             case "=": // "For Justice!"
                 game.player1.paddle.y = game.ball.y;
