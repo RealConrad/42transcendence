@@ -164,7 +164,7 @@ export default class Player {
         if (this.atkPowerUp) {
             switch (this.atkPowerUp.symbol) {
                 case "%": // Teleport ball
-                    const ballOnAISide = this.ball.x > this.canvas.width * / 4;
+                    const ballOnAISide = this.ball.x > this.canvas.width * 3 / 4;
                     const opponentCannotReach = 
                         Math.abs(game.player1.paddle.y + game.player1.paddle.height / 2 - this.ball.y) > game.player1.paddle.height / 2;
                     if (ballOnAISide && opponentCannotReach) {
