@@ -84,7 +84,7 @@ export class DashboardView extends HTMLElement {
             </button>` :
             `<button id="login-button" class="user-display">
                 <img src="${USER.profilePicture ? `${USER.profilePicture}`: `${USER.backupProfilePicture}`}">
-                <div>${USER.displayname}</div>
+                <div>${USER.username}</div>
             </button>`
             }
             </header>
