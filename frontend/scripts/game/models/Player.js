@@ -164,7 +164,7 @@ export default class Player {
         if (this.atkPowerUp) {
             switch (this.atkPowerUp.symbol) {
                 case "%": // Teleport ball
-                    const ballOnAISide = this.ball.x < this.canvas.width / 4;
+                    const ballOnAISide = this.ball.x > this.canvas.width * / 4;
                     const opponentCannotReach = 
                         Math.abs(game.player1.paddle.y + game.player1.paddle.height / 2 - this.ball.y) > game.player1.paddle.height / 2;
                     if (ballOnAISide && opponentCannotReach) {
@@ -180,9 +180,7 @@ export default class Player {
     
                 case "&": // Reverse ball direction
                     const ballTooFastForAI = this.ball.dx > 0 && Math.abs(this.ball.y - this.paddle.y) > this.paddle.height / 2;
-                    const ballTooFastForOpponent = this.ball.dx < 0 && 
-                        Math.abs(game.player1.paddle.y + game.player1.paddle.height / 2 - this.ball.y) > game.player1.paddle.height / 2;
-                    if (ballTooFastForAI || ballTooFastForOpponent) {
+                    if (ballTooFastForAI) {
                         this.activatePowerUpAI("ATK", game);
                     }
                     break;
@@ -200,20 +198,11 @@ export default class Player {
         if (this.defPowerUp) {
             switch (this.defPowerUp.symbol) {
                 case "|": // Max size paddle
-                    this.activatePowerUpAI("DEF", game);
-                    break;
-    
-                case "@": // Pull ball
-                    const ballOnOpponentSide = this.ball.x > this.canvas.width / 2;
-                    if (ballOnOpponentSide) {
-                        this.activatePowerUpAI("DEF", game);
-                    }
-                    break;
-    
                 case "+": // Paddle strong
                     this.activatePowerUpAI("DEF", game);
                     break;
-    
+
+                case "@": // Pull ball
                 case "*": // Slow-mo ball
                 case "=": // Freeze paddles
                     const ballTooFastForAI = Math.abs(this.ball.y - this.paddle.y) > this.paddle.height / 2;
