@@ -1,6 +1,8 @@
 export default class CollisionManager {
     constructor(game) {
         this.game = game;
+        this.hype = 0;
+        this.hypeCounter = 0;
     }
 
     checkWallCollision() {
@@ -31,16 +33,30 @@ export default class CollisionManager {
     }
 
     checkScoring() {
-        if (this.game.ball.x - this.game.ball.radius < 0) {
+        if (this.game.ball.x - this.game.ball.radius < 0 && this.hype === 0) {
+            this.hype = 2;
+        }
+        else if (this.game.ball.x + this.game.ball.radius > this.game.canvas.width && this.hype === 0) {
+            this.hype = 1;
+        }
+        if (this.hype === 2) {
             this.game.player2.incrementScore();
-            this.game.resetGameState();
             this.game.updatePlayerScore();
+            this.game.ball.reset();
+            this.hypeCounter += 1;
         }
-        else if (this.game.ball.x + this.game.ball.radius > this.game.canvas.width) {
+        else if (this.hype === 1) {
             this.game.player1.incrementScore();
-            this.game.resetGameState();
             this.game.updatePlayerScore();
+            this.game.ball.reset();
+            this.hypeCounter += 1;
         }
+        if (this.hypeCounter > 99) {
+            this.game.resetGameState();
+            this.hype = 0;
+            this.hypeCounter = 0;
+        }
+
     }
 
     handleCollisions() {

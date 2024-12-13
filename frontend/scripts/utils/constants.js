@@ -2,7 +2,7 @@ export const PADDLE_SPEED = 10;
 export const PADDLE_HEIGHT = 100;
 export const PADDLE_WIDTH = 10;
 
-export const MAX_SCORE = 2;
+export const MAX_SCORE = 1000;
 
 export const FORM_ERROR_MESSAGES = {
     usernameRequired: "Username is required",

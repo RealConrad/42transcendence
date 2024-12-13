@@ -12,7 +12,8 @@ export default class Ball extends Renderable {
         const angleDegrees = this.getRandomAngle();
         const angleRadians = angleDegrees * (Math.PI / 180);
 
-        const speedMagnitude = 7;
+        const speedMagnitude = 2;
+        this.speedMagnitude = speedMagnitude;
         this.speedX = speedMagnitude * Math.cos(angleRadians);
         this.speedY = speedMagnitude * Math.sin(angleRadians);
 
@@ -74,8 +75,8 @@ export default class Ball extends Renderable {
     reset() {
         this.x = this.initialX;
         this.y = this.initialY;
-        this.speedX = 1 * (Math.random() > 0.5 ? 5 : -5);
-        this.speedY = 1 * (Math.random() > 0.5 ? 5 : -5);
+        this.speedX = this.speedMagnitude * (Math.random() > 0.5 ? 1 : -1);
+        this.speedY = this.speedMagnitude * (Math.random() > 0.5 ? 1 : -1);
         this.trail = []; 
         this.lastTouchedPlayer = null;
     }
