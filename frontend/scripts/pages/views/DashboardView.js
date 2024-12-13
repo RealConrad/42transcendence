@@ -347,6 +347,12 @@ export class DashboardView extends HTMLElement {
             const option = event.target.closest(".menu-option");
             if (option) {
                 const buttonText = option.querySelector("button").textContent.trim();
+                option.querySelector("button").classList.add("glowing-effect");
+                leftMenu.querySelectorAll(".menu-option").forEach((menuOption) => {
+                    if (menuOption !== option) {
+                        menuOption.querySelector("button").classList.remove("glowing-effect");
+                    }
+                });
                 this.updateRightMenuContent(rightMenuContainer, contentMapping[buttonText]);
             }
         });
