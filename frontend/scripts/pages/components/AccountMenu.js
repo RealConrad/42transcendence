@@ -22,7 +22,8 @@ export class AccountMenu extends HTMLElement {
     }
     connectedCallback() {
         this.accessToken = getAccessToken();
-        this.displayName = USER.username;
+        this.username = USER.username;
+        this.displayName = USER.displayname;
         this.imgUrl = USER.profilePicture;
         this.render();
         if (this.accessToken){
@@ -173,7 +174,6 @@ html() {
             if (newDisplayName && newDisplayName !== this.username) {
                 try {
                     validateInput(newDisplayName);
-                    console.log(newDisplayName);
                     const response = await apiCall(`${BASE_AUTH_API_URL}/update_displayname/`, {
                         method: "PUT",
                         headers: {
@@ -183,8 +183,9 @@ html() {
                     });
 
                     if (response.ok) {
-                        this.username = newDisplayName;
-                        USER.username = newDisplayName;
+                        localStorage.setItem('displayName', newDisplayName);
+                        // this.username = newDisplayName;
+                        // USER.username = newDisplayName;
                         usernameDisplay.textContent = newDisplayName;
                         GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
                     } else {
