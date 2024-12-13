@@ -1,13 +1,12 @@
 import {showToast, validateInput} from "../../api/api.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
-import {EVENT_TYPES} from "../../utils/constants.js";
+import {EVENT_TYPES, USER} from "../../utils/constants.js";
 
 export class TournamentSetupDialog extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({mode: 'open'})
-        // TODO: Get from localstorage
-        this.username = localStorage.getItem("username");
+        this.displayname = USER.displayname;
     }
 
     connectedCallback() {
@@ -28,7 +27,7 @@ export class TournamentSetupDialog extends HTMLElement {
                     <div class="heading">Tournament Setup</div>
                     <div id="player-inputs" class="player-inputs">
                         <div class="player-input">
-                            <input type="text" placeholder="Player 1 (You)" value="${this.username}">
+                            <input type="text" placeholder="Player 1 (You)" value="${this.displayname}">
                         </div>
                         <div class="player-input">
                             <input type="text" placeholder="Player 2" value="Player 2">
