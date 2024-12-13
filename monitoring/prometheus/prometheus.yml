@@ -1,0 +1,19 @@
+global:
+  scrape_interval: 15s
+
+  external_labels:
+    monitor: 'container-monitor'
+
+scrape_configs:
+  - job_name: 'cadvisor'
+    static_configs:
+      - targets: ['cadvisor:8080']
+
+rule_files:
+  - 'alert_rules.yml'
+
+
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: ['alertmanager:9093']

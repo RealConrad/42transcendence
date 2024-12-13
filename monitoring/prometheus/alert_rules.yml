@@ -1,0 +1,21 @@
+groups:
+  - name: container_alerts
+    rules:
+
+      - alert: ContainerKilled
+        expr: count(time() - container_last_seen{} > 15) by (name)
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Container {{ $labels.name }} is down"
+          description: "The container {{ $labels.name }} is down."
+      
+      - alert: ContainerAbsent
+        expr: absent(container_last_seen)
+        for: 30s
+        labels:
+          severity: warning
+        annotations:
+          summary: Container absent (instance {{ $labels.instance }})
+          description: "A container is absent for 5 min\n  VALUE = {{ $value }}\n  LABELS = {{ $labels }}"

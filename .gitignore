@@ -9,3 +9,14 @@ db.sqlite3
 *.key
 *.rdb
 *.idea/
+*.tar
+prometheus/prometheus-data/*
+grafana/grafana_data/*
+grafana/logs/*
+grafana/provisioning/*
+grafana/dashboard/*
+!prometheus/prometheus-data
+!grafana/grafana_data
+!grafana/logs
+!grafana/provisioning
+!grafana/dashboard
