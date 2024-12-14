@@ -22,7 +22,8 @@ export class AccountMenu extends HTMLElement {
     }
     connectedCallback() {
         this.accessToken = getAccessToken();
-        this.displayName = USER.username;
+        this.username = USER.username;
+        this.displayName = USER.displayname;
         this.imgUrl = USER.profilePicture;
         this.render();
         if (this.accessToken){
@@ -38,7 +39,218 @@ export class AccountMenu extends HTMLElement {
 
 html() {
     return `
-        <link rel="stylesheet" href="../../../styles/account.css">
+        <style>
+            .guest-view {
+                display: grid;
+                align-items: center;
+                color: white;
+                height: 100%;
+                text-align: center;
+            }
+
+            .container {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                height: 100%;
+                width: 100%;
+                text-align: center;
+                position: relative;
+            }
+
+            .heading {
+                display: flex;
+                gap: 30px;
+                align-items: center;
+                /* margin-bottom: 20px; */
+                color: white;
+                font-size: 2rem;
+            }
+
+            .profile-picture {
+                width: 100px;
+                height: 100px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                background-color: lightblue;
+                border-radius: 50%;
+                font-size: 2rem;
+                overflow: hidden;
+                position: relative;
+            }
+
+            .profile-picture img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                display: none; /* hide it by default */
+            }
+
+            .profile-picture .initial {
+                position: absolute;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                width: 100%;
+                height: 100%;
+                color: red;
+            }
+
+            .flex-container {
+                display: flex;
+                gap: 20px;
+                margin-top: 50px;
+                margin-bottom: 50px;
+            }
+
+            .orange-2FA-button{
+                all: unset;
+                display: block;
+                background: var(--background-yellow);
+                color: black;
+                padding: 10px;
+                border-radius: 8px;
+                font-size: 20px;
+            }
+
+
+            .total-match-stats {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                text-align: center;
+                gap: 70px;
+                font-size: 1.5rem;
+            }
+
+            .matches-lost, .matches-won {
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                flex-grow: 1;
+            }
+
+            .matches-lost {
+                color: darkred;
+            }
+
+            .matches-won {
+                color: darkgreen;
+            }
+
+            .score {
+                padding-top: 20px;
+            }
+
+            .previous-matches-container {
+                display: flex;
+                flex-direction: column;
+                margin-left: 30px;
+                gap: 10px;
+                margin-top: 20px;
+                width: 90%;
+                max-height: 400px;
+                overflow-y: auto;
+                border: 1px solid #22211F;
+                border-radius: 10px;
+                background-color: #030714;
+                padding: 20px;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+
+            .previous-matches-heading {
+                font-size: 1.5rem;
+                font-weight: bold;
+                text-align: center;
+                color: lightcyan;
+            }
+
+            .previous-matches {
+                display: flex;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .username-container {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            #username-input {
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                padding: 5px;
+                font-size: 1rem;
+            }
+
+            #username-edit-buttons {
+                display: inline-flex;
+                gap: 5px;
+            }
+
+            .match {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                background-color: lightgray;
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                padding: 10px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+
+            .winner {
+                color: green;
+                font-weight: bold;
+            }
+
+            .loser {
+                color: red;
+            }
+
+            .winner, .loser {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                gap: 10px;
+                flex-basis: 40%;
+                text-align: center;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+
+            .player-name {
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+                flex-grow: 1;
+            }
+
+            .player-score {
+                flex-shrink: 0; /* Prevents the score from shrinking */
+                margin-left: 5px;
+                font-weight: bold;
+            }
+
+            .vs {
+                flex-basis: 20%;
+                text-align: center;
+                color: #555;
+                font-weight: bold;
+            }
+
+            .tournaments {
+                color: white;
+                font-weight: bold; /* Optional: Makes the text bold */
+                font-size: 1.2em;  /* Optional: Adjusts the font size */
+                padding-top: 50px;
+            }
+
+        </style>
         <link id="style-sheet2" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
         ${!this.accessToken ? 
             `
@@ -55,7 +267,7 @@ html() {
                             <span class="initial"></span>
                         </div>
                         <div class="username-container">
-                            <span id="username-display">${this.displayName}</span>
+                            <span id="username-display">${this.username}</span>
                             <input id="username-input" type="text" value="${this.displayName}" style="display: none;">
                             <svg id="edit-username-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil" viewBox="0 0 16 16">
                               <path d="M12.146.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1 0 .708l-10 10a.5.5 0 0 1-.168.11l-5 2a.5.5 0 0 1-.65-.65l2-5a.5.5 0 0 1 .11-.168zM11.207 2.5 13.5 4.793 14.793 3.5 12.5 1.207zm1.586 3L10.5 3.207 4 9.707V10h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.293zm-9.761 5.175-.106.106-1.528 3.821 3.821-1.528.106-.106A.5.5 0 0 1 5 12.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.468-.325"/>
@@ -173,7 +385,6 @@ html() {
             if (newDisplayName && newDisplayName !== this.username) {
                 try {
                     validateInput(newDisplayName);
-                    console.log(newDisplayName);
                     const response = await apiCall(`${BASE_AUTH_API_URL}/update_displayname/`, {
                         method: "PUT",
                         headers: {
@@ -183,8 +394,7 @@ html() {
                     });
 
                     if (response.ok) {
-                        this.username = newDisplayName;
-                        USER.username = newDisplayName;
+                        localStorage.setItem('displayName', newDisplayName);
                         usernameDisplay.textContent = newDisplayName;
                         GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
                     } else {

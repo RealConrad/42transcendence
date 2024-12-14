@@ -154,10 +154,10 @@ export default class Game {
         if (this.player2.controller.ai === true) {
             this.player2.evaluatePowerUps(this)
         }
-        if (this.inputManager.isKeyPressed('a')) {
+        if (this.inputManager.isKeyPressed('a') || this.inputManager.isKeyPressed('A')) {
             this.player1.activatePowerUp("ATK", this);
         }
-        if (this.inputManager.isKeyPressed('d')) {
+        if (this.inputManager.isKeyPressed('d') || this.inputManager.isKeyPressed('D')) {
             this.player1.activatePowerUp("DEF", this);
         }
 

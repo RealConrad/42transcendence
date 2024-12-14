@@ -2,7 +2,7 @@ import GlobalEventEmitter from "../../utils/EventEmitter.js";
 import {EVENT_TYPES} from "../../utils/constants.js";
 import Game from "../../game/Game.js";
 import Tournament from "../../game/Tournament.js";
-import {getUserName, getUserPicture,getDefaultPicture, setDefaultPicture} from "../../api/api.js";
+import {getUserName, getDisplayname, getUserPicture, getDefaultPicture, setDefaultPicture} from "../../api/api.js";
 import { USER } from "../../utils/constants.js";
 
 
@@ -19,6 +19,7 @@ export class DashboardView extends HTMLElement {
         this.isTournamentMatch = false;
         this.matchDataForMenuDialog = null;
         this.isGameMenuOpen = false;
+        this.menuComponents = {}; 
         setDefaultPicture();
     }
 
@@ -55,6 +56,9 @@ export class DashboardView extends HTMLElement {
 
     getUserInfo(){
         USER.username = getUserName();
+        USER.displayname = getUserName();
+        if (getDisplayname())
+            USER.displayname = getDisplayname();
         USER.profilePicture = getUserPicture();
         USER.backupProfilePicture = getDefaultPicture();
     }
@@ -81,7 +85,7 @@ export class DashboardView extends HTMLElement {
             </button>` :
             `<button id="login-button" class="user-display">
                 <img src="${USER.profilePicture ? `${USER.profilePicture}`: `${USER.backupProfilePicture}`}">
-                <div>${USER.username}</div>
+                <div>${USER.displayname}</div>
             </button>`
             }
             </header>
@@ -104,13 +108,13 @@ export class DashboardView extends HTMLElement {
                         <button>Account</button>
                         <span class="button-description">Who are you anyway?</span>
                     </div>
-                    <div class="menu-option">
-                        <button>About</button>
-                        <span class="button-description">ft_transcendence at 42 Heilbronn</span>
+                    <div class="menu-option" style="grid-row-start: 4;">
+                        <button>Friends</button>
+                        <span class="button-description">You have them, right?..</span>
                     </div>
                     <div class="menu-option" style="grid-row-start: 5;">
-                        <button>Friends</button>
-                        <span class="button-description">you have friends??</span>
+                        <button>About</button>
+                        <span class="button-description">ft_transcendence at 42 Heilbronn</span>
                     </div>
                 </left-menu>
                 <right-menu>
@@ -346,6 +350,12 @@ export class DashboardView extends HTMLElement {
             const option = event.target.closest(".menu-option");
             if (option) {
                 const buttonText = option.querySelector("button").textContent.trim();
+                option.querySelector("button").classList.add("glowing-effect");
+                leftMenu.querySelectorAll(".menu-option").forEach((menuOption) => {
+                    if (menuOption !== option) {
+                        menuOption.querySelector("button").classList.remove("glowing-effect");
+                    }
+                });
                 this.updateRightMenuContent(rightMenuContainer, contentMapping[buttonText]);
             }
         });
@@ -353,11 +363,20 @@ export class DashboardView extends HTMLElement {
 
     updateRightMenuContent(container, menuTag) {
         if (menuTag) {
-            container.innerHTML = "";
-            const menuComponent = document.createElement(menuTag);
-            container.appendChild(menuComponent);
+            if (!this.menuComponents[menuTag]) {
+                const menuComponent = document.createElement(menuTag);
+                this.menuComponents[menuTag] = menuComponent;
+                container.appendChild(menuComponent);
+            }
+    
+            Object.values(this.menuComponents).forEach(component => {
+                component.style.display = "none";
+            });
+    
+            this.menuComponents[menuTag].style.display = "block";
         }
     }
+    
 
     startGame(player1Name, player2Name, vsAI, aiDifficulty = 5, powerUpCount) {
         this.hideAllDashboardUI();

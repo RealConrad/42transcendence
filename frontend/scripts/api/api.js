@@ -173,6 +173,7 @@ export const setLocal2FA = async (value) => {
 
 // GETTERS
 export const getUserName = () => localStorage.getItem("username");
+export const getDisplayname = () => localStorage.getItem("displayName");
 export const getUserPicture = () => localStorage.getItem("ProfilePicture");
 export const getDefaultPicture = () => localStorage.getItem("DefaultPicture");
 export const getLocal2FA = () => localStorage.getItem("2FA");
