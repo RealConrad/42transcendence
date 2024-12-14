@@ -11,6 +11,8 @@ import GlobalEventEmitter from "../utils/EventEmitter.js";
 import GlobalCacheManager from "../utils/CacheManager.js";
 
 let accessToken = null;
+let oauthData2FA = null;
+
 
 const AUTH_METHODS = {
     JWT: 'JWT', //normal
@@ -118,7 +120,8 @@ window.onload = async () => {
             GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
         }
     } catch (error) {
-        deleteUser();
+        // deleteUser();
+        console.log("Error", error);
     } finally {
         document.body.removeChild(overlay);
         document.head.removeChild(style);
@@ -136,7 +139,7 @@ export const apiCall = async (url, options = {}) => {
     if (!accessToken) {
         await refreshTokens();
     }
-    
+
     options.headers = {
         ...options.headers,
         Authorization: `Bearer ${getAccessToken()}`,
@@ -234,8 +237,13 @@ export const setDefaultPicture = async () => {
 export const setLocal2FA = async (value) => {
     localStorage.setItem('2FA', value);
 }
+export const setOAuthDataWith2FA = (data) => {
+    oauthData2FA = data;
+}
+
 
 // GETTERS
+export const getOAuthData = () => oauthData2FA;
 export const getUserName = () => localStorage.getItem("username");
 export const getDisplayname = () => localStorage.getItem("displayName");
 export const getUserPicture = () => localStorage.getItem("ProfilePicture");
@@ -279,6 +287,7 @@ export const disable2FA = async () => {
         .then((response) => response.json())
         .then(() => {
             setLocal2FA(false);
+            showToast("Disabled 2FA", "warn");
             return true;
         }) .catch((error) => {
             return false;

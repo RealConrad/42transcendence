@@ -1,6 +1,15 @@
 import {
-	setAccessToken, apiCall, setLocalUsername, setDefaultPicture,
-	setLocalPicture, setLocal2FA, fetchMatchHistory, fetchFriends, showToast, setOnlineStatus
+	setAccessToken,
+	apiCall,
+	setLocalUsername,
+	setDefaultPicture,
+	setLocalPicture,
+	setLocal2FA,
+	fetchMatchHistory,
+	fetchFriends,
+	showToast,
+	setOnlineStatus,
+	logout, setOAuthDataWith2FA, getOAuthData
 } from "../../api/api.js";
 import {BASE_AUTH_API_URL, BASE_MFA_API_URL, EVENT_TYPES, FORM_ERROR_MESSAGES} from "../../utils/constants.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
@@ -11,6 +20,7 @@ class AuthDialog extends HTMLElement {
 	constructor() {
 		super();
 		this.attachShadow({ mode: 'open' });
+		this.closingBefore2FA = false;
 	}
 
 	html() {
@@ -445,24 +455,17 @@ class AuthDialog extends HTMLElement {
 	}
 
 	open() {
+		if (localStorage.getItem("authDialogState") !== "otp")
+			this.closingBefore2FA = false;
 		this.style.display = "block";
-	}
-
-	openEnable2fa() {
-		this.enable2FA().then((data)=>{
-			if (data == 200){
-				console.log('enabled 2fa: ', data); 
-				this.shadowRoot.getElementById("sign-in-view").style.display = "none";
-				this.style.display = "block";
-			}
-			else if (data == 400){
-				console.log('not enabling bc already enabled?')
-			}
-		})
 	}
 	
 	close() {
 		this.style.display = "none";
+		if (this.closingBefore2FA) {
+			localStorage.removeItem("authDialogState");
+			logout();
+		}
 	}
 
 	isValidInput(input) {
@@ -586,7 +589,6 @@ class AuthDialog extends HTMLElement {
 		//TODO: Change sign in view and auth button query to enable 2fa button
 		this.shadowRoot.getElementById("sign-in-view").querySelector(".auth-button").addEventListener("click", (e) => {
 			e.preventDefault();
-			// this.enable2FA(); // Here for testing purpose
 			this.authorize42();
 		});
 
@@ -668,7 +670,7 @@ class AuthDialog extends HTMLElement {
 			}
 
 			if (data.mfa_enable_flag) {
-				this.tempAccessToken = data.access_token;
+				this.closingBefore2FA = true;
 				this.shadowRoot.getElementById("sign-in-view").style.display = "none";
 				this.shadowRoot.getElementById("otp-view").style.display = "block";
 			} else {
@@ -678,7 +680,6 @@ class AuthDialog extends HTMLElement {
 				await setDefaultPicture();
 				GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
 			}
-
 		} catch (err) {
 			showToast("Unable to login. Make sure credentials are correct or try again later.", 'danger');
 			console.error(err);
@@ -721,21 +722,31 @@ class AuthDialog extends HTMLElement {
 		}
 	}
 
-	async authorize42()  {
+	async authorize42() {
 		const response = await fetch(`${BASE_AUTH_API_URL}/authorize/`, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
 			},
-		})
+		});
 
-		const data = await response.json()
+		const data = await response.json();
 		if (response.ok) {
 			window.location.href = data.location;
-
 		} else {
-			console.error("Some backend error");
+			console.error("Error during OAuth authorization");
 		}
+	}
+
+	openEnable2fa() {
+		this.enable2FA().then((data)=>{
+			if (data === 200){
+				this.style.display = "block";
+			}
+			else if (data === 400){
+				showToast("Error when trying to enable 2FA", "danger");
+			}
+		})
 	}
 
 	async enable2FA() {
@@ -746,7 +757,6 @@ class AuthDialog extends HTMLElement {
 			},
 		})
 		if(!response.ok) {
-			console.log('response status: ', response.status);
 			return response.status;
 		}
 		let blob = await response.blob();
@@ -780,7 +790,16 @@ class AuthDialog extends HTMLElement {
 			}
 		})
 			.then((data) => {
-				console.log("OTP Verified Successfully!", data);
+				localStorage.removeItem("authDialogState");
+				const oauthData = getOAuthData();
+				if (oauthData) {
+					setLocalUsername(oauthData.username);
+					setLocalPicture(oauthData.profile_picture);
+					setAccessToken(oauthData.access_token);
+				}
+				this.closingBefore2FA = false;
+				showToast("2FA Successful", "success");
+
 				this.close();
 				return true;
 		}) .catch((error) => {
@@ -799,16 +818,13 @@ class AuthDialog extends HTMLElement {
 
 		if (otpCode.length === 6) {
 			this.verify2FA(otpCode).then((val)=>{
-				console.log('verification status: ', val);
 				if (val){
-					// GlobalEventEmitter.emit(EVENT_TYPES.SET_TWOFACTOR, {})
 					setLocal2FA(true);
 					GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
 				}
 			})
 		}
 		else {
-			console.error("Invalid OTP: Must be 6 digits");
 			const errorMessage = this.shadowRoot.querySelector(".error-message");
 			if (errorMessage) {
 				errorMessage.textContent = "Invalid OTP. Please enter all 6 digits.";
@@ -816,9 +832,19 @@ class AuthDialog extends HTMLElement {
 		}
 	}
 
+	showView(view) {
+		const views = ["sign-in-view", "register-view", "otp-view", "enable-2fa-view"];
+		views.forEach((v) => {
+			this.shadowRoot.getElementById(v).style.display = v === view ? "block" : "none";
+		});
+	}
+
 	connectedCallback() {
 		this.render();
 		this.attachEventListeners();
+		if (localStorage.getItem("authDialogState") === "otp") {
+			this.closingBefore2FA = true;
+		}
 	}
 }
 
@@ -842,12 +868,16 @@ export async function handleCallback() {
 
 				if (response.ok) {
 					const data = await response.json();
-					console.log("OAuth Success:", data);
-					setLocalUsername(data.username);
-					setLocalPicture(data.profile_picture);
 					localStorage.setItem('authMethod', '42OAuth');
-					console.log(`Welcome, ${data.username}!`);
-					setAccessToken(data.access_token);
+					if (data.mfa_enable_flag) {
+						setOAuthDataWith2FA(data);
+						setLocal2FA(true);
+						localStorage.setItem("authDialogState", "otp");
+					} else {
+						setLocalUsername(data.username);
+						setLocalPicture(data.profile_picture);
+						setAccessToken(data.access_token);
+					}
 					Router.navigateTo("/");
 				} else {
 					Router.navigateTo("/");
@@ -858,6 +888,6 @@ export async function handleCallback() {
 				console.error("Error during callback handling:", error);
 			}
 		} else {
-			console.log("Authorization code not found in URL");
+			console.error("Authorization code not found in URL");
 		}
 	}
