@@ -239,8 +239,8 @@ export const logout = async () => {
 
         if (response.ok) {
             deleteUser();
+            location.reload();
             showToast('Logged out', 'success');
-            GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
         } else {
             const error = await response.json();
             console.error("Failed to logout", error);
