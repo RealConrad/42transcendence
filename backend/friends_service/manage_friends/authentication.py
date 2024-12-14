@@ -31,16 +31,8 @@ class JWTAuthentication(authentication.BaseAuthentication):
 
         token_data = self.validate_token_with_service(access_token, self.OAUTH)
         username = token_data.get("username")
-
         user, created = User.objects.get_or_create(username=username)
-        user_profile, _ = UserProfile.objects.get_or_create(user=user)
-
-        profile_picture_url = self.fetch_profile_picture_from_service(request, username)
-
-        if self.should_update_profile_picture_url(user_profile, profile_picture_url):
-            user_profile.profile_picture_url = profile_picture_url
-            user_profile.save()
-
+        UserProfile.objects.get_or_create(user=user)
         request.token_data = token_data
         return user, None
 
@@ -77,21 +69,3 @@ class JWTAuthentication(authentication.BaseAuthentication):
 
         access_token = auth_header.split(" ")[1]
         return access_token
-
-    @staticmethod
-    def fetch_profile_picture_from_service(request, username):
-        params = {"username": username}
-        headers = {
-            key: value for key, value in request.headers.items()
-            if key.lower() in ["authorization", "x-42-token"]
-        }
-        response = requests.get(AUTH_SERVICE_URL, params=params, headers=headers)
-        response.raise_for_status()
-        return response.json().get('profile_picture_url')
-
-    @staticmethod
-    def should_update_profile_picture_url(user_profile, new_picture_url):
-        return (
-                user_profile.profile_picture_url == '/media/profile_pictures/default.jpg'
-                and new_picture_url
-        )
