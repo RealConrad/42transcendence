@@ -10,9 +10,9 @@ export default class HumanController extends Controller {
     }
 
     update() {
-        if (this.inputManager.isKeyPressed(this.upKey)) {
+        if (this.inputManager.isKeyPressed(this.upKey) || this.inputManager.isKeyPressed(this.upKey.toUpperCase())) {
             this.paddle.dy = -this.paddle.speed;
-        } else if (this.inputManager.isKeyPressed(this.downKey)) {
+        } else if (this.inputManager.isKeyPressed(this.downKey) || this.inputManager.isKeyPressed(this.downKey.toUpperCase())) {
             this.paddle.dy = this.paddle.speed;
         } else {
             this.paddle.dy = 0;
