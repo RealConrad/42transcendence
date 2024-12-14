@@ -24,9 +24,19 @@ export class DashboardView extends HTMLElement {
     }
 
     connectedCallback() {
-        this.getUserInfo();
         this.loadMenuComponents();
+        this.initializeDashboard();
+        this.handleKeyDown = this.handleKeyDown.bind(this);
+        window.addEventListener("keydown", this.handleKeyDown);
+        GlobalEventEmitter.replaceOn(EVENT_TYPES.RELOAD_DASHBOARD, () => {
+            this.initializeDashboard();
+        });
+    }
+
+    initializeDashboard() {
+        this.getUserInfo();
         this.render();
+        this.menuComponents = {};
         const styleSheet = this.shadowRoot.getElementById('style-sheet');
         if (styleSheet.sheet) {
             this.initMenu();
@@ -37,9 +47,7 @@ export class DashboardView extends HTMLElement {
                 this.showAllDashboardUI();
             });
         }
-        this.handleKeyDown = this.handleKeyDown.bind(this);
-        this.onResumeGame = this.onResumeGame.bind(this);
-        window.addEventListener("keydown", this.handleKeyDown);
+        this.setupEventListeners();
     }
 
     disconnectedCallback() {
@@ -48,10 +56,9 @@ export class DashboardView extends HTMLElement {
             this.resizeObserver.disconnect();
         }
     }
-    
+
     render() {
         this.shadowRoot.innerHTML = this.html();
-        this.setupEventListeners();
     }
 
     getUserInfo(){
@@ -62,12 +69,11 @@ export class DashboardView extends HTMLElement {
         USER.profilePicture = getUserPicture();
         USER.backupProfilePicture = getDefaultPicture();
     }
-    
+
     html() {
         return `
             <link id="style-sheet" rel="stylesheet" href="../../../styles/style.css">
             ${USER.username ? `
-            <!--HERE DEACTIVATING BUTTON CLICK AFTER LOGIN-->
             <style>
                 #login-button{ pointer-events: none }
             </style>
@@ -210,9 +216,6 @@ export class DashboardView extends HTMLElement {
         });
         GlobalEventEmitter.on(EVENT_TYPES.RESUME_GAME, () => this.onResumeGame());
         GlobalEventEmitter.on(EVENT_TYPES.QUIT_GAME, () => this.quitGame());
-        GlobalEventEmitter.replaceOn(EVENT_TYPES.RELOAD_DASHBOARD, () => {
-            this.connectedCallback()
-        });
     }
 
     handleKeyDown(event) {
@@ -368,11 +371,10 @@ export class DashboardView extends HTMLElement {
                 this.menuComponents[menuTag] = menuComponent;
                 container.appendChild(menuComponent);
             }
-    
+
             Object.values(this.menuComponents).forEach(component => {
                 component.style.display = "none";
             });
-    
             this.menuComponents[menuTag].style.display = "block";
         }
     }

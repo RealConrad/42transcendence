@@ -6,6 +6,7 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.exceptions import ValidationError, APIException, NotFound
+from django.db import models
 
 # Create your views here.
 
@@ -54,7 +55,7 @@ class AcceptFriendRequestView(generics.GenericAPIView):
         try:
             sender = User.objects.get(username=sender_username)
         except User.DoesNotExist:
-            raise ValidationError("The user does not exist. You are accepting a ghostly request!")
+            raise NotFound("The user does not exist. You are accepting a ghostly request!")
 
         try:
             friend_request = FriendRequest.objects.get(
@@ -85,28 +86,34 @@ class DeclineFriendRequestView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, *args, **kwargs):
-        sender_username = request.data.get('username')
+        target_username = request.data.get('username')
 
-        if not sender_username:
+        if not target_username:
             raise ValidationError("You can unfriend someone without a name :(")
 
         try:
-            sender = User.objects.get(username=sender_username)
+            target_user = User.objects.get(username=target_username)
         except User.DoesNotExist:
-            raise ValidationError("The user does not exist. You are accepting a ghostly request!")
+            raise NotFound("The user does not exist. You are accepting a ghostly request!")
 
         try:
             friend_request = FriendRequest.objects.get(
-                sender=sender, receiver=request.user, status="pending"
+                (models.Q(sender=request.user, receiver=target_user) |
+                 models.Q(sender=target_user, receiver=request.user)),
+                status="pending"
             )
         except FriendRequest.DoesNotExist:
             raise NotFound("Already Declined or No friend request found from the user")
 
-        friend_request.status = "declined"
-        friend_request.save()
+        if friend_request.sender == request.user:
+            action = "cancelled"
+        else:
+            action = "declined"
+
+        friend_request.delete()
 
         return Response(
-            {"detail": "Friend request declined successfully."},
+            {"detail": f"Friend request {action} successfully."},
             status=status.HTTP_201_CREATED
         )
 
@@ -238,3 +245,49 @@ class UpdateUserStatusAPIView(generics.GenericAPIView):
             "detail": f"{user.username}'s status updated successfully",
             "status": user_status
         }, status=status.HTTP_200_OK)
+
+
+class RemoveFriendAPIView(generics.GenericAPIView):
+    """
+    API Endpoint to remove a friend from friend list
+    """
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, *args, **kwargs):
+        friend_username = request.data.get("username")
+
+        if not friend_username:
+            raise ValidationError("You can unfriend someone without a name :(")
+
+        try:
+            friend = User.objects.get(username=friend_username)
+        except User.DoesNotExist:
+            raise NotFound("The user does not exist. You are accepting a ghostly request!")
+
+        # Get the current User's (authenticated user) friendship record
+        try:
+            user_friendship = Friendship.objects.get(user=request.user)
+        except Friendship.DoesNotExist:
+            raise NotFound("You have no friends to remove.")
+
+        if friend in user_friendship.friends.all():
+            user_friendship.friends.remove(friend)
+
+            # Removing the User from Friend;s friendship record
+            friend_friendship, _ = Friendship.objects.get_or_create(user=friend)
+            friend_friendship.friends.remove(request.user)
+
+            FriendRequest.objects.filter(
+                (models.Q(sender=request.user, receiver=friend) |
+                 models.Q(sender=friend, receiver=request.user))
+            ).delete()
+
+            return Response(
+                {"detail": f"{friend_username} has been removed from your friend list."},
+                status=status.HTTP_200_OK
+            )
+        else:
+            return Response(
+                {"detail": f"{friend_username} is not in your friend list"},
+                status=status.HTTP_400_BAD_REQUEST
+            )

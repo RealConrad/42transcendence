@@ -26,7 +26,7 @@ SECRET_KEY = os.environ.get('FRIENDS_SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['friendsservice', 'localhost', '127.0.0.1', "authservice"]
 
 CORS_ORIGIN_WHITELIST = [
     "http://localhost",
@@ -60,6 +60,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

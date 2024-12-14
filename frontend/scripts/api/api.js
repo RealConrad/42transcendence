@@ -20,7 +20,7 @@ const AUTH_METHODS = {
 export const validateInput = (input) => {
     const sanitized = input.trim();
     const maxLength = 200;
-    const minLength = 2;
+    const minLength = 1;
     if (/[^a-zA-Z0-9 _]/.test(sanitized)) {
         throw new Error("Input contains invalid characters. Only include letters, '_', spaces or numbers.");
     }
@@ -66,19 +66,64 @@ export const refreshTokens = async () => {
 }
 
 window.onload = async () => {
+    const overlay = document.createElement('div');
+    overlay.id = 'loading-overlay';
+    overlay.innerHTML = `
+        <div class="spinner"></div>
+        <p>Loading, please wait...</p>
+    `;
+    document.body.appendChild(overlay);
+
+    const style = document.createElement('style');
+    style.innerHTML = `
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid white;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin-bottom: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    `;
+    document.head.appendChild(style);
+
     console.log("Page refreshed, trying to get new tokens....");
-    if (!accessToken) {
-        try {
+    try {
+        if (!accessToken) {
             await refreshTokens();
             await GlobalCacheManager.initialize("matches", fetchMatchHistory);
-            // await GlobalCacheManager.initialize("friends", fetchFriends);
-        } catch (error) {
-            deleteUser();
+            await GlobalCacheManager.initialize("friends", fetchFriends);
+            await setOnlineStatus(true);
+        } else {
+            GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
         }
-    } else {
-        GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
+    } catch (error) {
+        deleteUser();
+    } finally {
+        document.body.removeChild(overlay);
+        document.head.removeChild(style);
     }
-}
+};
 
 /**
  * Handles API calls the server. The caller should convert to json and handle appropriately
@@ -137,7 +182,7 @@ export const fetchMatchHistory = async () => {
 
 export const fetchFriends = async () => {
     try {
-        const response = await apiCall(`${BASE_FRIENDS_API_URL}/get-friends/`, {
+        const response = await apiCall(`${BASE_FRIENDS_API_URL}/list/`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -147,6 +192,25 @@ export const fetchFriends = async () => {
     } catch (error) {
         showToast('Error when fetching friends', 'danger');
         console.error(error);
+    }
+}
+
+export const setOnlineStatus = async (status) => {
+    try {
+        const response = await apiCall(`${BASE_FRIENDS_API_URL}/update_status/`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            keepalive: true,
+            body: JSON.stringify({
+                status: status
+            })
+        })
+        return response.json();
+    } catch (err) {
+        showToast("Error when trying to set online status", 'danger');
+        console.error(err);
     }
 }
 
@@ -237,9 +301,10 @@ export const logout = async () => {
         });
 
         if (response.ok) {
+            await setOnlineStatus(false);
             deleteUser();
+            location.reload();
             showToast('Logged out', 'success');
-            GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
         } else {
             const error = await response.json();
             console.error("Failed to logout", error);
