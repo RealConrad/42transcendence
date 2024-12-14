@@ -1,6 +1,16 @@
 import {
-	setAccessToken, apiCall, setLocalUsername, setDefaultPicture,
-	setLocalPicture, setLocal2FA, fetchMatchHistory, fetchFriends, showToast, setOnlineStatus
+	setAccessToken,
+	apiCall,
+	setLocalUsername,
+	setDefaultPicture,
+	setLocalPicture,
+	setLocal2FA,
+	fetchMatchHistory,
+	fetchFriends,
+	showToast,
+	setOnlineStatus,
+	deleteUser,
+	clearCookie, logout
 } from "../../api/api.js";
 import {BASE_AUTH_API_URL, BASE_MFA_API_URL, EVENT_TYPES, FORM_ERROR_MESSAGES} from "../../utils/constants.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
@@ -11,6 +21,7 @@ class AuthDialog extends HTMLElement {
 	constructor() {
 		super();
 		this.attachShadow({ mode: 'open' });
+		this.closingBefore2FA = false;
 	}
 
 	html() {
@@ -445,6 +456,7 @@ class AuthDialog extends HTMLElement {
 	}
 
 	open() {
+		this.closingBefore2FA = false;
 		this.style.display = "block";
 	}
 
@@ -463,6 +475,9 @@ class AuthDialog extends HTMLElement {
 	
 	close() {
 		this.style.display = "none";
+		if (this.closingBefore2FA) {
+			logout();
+		}
 	}
 
 	isValidInput(input) {
@@ -668,7 +683,7 @@ class AuthDialog extends HTMLElement {
 			}
 
 			if (data.mfa_enable_flag) {
-				this.tempAccessToken = data.access_token;
+				this.closingBefore2FA = true;
 				this.shadowRoot.getElementById("sign-in-view").style.display = "none";
 				this.shadowRoot.getElementById("otp-view").style.display = "block";
 			} else {
@@ -781,6 +796,7 @@ class AuthDialog extends HTMLElement {
 		})
 			.then((data) => {
 				console.log("OTP Verified Successfully!", data);
+				this.closingBefore2FA = false;
 				this.close();
 				return true;
 		}) .catch((error) => {
