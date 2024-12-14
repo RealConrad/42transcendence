@@ -338,9 +338,9 @@ html() {
         if (!getLocal2FA()){
             setLocal2FA(false);
         }
-        if (getLocal2FA() == 'false')
+        if (getLocal2FA() === 'false')
             this.toggle2faButton(false);
-        else if(getLocal2FA() == 'true')
+        else if(getLocal2FA() === 'true')
             this.toggle2faButton(true);
         TwoFactorAuthButton.addEventListener("mouseover", () => {
             GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_HOVER, { element: TwoFactorAuthButton});
@@ -360,12 +360,12 @@ html() {
         })
 
         TwoFactorAuthButton.addEventListener("click", () => {
-            if (getLocal2FA() == 'false'){
+            if (getLocal2FA() === 'false'){
                 GlobalEventEmitter.emit(EVENT_TYPES.SET_TWOFACTOR, { element: TwoFactorAuthButton });
             }
-            else if (getLocal2FA() == 'true'){
+            else if (getLocal2FA() === 'true'){
                 disable2FA().then((success) => {
-                    if (success == true){
+                    if (success) {
                         this.toggle2faButton(false);
                         GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
                     }
