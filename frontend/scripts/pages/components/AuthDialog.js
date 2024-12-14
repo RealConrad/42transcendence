@@ -633,10 +633,6 @@ class AuthDialog extends HTMLElement {
 				GlobalEventEmitter.emit(EVENT_TYPES.CURSOR_UNHOVER, { element: button });
 			});
 		});
-
-		// GlobalEventEmitter.on(EVENT_TYPES.UNSET_TWOFACTOR, (() => {
-		// 	this.disable2FA()
-		// }))
 	}
 
 	async login(username, password) {
@@ -683,6 +679,7 @@ class AuthDialog extends HTMLElement {
 			}
 
 		} catch (err) {
+			showToast("Unable to login. Make sure credentials are correct or try again later.", 'danger');
 			console.error(err);
 		}
 	}
@@ -758,11 +755,6 @@ class AuthDialog extends HTMLElement {
 		this.shadowRoot.getElementById("sign-in-view").style.display = "none";
 		this.shadowRoot.getElementById("enable-2fa-view").style.display = "block";
 		return 200;
-		// }
-		// catch(error){
-		// 	console.error("Error enabling 2FA:", error);
-		// 	return 0;
-		// }
 	}
 
 	async verify2FA(otpCode) {
