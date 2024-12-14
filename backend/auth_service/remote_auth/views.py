@@ -3,14 +3,13 @@ from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK, HTTP_500_IN
 from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import permissions
 from django.http import JsonResponse
 from rest_framework.permissions import AllowAny
 from .helpers import (
     authorize_url,
     create_user_from_token_data,
 )
-
+from rest_framework import serializers
 # Create your views here.
 
 class AuthorizeAPI(APIView):
@@ -53,45 +52,42 @@ class CallbackAPI(APIView):
 
         try:
             token_response = requests.post(token_url, data=data)
-            if token_response.status_code == 200:
-                token_data = token_response.json()
-                user = create_user_from_token_data(token_data)
-                access_token = token_data.get('access_token')
-                refresh_token = token_data.get('refresh_token')
+            token_response.raise_for_status()
+            token_data = token_response.json()
 
-                response = Response(
-                    {
-                        'detail': "User logged in successfully",
-                        'username': user.username,
-                        'profile_picture': user.profile_picture_url,
-                        'access_token': access_token,
-                        'refresh_token': refresh_token,
-                        'displayname': user.displayname
-                    },
-                    status=HTTP_200_OK
-                )
+            user = create_user_from_token_data(token_data)
+            access_token = token_data.get('access_token')
+            refresh_token = token_data.get('refresh_token')
 
-                response.set_cookie(
-                    key='refresh_token',
-                    value=refresh_token,
-                    httponly=True,
-                    secure=False,
-                    samesite='Lax',
-                )
-                return  response
-            else:
-                return Response(
-                    {'detail': 'Failed to fetch user data from 42 API'},
-                    status=HTTP_400_BAD_REQUEST)
-
-        except requests.HTTPError:
-            return Response(
-                {'detail': 'Failed to exchange code for token'},
-                status=HTTP_400_BAD_REQUEST
+            response = Response(
+                {
+                    'detail': "User logged in successfully",
+                    'username': user.username,
+                    'profile_picture': user.profile_picture_url,
+                    'access_token': access_token,
+                    'refresh_token': refresh_token,
+                    'displayname': user.displayname
+                },
+                status=HTTP_200_OK
             )
 
-        except Exception as exc:
+            response.set_cookie(
+                key='refresh_token',
+                value=refresh_token,
+                httponly=True,
+                secure=False,
+                samesite='Lax',
+            )
+            return  response
+
+        except serializers.ValidationError as e:
+            return Response({"detail": e.detail}, status=400)
+
+        except requests.HTTPError as e:
+            return Response({"detail": f"Token exchange failed: {str(e)}"}, status=400)
+
+        except Exception as e:
             return Response(
-                {'detail': f"Internal server error: {str(exc)}"},
+                {'detail': f"Internal server error: {str(e)}"},
                 status=HTTP_500_INTERNAL_SERVER_ERROR
             )

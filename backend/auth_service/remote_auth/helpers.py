@@ -1,7 +1,6 @@
 from django.conf import settings
 from urllib.parse import urlencode
 import requests
-from rest_framework.exceptions import ValidationError
 from .serializers import RemoteUserSerializer
 from urllib.parse import  unquote
 
@@ -25,19 +24,15 @@ def create_user_from_token_data(token_data):
     header = {'Authorization': f'Bearer {access_token}'}
 
     response = requests.get(user_data_url, headers=header)
+    response.raise_for_status()
 
-    if response.status_code == 200:
-        user_data = response.json()
+    user_data = response.json()
+    username = user_data.get('login')
+    email = user_data.get('email')
+    profile_picture_url = user_data.get('image', {}).get('link', None)
 
-        username = user_data.get('login')
-        profile_picture_url = user_data.get('image', {}).get('link', None)
+    if profile_picture_url and profile_picture_url.startswith("https%3A"):
+        profile_picture_url = unquote(profile_picture_url)
 
-        if profile_picture_url and profile_picture_url.startswith("https%3A"):
-            profile_picture_url = unquote(profile_picture_url)
-
-        serializer = RemoteUserSerializer()
-        user = serializer.save_user(username=username, profile_picture_url=profile_picture_url)
-
-        return user
-    else:
-        raise ValidationError("Failed to fetch user data from 42 API")
+    serializer = RemoteUserSerializer()
+    return serializer.save_user(username=username, profile_picture_url=profile_picture_url, email=email)

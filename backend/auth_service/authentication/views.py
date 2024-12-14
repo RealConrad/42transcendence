@@ -2,12 +2,14 @@ import requests
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK
 from .models import CustomUser
 from .serializers import RegisterSerializer, LoginSerializer
 from .authentication import JWTAuthentication
 
 JWT_SERVICE_URL = 'http://jwtservice:8002/api/token/generate-tokens/'
 JWT_VERIFY_URL = 'http://jwtservice:8002/api/token/verify/'
+FRIENDS_SERVICE_URl = 'http://friendsservice:8004/api/friends/update-profile-pic-url/'
 
 class RegisterView(generics.CreateAPIView):
     permission_classes = [AllowAny]
@@ -171,10 +173,33 @@ class SaveProfilePicture(generics.GenericAPIView):
             else None
         )
 
+        self.update_friends_service(request, profile_picture_url)
+
         return Response({
             'detail': "Profile picture uploaded successfully",
              'profile_picture': profile_picture_url
         }, status=status.HTTP_200_OK )
+
+    def update_friends_service(self, request, profile_picture_url):
+        """
+        Updates profile picture url in the friends service
+        """
+
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": request.headers.get("Authorization")
+        }
+
+        if "X-42-Token" in request.headers:
+            headers['X-42-Token'] = request.headers.get('X-42-Token')
+
+        payload = {
+            "profile_picture_url": profile_picture_url,
+        }
+
+        response = requests.put(FRIENDS_SERVICE_URl, json=payload, headers=headers)
+        response.raise_for_status()
+
 
 
 class GetUserData(generics.GenericAPIView):
@@ -234,3 +259,40 @@ class UpdateDisplayName(generics.GenericAPIView):
         }, status=status.HTTP_200_OK)
 
         return response
+
+class CheckUserExistence(generics.GenericAPIView):
+    """
+    Generic View to check if a user exits or not, if yes return username and user id
+    """
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        receiver_username = request.query_params.get('username')
+
+        if not receiver_username:
+            return Response(
+                {"detail": "Username required"},
+                status = HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            receiver = CustomUser.objects.get(username=receiver_username)
+
+            return Response({
+                "does_exist": True,
+                "username": receiver.username,
+                "profile_picture_url": receiver.profile_picture_url,
+            }, status=HTTP_200_OK)
+
+        except CustomUser.DoesNotExist:
+            return Response(
+                {"detail": f"User '{receiver_username}' does not exist.",
+                 "does_exist": False},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"detail": f"An error occurred: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
