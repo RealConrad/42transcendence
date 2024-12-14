@@ -639,91 +639,88 @@ class AuthDialog extends HTMLElement {
 		// }))
 	}
 
-	register(username, password) {
-		fetch(`${BASE_AUTH_API_URL}/register/`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			credentials: "include",
-			body: JSON.stringify({
-				"username": username,
-				"password": password
-			})
-		}).then((response) => {
-			if (response.ok) {
-				return response.json();
-			} else {
-				return response.json().then((err) => {
-					throw new Error(JSON.stringify(err));
+	async login(username, password) {
+		try {
+			const response = await fetch(`${BASE_AUTH_API_URL}/login/`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				credentials: "include",
+				body: JSON.stringify({
+					"username": username,
+					"password": password
 				})
+			});
+
+			if (!response.ok) {
+				const err = await response.json();
+				console.error("Response not 200");
+				throw new Error(JSON.stringify(err));
 			}
-		}).then((data) => {
+
+			const data = await response.json();
+			localStorage.setItem('authMethod', 'JWT');
+			await setDefaultPicture();
+			setAccessToken(data.access_token);
+			showToast('Successfully logged in!', 'success');
+			setLocalUsername(username);
+
+			if (data.displayname) {
+				localStorage.setItem('displayName', data.displayname);
+			}
+
+			if (data.mfa_enable_flag) {
+				this.tempAccessToken = data.access_token;
+				this.shadowRoot.getElementById("sign-in-view").style.display = "none";
+				this.shadowRoot.getElementById("otp-view").style.display = "block";
+			} else {
+				this.close();
+				await GlobalCacheManager.initialize("matches", fetchMatchHistory);
+				await GlobalCacheManager.initialize("friends", fetchFriends);
+				await setDefaultPicture();
+				GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
+			}
+
+		} catch (err) {
+			console.error(err);
+		}
+	}
+
+	async register(username, password) {
+		try {
+			const response = await fetch(`${BASE_AUTH_API_URL}/register/`, {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json"
+				},
+				credentials: "include",
+				body: JSON.stringify({
+					"username": username,
+					"password": password
+				})
+			});
+
+			if (!response.ok) {
+				const err = await response.json();
+				throw new Error(JSON.stringify(err));
+			}
+
+			const data = await response.json();
 			localStorage.setItem('authMethod', 'JWT');
 			setLocalUsername(username);
 			setAccessToken(data.access_token);
 			this.close();
 			showToast('Registered successfully', 'success');
-			setDefaultPicture().then(() => GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {}))
-		}).catch(err => {
+			await GlobalCacheManager.initialize("matches", fetchMatchHistory());
+			await GlobalCacheManager.initialize("friends", fetchFriends());
+			await setDefaultPicture();
+			GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
+		} catch (err) {
 			showToast(err, 'danger');
 			console.log(err);
-		});
+		}
 	}
-
-	login(username, password) {
-		fetch(`${BASE_AUTH_API_URL}/login/`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json"
-			},
-			credentials: "include",
-			body: JSON.stringify({
-				"username": username,
-				"password": password
-			})
-		}).then((response) => {
-			if (response.ok) {
-				return response.json();
-			} else {
-				return response.json().then((err) => {
-					console.error("Response not 200");
-					throw new Error(JSON.stringify(err));
-				})
-			}
-		}).then((data) => {
-			console.log("LOGGED IN!");
-			localStorage.setItem('authMethod', 'JWT');
-			setDefaultPicture();
-			setAccessToken(data.access_token);
-			showToast('Successfully logged in!', 'success');
-			setLocalUsername(username);
-			if (data.displayname)
-				localStorage.setItem('displayName', data.displayname);
-			if (data.mfa_enable_flag) {
-				this.tempAccessToken = data.access_token;
-				this.shadowRoot.getElementById("sign-in-view").style.display = "none"
-				this.shadowRoot.getElementById("otp-view").style.display = "block";
-			} else {
-				this.close();
-				setDefaultPicture().then(() => GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {}))
-				// GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
-			}
-		})
-			.then(() => GlobalCacheManager.initialize("matches", fetchMatchHistory))
-			// .then(() => GlobalCacheManager.initialize("friends", fetchFriends))
-			.catch(err => console.error(err));
-	}
-
-	completeLogin(data) {
-		setAccessToken(data.access_token || this.tempAccessToken); // Use the stored token
-		setDefaultPicture();
-		setLocalUsername(data.username);
-		this.tempAccessToken = null; // Clear the temporary token
-		GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
-		this.close();
-	}
-
 
 	async authorize42()  {
 		const response = await fetch(`${BASE_AUTH_API_URL}/authorize/`, {
