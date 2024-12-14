@@ -11,17 +11,15 @@ export default class Ball extends Renderable {
 
         const angleDegrees = this.getRandomAngle();
         const angleRadians = angleDegrees * (Math.PI / 180);
-
-        const speedMagnitude = 2;
-        this.speedMagnitude = speedMagnitude;
-        this.speedX = speedMagnitude * Math.cos(angleRadians);
-        this.speedY = speedMagnitude * Math.sin(angleRadians);
+        this.speedMagnitude = 5;
+        this.speedX = this.speedMagnitude * Math.cos(angleRadians);
+        this.speedY = this.speedMagnitude * Math.sin(angleRadians);
 
         this.lastTouchedPlayer = null;
         this.trail = [];
     }
 
-   getRandomAngle() {
+    getRandomAngle() {
         const intervals = [
             { start: 0, end: 45 },    // 0° to 60°
             { start: 135, end: 180 }, // 120° to 240°
@@ -34,7 +32,7 @@ export default class Ball extends Renderable {
 
     move() {
         this.trail.push({ x: this.x, y: this.y });
-        if (this.trail.length > 20) { 
+        if (this.trail.length > 20) {
             this.trail.shift();
         }
         this.x += this.speedX;
@@ -75,9 +73,11 @@ export default class Ball extends Renderable {
     reset() {
         this.x = this.initialX;
         this.y = this.initialY;
-        this.speedX = this.speedMagnitude * (Math.random() > 0.5 ? 1 : -1);
-        this.speedY = this.speedMagnitude * (Math.random() > 0.5 ? 1 : -1);
-        this.trail = []; 
+        const angleDegrees = this.getRandomAngle();
+        const angleRadians = angleDegrees * (Math.PI / 180);
+        this.speedX = this.speedMagnitude * Math.cos(angleRadians);
+        this.speedY = this.speedMagnitude * Math.sin(angleRadians);
+        this.trail = [];
         this.lastTouchedPlayer = null;
     }
 }
