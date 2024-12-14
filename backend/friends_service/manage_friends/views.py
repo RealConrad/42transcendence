@@ -275,7 +275,12 @@ class RemoveFriendAPIView(generics.GenericAPIView):
 
             # Removing the User from Friend;s friendship record
             friend_friendship, _ = Friendship.objects.get_or_create(user=friend)
-            friend_friendship.friends.remove(friend)
+            friend_friendship.friends.remove(request.user)
+
+            FriendRequest.objects.filter(
+                (models.Q(sender=request.user, receiver=friend) |
+                 models.Q(sender=friend, receiver=request.user))
+            ).delete()
 
             return Response(
                 {"detail": f"{friend_username} has been removed from your friend list."},
