@@ -27,14 +27,18 @@ class FriendRequestSerializer(serializers.ModelSerializer):
         sender = self.context["request"].user # Authenticated user from authentication.py
         receiver_username = validated_data.pop("receiver_username") # friend name to add as friend
 
-        does_exist = check_user_in_auth_database(receiver_username, self.context["request"])
+        does_exist, profile_picture_url = check_user_in_auth_database(receiver_username, self.context["request"])
 
         if not does_exist:
             raise serializers.ValidationError("User not found in the database")
 
         # Check for receiver in the local db if not create him
         receiver, _ = User.objects.get_or_create(username=receiver_username)
-        UserProfile.objects.get_or_create(user=receiver)
+        receiver_user_profile, _ = UserProfile.objects.get_or_create(user=receiver)
+
+        if profile_picture_url:
+            receiver_user_profile.profile_picture_url = profile_picture_url
+            receiver_user_profile.save()
 
         if FriendRequest.objects.filter(sender=sender, receiver=receiver ,status="pending").exists():
             raise serializers.ValidationError("A pending friend request already exists for this user.")
