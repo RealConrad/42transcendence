@@ -221,7 +221,7 @@ export class FriendsMenu extends HTMLElement {
     async removeFriend(username) {
         try {
             const response = await apiCall(`${BASE_FRIENDS_API_URL}/remove/`, {
-                method: "POST",
+                method: "DELETE",
                 headers: {
                     "Content-Type": "application/json",
                 },
@@ -232,6 +232,7 @@ export class FriendsMenu extends HTMLElement {
                 showToast("Friend successfully removed", "success");
                 await this.refreshFriendsList();
             } else {
+                await this.refreshFriendsList();
                 showToast("Failed to remove friend", "danger");
             }
         } catch (error) {
@@ -254,6 +255,7 @@ export class FriendsMenu extends HTMLElement {
                 showToast(`${username} is now your friend!`, "success");
                 await this.refreshFriendsList();
             } else {
+                await this.refreshFriendsList();
                 showToast("Failed to accept friend request", "danger");
             }
         } catch (error) {
@@ -276,6 +278,7 @@ export class FriendsMenu extends HTMLElement {
                 showToast(`Rejected ${username}`, "success");
                 await this.refreshFriendsList();
             } else {
+                await this.refreshFriendsList();
                 showToast("Failed to decline friend request", "danger");
             }
         } catch (error) {
@@ -303,7 +306,7 @@ export class FriendsMenu extends HTMLElement {
             showToast('Sent friend invite', 'success');
             await this.refreshFriendsList();
         } catch (error) {
-            showToast('Error when sending friend invite', 'danger');
+            showToast('Error when sending friend invite: ' + error, 'danger');
             console.error(error);
         }
     }
