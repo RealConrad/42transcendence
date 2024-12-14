@@ -63,7 +63,6 @@ export const refreshTokens = async () => {
     }
     const data = await response.json();
     setAccessToken(data.access_token);
-    console.log("Setting access tokens....", data.access_token);
 }
 
 window.onload = async () => {
@@ -164,7 +163,6 @@ export const setOnlineStatus = async (status) => {
                 status: status
             })
         })
-        console.log("Setting online status...");
         return response.json();
     } catch (err) {
         showToast("Error when trying to set online status", 'danger');
