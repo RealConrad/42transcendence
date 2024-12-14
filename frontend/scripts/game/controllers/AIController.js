@@ -44,6 +44,7 @@ export default class AIController extends Controller{
 
             if (predictedY <= this.ball.radius || predictedY >= this.canvas.height - this.ball.radius) {
                 predictedSpeedY = -predictedSpeedY;
+                predictedSpeedX = predictedSpeedX > 0 ? predictedSpeedX + 1 : predictedSpeedX - 1;
             }
         }
 
