@@ -9,7 +9,7 @@ from .authentication import JWTAuthentication
 
 JWT_SERVICE_URL = 'http://jwtservice:8002/api/token/generate-tokens/'
 JWT_VERIFY_URL = 'http://jwtservice:8002/api/token/verify/'
-FRIENDS_SERVICE_URl = 'http://friendsservice:8004/api/friends/update-profile-pic-url'
+FRIENDS_SERVICE_URl = 'http://friendsservice:8004/api/friends/update-profile-pic-url/'
 
 class RegisterView(generics.CreateAPIView):
     permission_classes = [AllowAny]
@@ -267,8 +267,8 @@ class CheckUserExistence(generics.GenericAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes = [AllowAny]
 
-    def post(self, request, *args, **kwargs):
-        receiver_username = request.data.get('username')
+    def get(self, request, *args, **kwargs):
+        receiver_username = request.query_params.get('username')
 
         if not receiver_username:
             return Response(
@@ -277,12 +277,14 @@ class CheckUserExistence(generics.GenericAPIView):
             )
 
         try:
-            reciever = CustomUser.objects.get(username=receiver_username)
+            receiver = CustomUser.objects.get(username=receiver_username)
 
-            return Response(
-                {"does_exist": True, "username": reciever.username},
-                status=HTTP_200_OK
-            )
+            return Response({
+                "does_exist": True,
+                "username": receiver.username,
+                "profile_picture_url": receiver.profile_picture_url,
+            }, status=HTTP_200_OK)
+
         except CustomUser.DoesNotExist:
             return Response(
                 {"detail": f"User '{receiver_username}' does not exist.",
