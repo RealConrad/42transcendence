@@ -662,10 +662,9 @@ class AuthDialog extends HTMLElement {
 			localStorage.setItem('authMethod', 'JWT');
 			setLocalUsername(username);
 			setAccessToken(data.access_token);
-			setDefaultPicture();
-			GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
 			this.close();
 			showToast('Registered successfully', 'success');
+			setDefaultPicture().then(() => GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {}))
 		}).catch(err => {
 			showToast(err, 'danger');
 			console.log(err);
@@ -695,16 +694,20 @@ class AuthDialog extends HTMLElement {
 		}).then((data) => {
 			console.log("LOGGED IN!");
 			localStorage.setItem('authMethod', 'JWT');
+			setDefaultPicture();
 			setAccessToken(data.access_token);
 			showToast('Successfully logged in!', 'success');
 			setLocalUsername(username);
+			if (data.displayname)
+				localStorage.setItem('displayName', data.displayname);
 			if (data.mfa_enable_flag) {
-    			this.tempAccessToken = data.access_token;
+				this.tempAccessToken = data.access_token;
 				this.shadowRoot.getElementById("sign-in-view").style.display = "none"
 				this.shadowRoot.getElementById("otp-view").style.display = "block";
 			} else {
 				this.close();
-				GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
+				setDefaultPicture().then(() => GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {}))
+				// GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
 			}
 		})
 			.then(() => GlobalCacheManager.initialize("matches", fetchMatchHistory))

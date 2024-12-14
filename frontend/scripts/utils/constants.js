@@ -37,6 +37,7 @@ export const EVENT_TYPES = {
 
 export const USER = {
     username: null,
+    displayname: null,
     profilePicture: null,
     backupProfilePicture: null,
 }

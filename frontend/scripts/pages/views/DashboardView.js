@@ -2,7 +2,7 @@ import GlobalEventEmitter from "../../utils/EventEmitter.js";
 import {EVENT_TYPES} from "../../utils/constants.js";
 import Game from "../../game/Game.js";
 import Tournament from "../../game/Tournament.js";
-import {getUserName, getUserPicture,getDefaultPicture, setDefaultPicture} from "../../api/api.js";
+import {getUserName, getDisplayname, getUserPicture, getDefaultPicture, setDefaultPicture} from "../../api/api.js";
 import { USER } from "../../utils/constants.js";
 
 
@@ -56,6 +56,9 @@ export class DashboardView extends HTMLElement {
 
     getUserInfo(){
         USER.username = getUserName();
+        USER.displayname = getUserName();
+        if (getDisplayname())
+            USER.displayname = getDisplayname();
         USER.profilePicture = getUserPicture();
         USER.backupProfilePicture = getDefaultPicture();
     }
@@ -82,7 +85,7 @@ export class DashboardView extends HTMLElement {
             </button>` :
             `<button id="login-button" class="user-display">
                 <img src="${USER.profilePicture ? `${USER.profilePicture}`: `${USER.backupProfilePicture}`}">
-                <div>${USER.username}</div>
+                <div>${USER.displayname}</div>
             </button>`
             }
             </header>

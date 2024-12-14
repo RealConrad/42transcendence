@@ -1,4 +1,4 @@
-import {EVENT_TYPES} from "../../utils/constants.js";
+import {EVENT_TYPES, USER} from "../../utils/constants.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
 import {getAccessToken, showToast, validateInput} from "../../api/api.js";
 
@@ -7,6 +7,7 @@ export class GameSetupDialog extends HTMLElement {
         super();
         this.matchType = null;
         this.attachShadow({ mode: 'open' });
+        this.displayname = USER.displayname;
     }
 
     connectedCallback() {
@@ -427,10 +428,11 @@ export class GameSetupDialog extends HTMLElement {
         closeButton.addEventListener("click", () => {
             this.close();
         });
+        //here change displayname
         startButton.addEventListener("click", () => {
             let player1Name = this.shadowRoot.querySelector("#player1-name")?.value?.trim();
-            if (localStorage.getItem("username")) {
-                player1Name = localStorage.getItem("username");
+            if (USER.username) {
+                player1Name = this.displayname;
             }
             const player2Name = this.matchType === "local"
                 ? this.shadowRoot.querySelector("#player2-name").value.trim()
