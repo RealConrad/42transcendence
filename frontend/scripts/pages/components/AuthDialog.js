@@ -1,6 +1,6 @@
 import {
 	setAccessToken, apiCall, setLocalUsername, setDefaultPicture,
-	setLocalPicture, setLocal2FA, fetchMatchHistory, fetchFriends, showToast
+	setLocalPicture, setLocal2FA, fetchMatchHistory, fetchFriends, showToast, setOnlineStatus
 } from "../../api/api.js";
 import {BASE_AUTH_API_URL, BASE_MFA_API_URL, EVENT_TYPES, FORM_ERROR_MESSAGES} from "../../utils/constants.js";
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
@@ -661,6 +661,7 @@ class AuthDialog extends HTMLElement {
 			setAccessToken(data.access_token);
 			showToast('Successfully logged in!', 'success');
 			setLocalUsername(username);
+			await setOnlineStatus(true);
 
 			if (data.displayname) {
 				localStorage.setItem('displayName', data.displayname);
@@ -711,6 +712,7 @@ class AuthDialog extends HTMLElement {
 			showToast('Registered successfully', 'success');
 			await GlobalCacheManager.initialize("matches", fetchMatchHistory());
 			await GlobalCacheManager.initialize("friends", fetchFriends());
+			await setOnlineStatus(true);
 			await setDefaultPicture();
 			GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
 		} catch (err) {

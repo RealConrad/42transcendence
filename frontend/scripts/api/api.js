@@ -20,7 +20,7 @@ const AUTH_METHODS = {
 export const validateInput = (input) => {
     const sanitized = input.trim();
     const maxLength = 200;
-    const minLength = 2;
+    const minLength = 1;
     if (/[^a-zA-Z0-9 _]/.test(sanitized)) {
         throw new Error("Input contains invalid characters. Only include letters, '_', spaces or numbers.");
     }
@@ -73,6 +73,7 @@ window.onload = async () => {
             await refreshTokens();
             await GlobalCacheManager.initialize("matches", fetchMatchHistory);
             await GlobalCacheManager.initialize("friends", fetchFriends);
+            await setOnlineStatus(true);
         } catch (error) {
             deleteUser();
         }
@@ -148,6 +149,26 @@ export const fetchFriends = async () => {
     } catch (error) {
         showToast('Error when fetching friends', 'danger');
         console.error(error);
+    }
+}
+
+export const setOnlineStatus = async (status) => {
+    try {
+        const response = await apiCall(`${BASE_FRIENDS_API_URL}/update_status/`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            keepalive: true,
+            body: JSON.stringify({
+                status: status
+            })
+        })
+        console.log("Setting online status...");
+        return response.json();
+    } catch (err) {
+        showToast("Error when trying to set online status", 'danger');
+        console.error(err);
     }
 }
 
@@ -238,6 +259,7 @@ export const logout = async () => {
         });
 
         if (response.ok) {
+            await setOnlineStatus(false);
             deleteUser();
             location.reload();
             showToast('Logged out', 'success');

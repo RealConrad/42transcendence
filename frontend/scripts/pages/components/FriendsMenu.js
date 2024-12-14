@@ -120,7 +120,7 @@ export class FriendsMenu extends HTMLElement {
                     width: 12px;
                     height: 12px;
                     border-radius: 50%;
-                    border: 2px solid #fff;
+                    border: 1px solid #fff;
                 }
 
                 .green {
@@ -149,6 +149,7 @@ export class FriendsMenu extends HTMLElement {
                             <input class="input-field" type="text" placeholder="Username">
                             <button id="add-btn" class="orange-button-no-absolute">ADD</button>
                         </div>
+                        <button id="refresh-btn" class="orange-button-no-absolute">Refresh</button>
                         <div class="friends-list">
                             ${this.displayFriendList()}
                         </div>
@@ -175,6 +176,9 @@ export class FriendsMenu extends HTMLElement {
                 this.addFriend();
             });
         }
+        const refreshButton = this.shadowRoot.getElementById("refresh-btn");
+        refreshButton.addEventListener('click', () => this.refreshFriendsList());
+
         const removeButtons = this.shadowRoot.querySelectorAll(".remove-btn");
         removeButtons.forEach(button => {
             button.addEventListener("click", (e) => {
@@ -323,7 +327,7 @@ export class FriendsMenu extends HTMLElement {
                         <button class="btn btn-success btn-sm accept-btn" data-username="${user.username}">✔</button>
                         <button class="btn btn-danger btn-sm decline-btn" data-username="${user.username}">✖</button>
                     ` : user.status === "pending" ? `
-                        <button class="btn btn-danger btn-sm remove-btn" data-username="${user.username}">✖</button>
+                        <button class="btn btn-danger btn-sm decline-btn" data-username="${user.username}">✖</button>
                     ` : ""}
                 </div>
             </div>
