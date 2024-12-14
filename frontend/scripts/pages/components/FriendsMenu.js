@@ -1,14 +1,13 @@
 import GlobalEventEmitter from "../../utils/EventEmitter.js";
 import {BASE_FRIENDS_API_URL, EVENT_TYPES} from "../../utils/constants.js";
-import {apiCall, fetchMatchHistory, getAccessToken, showToast, validateInput} from "../../api/api.js";
+import {apiCall, getAccessToken, showToast, validateInput} from "../../api/api.js";
 import GlobalCacheManager from "../../utils/CacheManager.js";
 
 export class FriendsMenu extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({mode: 'open'});
-        this.users = GlobalCacheManager.get("friends");
-        console.log("Friends", this.users);
+        this.users = GlobalCacheManager.get("friends") || [];
     }
 
     connectedCallback() {
@@ -160,7 +159,7 @@ export class FriendsMenu extends HTMLElement {
                     </div>
                 `}
             </div>
-        `
+        `;
     }
 
     setupEventListeners() {
@@ -184,6 +183,14 @@ export class FriendsMenu extends HTMLElement {
             });
         });
 
+        const declineButtons = this.shadowRoot.querySelectorAll(".decline-btn");
+        declineButtons.forEach(button => {
+            button.addEventListener("click", (e) => {
+                const username = e.target.getAttribute("data-username");
+                this.declineFriend(username);
+            });
+        });
+
         const acceptButtons = this.shadowRoot.querySelectorAll(".accept-btn");
         acceptButtons.forEach(button => {
             button.addEventListener("click", (e) => {
@@ -191,6 +198,20 @@ export class FriendsMenu extends HTMLElement {
                 this.acceptFriend(username);
             });
         });
+    }
+
+    async refreshFriendsList() {
+        const response = await apiCall(`${BASE_FRIENDS_API_URL}/list/`, {
+            method: "GET"
+        });
+        if (!response.ok) {
+            console.error("Failed to fetch updated friend list");
+            return;
+        }
+        const updatedFriends = await response.json();
+        GlobalCacheManager.set("friends", updatedFriends);
+        this.users = updatedFriends;
+        this.render();
     }
 
     async removeFriend(username) {
@@ -204,9 +225,8 @@ export class FriendsMenu extends HTMLElement {
             });
 
             if (response.ok) {
-                this.users = this.users.filter(user => user.username !== username);
-                this.render();
                 showToast("Friend successfully removed", "success");
+                await this.refreshFriendsList();
             } else {
                 showToast("Failed to remove friend", "danger");
             }
@@ -227,11 +247,8 @@ export class FriendsMenu extends HTMLElement {
             });
 
             if (response.ok) {
-                const user = this.users.find(user => user.username === username);
-                if (user)
-                    user.status = "accepted";
-                this.render();
                 showToast(`${username} is now your friend!`, "success");
+                await this.refreshFriendsList();
             } else {
                 showToast("Failed to accept friend request", "danger");
             }
@@ -252,9 +269,8 @@ export class FriendsMenu extends HTMLElement {
             });
 
             if (response.ok) {
-                const user = this.users.find(user => user.username === username);
-                this.render();
                 showToast(`Rejected ${username}`, "success");
+                await this.refreshFriendsList();
             } else {
                 showToast("Failed to decline friend request", "danger");
             }
@@ -278,12 +294,10 @@ export class FriendsMenu extends HTMLElement {
                 }),
             });
             if (!response.ok) {
-                throw new Error(response.json());
+                throw new Error("Failed to send friend invite");
             }
             showToast('Sent friend invite', 'success');
-            const updatedFriendList = await fetchMatchHistory();
-            GlobalCacheManager.set("friends", updatedFriendList);
-            this.render();
+            await this.refreshFriendsList();
         } catch (error) {
             showToast('Error when sending friend invite', 'danger');
             console.error(error);
@@ -291,25 +305,23 @@ export class FriendsMenu extends HTMLElement {
     }
 
     displayFriendList() {
-        if (!this.users) {
-            return `<div> Add a friend to see them here!</div>`
+        if (!this.users || this.users.length === 0) {
+            return `<div>Add a friend to see them here!</div>`
         }
         return this.users.map(user => `
             <div class="user-item">
                 <div class="profile-container">
                     <img class="profile-picture" src="${user.profilePicture}" alt="">
-                    <span class="status-dot ${user.online && (user.status !== "pending" || user.status !== "incoming") ? 'green' : 'grey'}"></span>
+                    <span class="status-dot ${user.online === "online" && user.status !== "pending" && user.status !== "waiting" ? 'green' : 'grey'}"></span>
                 </div>
                 <div class="username">${user.username}</div>
-                ${user.status === "pending" ? `
-                    <span class="pending">(pending)</span>
-                `:""}
+                ${user.status === "pending" ? `<span class="pending">(pending)</span>`: ""}
                 <div class="action-buttons">
                     ${user.status === "friends" ? `
                         <button class="btn btn-danger btn-sm remove-btn" data-username="${user.username}">✖</button>
                     ` : user.status === "waiting" ? `
                         <button class="btn btn-success btn-sm accept-btn" data-username="${user.username}">✔</button>
-                        <button class="btn btn-danger btn-sm remove-btn" data-username="${user.username}">✖</button>
+                        <button class="btn btn-danger btn-sm decline-btn" data-username="${user.username}">✖</button>
                     ` : user.status === "pending" ? `
                         <button class="btn btn-danger btn-sm remove-btn" data-username="${user.username}">✖</button>
                     ` : ""}
