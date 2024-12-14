@@ -12,6 +12,8 @@ from .helpers import (
 from rest_framework import serializers
 # Create your views here.
 
+FRIENDS_SERVICE_URl = 'http://friendsservice:8004/api/friends/update-profile-pic-url/'
+
 class AuthorizeAPI(APIView):
     permission_classes = [AllowAny]
 
@@ -59,6 +61,8 @@ class CallbackAPI(APIView):
             access_token = token_data.get('access_token')
             refresh_token = token_data.get('refresh_token')
 
+            self.update_friends_service(request, user.profile_picture_url, access_token)
+
             response = Response(
                 {
                     'detail': "User logged in successfully",
@@ -92,3 +96,21 @@ class CallbackAPI(APIView):
                 {'detail': f"Internal server error: {str(e)}"},
                 status=HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+    def update_friends_service(self, request, profile_picture_url, access_token):
+        """
+        Updates profile picture url in the friends service
+        """
+
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {access_token}",
+            "X-42-Token": "true"
+        }
+
+        payload = {
+            "profile_picture_url": profile_picture_url,
+        }
+
+        response = requests.put(FRIENDS_SERVICE_URl, json=payload, headers=headers)
+        response.raise_for_status()
