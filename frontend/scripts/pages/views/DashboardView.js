@@ -48,6 +48,12 @@ export class DashboardView extends HTMLElement {
             });
         }
         this.setupEventListeners();
+        if (localStorage.getItem("authDialogState") === "otp") {
+            console.log("Opening model...");
+            const authDialogPopup = this.shadowRoot.getElementById("auth-dialog");
+            authDialogPopup.showView("otp-view");
+            authDialogPopup.open();
+        }
     }
 
     disconnectedCallback() {
@@ -223,7 +229,6 @@ export class DashboardView extends HTMLElement {
             this.toggleGameMenu();
         }
     }
-
 
     toggleGameMenu() {
         const gameMenuDialog = this.shadowRoot.getElementById("game-menu-dialog");
