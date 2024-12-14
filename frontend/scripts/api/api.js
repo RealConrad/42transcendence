@@ -297,9 +297,9 @@ export const disable2FA = async () => {
 export const logout = async () => {
     const authMethod = localStorage.getItem('authMethod');
     if (authMethod === "42OAuth") {
+        // TODO: CALL OAUTH LOGOUT API HERE!
         deleteUser();
         location.reload();
-        console.log("LOGGING OUT 42USER");
         return;
     }
     try {
