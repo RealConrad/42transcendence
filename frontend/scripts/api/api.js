@@ -63,6 +63,7 @@ export const refreshTokens = async () => {
     }
     const data = await response.json();
     setAccessToken(data.access_token);
+    console.log("Setting access tokens....", data.access_token);
 }
 
 window.onload = async () => {
@@ -71,7 +72,7 @@ window.onload = async () => {
         try {
             await refreshTokens();
             await GlobalCacheManager.initialize("matches", fetchMatchHistory);
-            // await GlobalCacheManager.initialize("friends", fetchFriends);
+            await GlobalCacheManager.initialize("friends", fetchFriends);
         } catch (error) {
             deleteUser();
         }
@@ -137,7 +138,7 @@ export const fetchMatchHistory = async () => {
 
 export const fetchFriends = async () => {
     try {
-        const response = await apiCall(`${BASE_FRIENDS_API_URL}/get-friends/`, {
+        const response = await apiCall(`${BASE_FRIENDS_API_URL}/list/`, {
             method: "GET",
             headers: {
                 "Content-Type": "application/json",

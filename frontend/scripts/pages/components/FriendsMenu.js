@@ -7,11 +7,8 @@ export class FriendsMenu extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({mode: 'open'});
-        this.users = [
-            { username: "Alice", online: true, status: "pending", profilePicture: "https://via.placeholder.com/40?text=A" },
-            { username: "Bob", online: false, status: "incoming", profilePicture: "https://via.placeholder.com/40?text=B" },
-            { username: "Charlie", online: true, status: "accepted", profilePicture: "https://via.placeholder.com/40?text=C" }
-        ];
+        this.users = GlobalCacheManager.get("friends");
+        console.log("Friends", this.users);
     }
 
     connectedCallback() {
@@ -146,20 +143,24 @@ export class FriendsMenu extends HTMLElement {
                 }
             </style>
             <link id="style-sheet2" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-            ${getAccessToken() ? `
-                <div class="container">
-                    <div class="flex-container">
-                        <input class="input-field" type="text" placeholder="Username">
-                        <button id="add-btn" class="orange-button-no-absolute">ADD</button>
+            <div style="width: 100%;">
+                ${getAccessToken() ? `
+                    <div class="container" style="width: 90%;">
+                        <div class="flex-container">
+                            <input class="input-field" type="text" placeholder="Username">
+                            <button id="add-btn" class="orange-button-no-absolute">ADD</button>
+                        </div>
+                        <div class="friends-list">
+                            ${this.displayFriendList()}
+                        </div>
                     </div>
-                    <div class="friends-list">
-                        ${this.displayFriendList()}
+                ` : `
+                    <div class="guest-view">
+                        Login first to view this page!
                     </div>
-                </div>
-            ` : `<div class="guest-view">
-                    Login first to view this page!
-                 </div>`}
-            `
+                `}
+            </div>
+        `
     }
 
     setupEventListeners() {
@@ -227,7 +228,8 @@ export class FriendsMenu extends HTMLElement {
 
             if (response.ok) {
                 const user = this.users.find(user => user.username === username);
-                if (user) user.status = "accepted";
+                if (user)
+                    user.status = "accepted";
                 this.render();
                 showToast(`${username} is now your friend!`, "success");
             } else {
@@ -239,17 +241,40 @@ export class FriendsMenu extends HTMLElement {
         }
     }
 
+    async declineFriend(username) {
+        try {
+            const response = await apiCall(`${BASE_FRIENDS_API_URL}/decline/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ username }),
+            });
+
+            if (response.ok) {
+                const user = this.users.find(user => user.username === username);
+                this.render();
+                showToast(`Rejected ${username}`, "success");
+            } else {
+                showToast("Failed to decline friend request", "danger");
+            }
+        } catch (error) {
+            console.error("Error declining friend:", error);
+            showToast("An error occurred while declining friend request", "danger");
+        }
+    }
+
     async addFriend() {
         const input = this.shadowRoot.querySelector('input');
         try {
             validateInput(input.value);
             const response = await apiCall(`${BASE_FRIENDS_API_URL}/add/`, {
                 method: "POST",
-                header: {
+                headers: {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    'username': input.value
+                    'receiver_username': input.value
                 }),
             });
             if (!response.ok) {
@@ -257,7 +282,7 @@ export class FriendsMenu extends HTMLElement {
             }
             showToast('Sent friend invite', 'success');
             const updatedFriendList = await fetchMatchHistory();
-            GlobalCacheManager.set("matches", updatedFriendList);
+            GlobalCacheManager.set("friends", updatedFriendList);
             this.render();
         } catch (error) {
             showToast('Error when sending friend invite', 'danger');
@@ -277,9 +302,9 @@ export class FriendsMenu extends HTMLElement {
                     <span class="pending">(pending)</span>
                 `:""}
                 <div class="action-buttons">
-                    ${user.status === "accepted" ? `
+                    ${user.status === "friends" ? `
                         <button class="btn btn-danger btn-sm remove-btn" data-username="${user.username}">✖</button>
-                    ` : user.status === "incoming" ? `
+                    ` : user.status === "waiting" ? `
                         <button class="btn btn-success btn-sm accept-btn" data-username="${user.username}">✔</button>
                         <button class="btn btn-danger btn-sm remove-btn" data-username="${user.username}">✖</button>
                     ` : user.status === "pending" ? `
