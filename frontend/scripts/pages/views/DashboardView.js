@@ -45,7 +45,7 @@ export class DashboardView extends HTMLElement {
             styleSheet.addEventListener('load', () => {
                 this.initMenu();
                 this.showAllDashboardUI();
-            }, { once: true });
+            });
         }
         this.setupEventListeners();
     }
@@ -56,10 +56,9 @@ export class DashboardView extends HTMLElement {
             this.resizeObserver.disconnect();
         }
     }
-    
+
     render() {
         this.shadowRoot.innerHTML = this.html();
-        this.setupEventListeners();
     }
 
     getUserInfo(){
@@ -70,7 +69,7 @@ export class DashboardView extends HTMLElement {
         USER.profilePicture = getUserPicture();
         USER.backupProfilePicture = getDefaultPicture();
     }
-    
+
     html() {
         return `
             <link id="style-sheet" rel="stylesheet" href="../../../styles/style.css">
