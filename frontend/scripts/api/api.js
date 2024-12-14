@@ -296,14 +296,12 @@ export const disable2FA = async () => {
 
 export const logout = async () => {
     const authMethod = localStorage.getItem('authMethod');
-    if (authMethod === "42OAuth") {
-        // TODO: CALL OAUTH LOGOUT API HERE!
-        deleteUser();
-        location.reload();
-        return;
-    }
+    const logoutUrl = authMethod === "42OAuth"
+        ? `${BASE_OAUTH_JWT_API_URL}/logout/`
+        : `${BASE_JWT_API_URL}/logout/`;
+
     try {
-        const response = await fetch(`${BASE_JWT_API_URL}/logout/`, {
+        const response = await fetch(logoutUrl, {
             method: 'POST',
             credentials: 'include',
             headers: {
