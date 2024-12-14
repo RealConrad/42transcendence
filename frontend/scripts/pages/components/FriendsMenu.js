@@ -291,6 +291,9 @@ export class FriendsMenu extends HTMLElement {
     }
 
     displayFriendList() {
+        if (!this.users) {
+            return `<div> Add a friend to see them here!</div>`
+        }
         return this.users.map(user => `
             <div class="user-item">
                 <div class="profile-container">
