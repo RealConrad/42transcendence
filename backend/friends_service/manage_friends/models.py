@@ -11,11 +11,6 @@ class UserProfile(models.Model):
     profile_picture_url = models.URLField(max_length=500, null=True, blank=True)
     online = models.BooleanField(default=False) # Online status
 
-    def save(self, *args, **kwargs):
-        if not self.profile_picture_url:
-            self.profile_picture_url =  f'/media/{self.profile_picture}'
-        super().save(*args, **kwargs)
-
     def __str__(self):
         return f"{self.user.username}'s profile"
 
