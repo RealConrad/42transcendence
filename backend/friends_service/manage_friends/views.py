@@ -1,4 +1,4 @@
-from rest_framework.status import HTTP_500_INTERNAL_SERVER_ERROR, HTTP_400_BAD_REQUEST
+from rest_framework.status import HTTP_500_INTERNAL_SERVER_ERROR, HTTP_400_BAD_REQUEST, HTTP_200_OK
 from .models import FriendRequest, Friendship, UserProfile
 from django.contrib.auth.models import User
 from .serializers import FriendRequestSerializer, FriendshipSerializer
@@ -74,7 +74,7 @@ class AcceptFriendRequestView(generics.GenericAPIView):
 
         return Response(
             {"detail": "Friend request accepted successfully."},
-            status=status.HTTP_200_OK
+            status=status.HTTP_201_CREATED
         )
 
 
@@ -107,7 +107,7 @@ class DeclineFriendRequestView(generics.GenericAPIView):
 
         return Response(
             {"detail": "Friend request declined successfully."},
-            status=status.HTTP_200_OK
+            status=status.HTTP_201_CREATED
         )
 
 
@@ -210,4 +210,31 @@ class UpdateProfilePictureAPIView(generics.GenericAPIView):
         return Response({
             "username": user.username,
             "profile_picture_url": user_profile.profile_picture_url
+        }, status=status.HTTP_200_OK)
+
+
+class UpdateUserStatusAPIView(generics.GenericAPIView):
+    """
+    Updates User status to online or offline
+    """
+    permission_classes = [IsAuthenticated]
+
+    def put(self, request):
+        user = request.user
+        user_status = request.data.get('status', None)
+
+        if not status:
+            return Response({
+                "detail": "missing status value"
+            }, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        user_profile, created = UserProfile.objects.get_or_create(user=user)
+        user_profile.online = user_status
+        user_profile.save()
+
+        return Response({
+            "username": user.username,
+            "detail": f"{user.username}'s status updated successfully",
+            "status": user_status
         }, status=status.HTTP_200_OK)
