@@ -177,7 +177,8 @@ export class FriendsMenu extends HTMLElement {
             });
         }
         const refreshButton = this.shadowRoot.getElementById("refresh-btn");
-        refreshButton.addEventListener('click', () => this.refreshFriendsList());
+        if (refreshButton)
+            refreshButton.addEventListener('click', () => this.refreshFriendsList());
 
         const removeButtons = this.shadowRoot.querySelectorAll(".remove-btn");
         removeButtons.forEach(button => {
