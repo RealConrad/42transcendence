@@ -3,8 +3,6 @@ from django.contrib.auth.models import User
 from .models import Friendship, UserProfile
 from rest_framework import exceptions, authentication
 
-AUTH_SERVICE_URL = "http://authservice:8000/api/auth/check_user_existence/"
-
 class JWTAuthentication(authentication.BaseAuthentication):
     """
     Custom JWT Authentication class to authenticate user via header Bearer token
