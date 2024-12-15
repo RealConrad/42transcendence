@@ -887,8 +887,8 @@ export async function handleCallback() {
 						setLocalPicture(data.profile_picture);
 						setAccessToken(data.access_token);
 					}
-					await setOnlineStatus(true);
 					Router.navigateTo("/");
+					location.reload();
 				} else {
 					const errorData = await response.json();
     				showToast(JSON.stringify(errorData), "danger");
