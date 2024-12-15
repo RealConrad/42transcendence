@@ -42,9 +42,9 @@ export const USER = {
     backupProfilePicture: null,
 }
 
-export const BASE_AUTH_API_URL = "http://127.0.0.1:8000/api/auth"
-export const BASE_GAME_API_URL = "http://127.0.0.1:8003/api/game"
-export const BASE_MFA_API_URL = "http://127.0.0.1:8001/api/2fa"
-export const BASE_JWT_API_URL = "http://127.0.0.1:8002/api/token"
-export const BASE_OAUTH_JWT_API_URL = "http://127.0.0.1:8002/api/oauth_token"
-export const BASE_FRIENDS_API_URL = "http://127.0.0.1:8004/api/friends"
+export const BASE_AUTH_API_URL = "https://127.0.0.1/api/auth"
+export const BASE_GAME_API_URL = "https://127.0.0.1/api/game"
+export const BASE_MFA_API_URL = "https://127.0.0.1/api/2fa"
+export const BASE_JWT_API_URL = "https://127.0.0.1/api/token"
+export const BASE_OAUTH_JWT_API_URL = "https://127.0.0.1/api/oauth_token"
+export const BASE_FRIENDS_API_URL = "https://127.0.0.1/api/friends"
