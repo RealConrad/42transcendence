@@ -210,6 +210,13 @@ services:
       - friends_media:/var/www/media/friends:ro
     networks:
       - transcendence
+    depends_on:
+      - authservice
+      - friendsservice
+      - jwtservice
+      - gameservice
+      - mfaservice
+
 
   prometheus:
     image: prom/prometheus
