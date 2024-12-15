@@ -35,6 +35,8 @@ services:
       - .env
     ports:
       - "8000:8000"
+    volumes:
+      - auth_media:/code/media
     depends_on:
       authdb:
         condition: service_healthy
@@ -189,6 +191,8 @@ services:
       - .env
     ports:
       - "8004:8004"
+    volumes:
+      - friends_media:/code/media
     networks:
       - transcendence
 
@@ -202,6 +206,8 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/ssl:/etc/nginx/ssl/:ro
       - ./frontend:/var/www/transcendence:ro
+      - auth_media:/var/www/media/auth:ro      # Mount auth media for Nginx
+      - friends_media:/var/www/media/friends:ro
     networks:
       - transcendence
 
@@ -273,3 +279,7 @@ volumes:
     name: transcendence_friends_postgres_data
   prometheus-data:
     name: transcendence_prometheus_data
+  auth_media:
+    name: transcendence_auth_media
+  friends_media:
+    name: transcendence_friends_media
