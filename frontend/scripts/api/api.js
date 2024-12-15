@@ -163,7 +163,7 @@ export const apiCall = async (url, options = {}) => {
     if (!response.ok) {
         const error = await response.json();
         console.error(`API Error: ${response.status}`, error);
-        throw new Error(error.error || "API call failed");
+        throw new Error(error.error || error.detail || "API call failed");
     }
     return response;
 }
