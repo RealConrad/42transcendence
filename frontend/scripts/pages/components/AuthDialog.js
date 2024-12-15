@@ -659,7 +659,11 @@ class AuthDialog extends HTMLElement {
 
 			const data = await response.json();
 			localStorage.setItem('authMethod', 'JWT');
-			await setDefaultPicture();
+			if (data.profile_picture) {
+				await setLocalPicture(data.profile_picture)
+			} else {
+				await setDefaultPicture();
+			}
 			setAccessToken(data.access_token);
 			showToast('Successfully logged in!', 'success');
 			setLocalUsername(username);
@@ -677,7 +681,11 @@ class AuthDialog extends HTMLElement {
 				this.close();
 				await GlobalCacheManager.initialize("matches", fetchMatchHistory);
 				await GlobalCacheManager.initialize("friends", fetchFriends);
-				await setDefaultPicture();
+				if (data.profile_picture) {
+					await setLocalPicture(data.profile_picture)
+				} else {
+					await setDefaultPicture();
+				}
 				GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
 			}
 		} catch (err) {
@@ -869,6 +877,7 @@ export async function handleCallback() {
 				if (response.ok) {
 					const data = await response.json();
 					localStorage.setItem('authMethod', '42OAuth');
+					setLocalPicture(data.profile_picture);
 					if (data.mfa_enable_flag) {
 						setOAuthDataWith2FA(data);
 						setLocal2FA(true);
