@@ -52,7 +52,7 @@ export const refreshTokens = async () => {
             break;
 
         default:
-            throw new Error("Authentication method not set");
+            throw new Error("User not logged in. Guest mode");
     }
 
     const response = await fetch(refreshUrl, {
@@ -120,8 +120,7 @@ window.onload = async () => {
             GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
         }
     } catch (error) {
-        // deleteUser();
-        console.log("Error", error);
+        console.log(error);
     } finally {
         document.body.removeChild(overlay);
         document.head.removeChild(style);
@@ -180,6 +179,7 @@ export const fetchMatchHistory = async () => {
         showToast('Error when fetching match history', 'danger');
         throw new Error(`Error fetching match history`);
     }
+    console.log("GOT MATCHES");
     return response.json();
 }
 
@@ -191,6 +191,7 @@ export const fetchFriends = async () => {
                 "Content-Type": "application/json",
             },
         })
+        console.log("GOT FRIENDS!");
         return response.json();
     } catch (error) {
         showToast('Error when fetching friends', 'danger');
@@ -310,6 +311,7 @@ export const logout = async () => {
         });
 
         if (response.ok) {
+            GlobalCacheManager.clear();
             await setOnlineStatus(false);
             deleteUser();
             location.reload();
