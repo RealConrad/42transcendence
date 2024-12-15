@@ -179,7 +179,6 @@ export const fetchMatchHistory = async () => {
         showToast('Error when fetching match history', 'danger');
         throw new Error(`Error fetching match history`);
     }
-    console.log("GOT MATCHES");
     return response.json();
 }
 
@@ -191,7 +190,6 @@ export const fetchFriends = async () => {
                 "Content-Type": "application/json",
             },
         })
-        console.log("GOT FRIENDS!");
         return response.json();
     } catch (error) {
         showToast('Error when fetching friends', 'danger');
