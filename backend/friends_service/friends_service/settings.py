@@ -31,6 +31,7 @@ ALLOWED_HOSTS = ['friendsservice', 'localhost', '127.0.0.1', "authservice"]
 CORS_ORIGIN_WHITELIST = [
     "http://localhost",
     "http://127.0.0.1",
+    "https://127.0.0.1",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
