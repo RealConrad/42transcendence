@@ -562,9 +562,6 @@ export class TournamentSetupDialog extends HTMLElement {
                 const slider = playerDiv.querySelector('input[type="range"]');
 
                 try {
-                    if (index === 0) {
-                        input.value = this.username;
-                    }
                     const username = validateInput(input.value);
                     return {
                         username,

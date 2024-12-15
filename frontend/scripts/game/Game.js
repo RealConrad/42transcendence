@@ -249,13 +249,19 @@ export default class Game {
     pauseGame() {
         if (this.isGameOver) return;
         this.isGamePaused = true;
+        cancelAnimationFrame(this.animationFrameId); // Stop the animation frame
+        this.animationFrameId = null;
         GlobalEventEmitter.emit(EVENT_TYPES.SHOW_GAME_MENU, { isTournament: this.isTournamentMatch });
     }
 
     resumeGame() {
         if (!this.isGameOver) {
             this.isGamePaused = false;
-            requestAnimationFrame(this.gameLoop.bind(this));
+            if (this.animationFrameId) {
+                cancelAnimationFrame(this.animationFrameId); // Stop the animation frame
+                this.animationFrameId = null;
+            }
+            this.animationFrameId = requestAnimationFrame(this.gameLoop.bind(this));
         }
     }
 

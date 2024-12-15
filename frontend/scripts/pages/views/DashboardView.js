@@ -30,7 +30,7 @@ export class DashboardView extends HTMLElement {
         this.handleKeyDown = this.handleKeyDown.bind(this);
         window.addEventListener("keydown", this.handleKeyDown);
         GlobalEventEmitter.replaceOn(EVENT_TYPES.RELOAD_DASHBOARD, () => {
-            this.initializeDashboard();
+            location.reload();
         });
     }
 
