@@ -879,6 +879,8 @@ export async function handleCallback() {
 					localStorage.setItem('authMethod', '42OAuth');
 					setLocalPicture(data.profile_picture);
 					if (data.mfa_enable_flag) {
+						setLocalUsername(data.username);
+						setLocalPicture(data.profile_picture);
 						setOAuthDataWith2FA(data);
 						setLocal2FA(true);
 						localStorage.setItem("authDialogState", "otp");
