@@ -29,6 +29,9 @@ class FriendRequestSerializer(serializers.ModelSerializer):
         sender = self.context["request"].user # Authenticated user from authentication.py
         receiver_username = validated_data.pop("receiver_username") # friend name to add as friend
 
+        if sender.username == receiver_username:
+            raise serializers.ValidationError("You cannot befriend yourself")
+
         does_exist, profile_picture_url = check_user_in_auth_database(receiver_username, self.context["request"])
 
         if not does_exist:

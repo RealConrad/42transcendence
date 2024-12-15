@@ -2,7 +2,7 @@ import Router from "./Router.js"
 import {setupGlobalCustomCursorEffects} from "./utils/CursorEffects.js";
 import GlobalEventEmitter from "./utils/EventEmitter.js";
 import {EVENT_TYPES} from "./utils/constants.js";
-import {setOnlineStatus} from "./api/api.js";
+import {getAccessToken, setOnlineStatus} from "./api/api.js";
 
 window.app = {};
 app.router = Router;
@@ -24,6 +24,7 @@ window.addEventListener('DOMContentLoaded', () => {
 });
 
 const handleUnload = async () => {
-    await setOnlineStatus(false);
+    if (getAccessToken())
+        await setOnlineStatus(false);
 }
 window.addEventListener('beforeunload', handleUnload);

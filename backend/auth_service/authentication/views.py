@@ -117,7 +117,6 @@ class SetMFAFlagView(generics.GenericAPIView):
     permission_classes = [AllowAny]
 
     def put(self, request, *args, **kwargs):
-        user_id = request.data.get('user_id')
         username = request.data.get('username')
         mfa_enabled = request.data.get('mfa_enabled')
 
@@ -128,7 +127,7 @@ class SetMFAFlagView(generics.GenericAPIView):
             )
 
         try:
-            user = CustomUser.objects.get(id=user_id, username=username)
+            user = CustomUser.objects.get(username=username)
         except CustomUser.DoesNotExist:
             return Response(
                 {'detail': 'User not found'},

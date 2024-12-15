@@ -665,7 +665,6 @@ class AuthDialog extends HTMLElement {
 				await setDefaultPicture();
 			}
 			setAccessToken(data.access_token);
-			showToast('Successfully logged in!', 'success');
 			setLocalUsername(username);
 			await setOnlineStatus(true);
 
@@ -678,6 +677,7 @@ class AuthDialog extends HTMLElement {
 				this.shadowRoot.getElementById("sign-in-view").style.display = "none";
 				this.shadowRoot.getElementById("otp-view").style.display = "block";
 			} else {
+				showToast('Successfully logged in!', 'success');
 				this.close();
 				await GlobalCacheManager.initialize("matches", fetchMatchHistory);
 				await GlobalCacheManager.initialize("friends", fetchFriends);
@@ -725,7 +725,7 @@ class AuthDialog extends HTMLElement {
 			await setDefaultPicture();
 			GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
 		} catch (err) {
-			showToast("username may contain only letters, numbers, and @/./+/-/_ characters / Password too weak", 'danger');
+			showToast(err, 'danger');
 			console.log(err);
 		}
 	}
@@ -887,9 +887,11 @@ export async function handleCallback() {
 						setLocalPicture(data.profile_picture);
 						setAccessToken(data.access_token);
 					}
-					await setOnlineStatus(true);
 					Router.navigateTo("/");
+					location.reload();
 				} else {
+					const errorData = await response.json();
+    				showToast(JSON.stringify(errorData), "danger");
 					Router.navigateTo("/");
 					console.error("Error from backed 42 OAuth API");
 				}

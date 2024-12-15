@@ -302,6 +302,8 @@ export class FriendsMenu extends HTMLElement {
                 }),
             });
             if (!response.ok) {
+                const errorData = await response.json();
+                showToast(JSON.stringify(errorData), "danger");
                 throw new Error("Failed to send friend invite");
             }
             showToast('Sent friend invite', 'success');

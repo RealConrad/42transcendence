@@ -52,7 +52,7 @@ export const refreshTokens = async () => {
             break;
 
         default:
-            throw new Error("Authentication method not set");
+            throw new Error("User not logged in. Guest mode");
     }
 
     const response = await fetch(refreshUrl, {
@@ -120,8 +120,7 @@ window.onload = async () => {
             GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
         }
     } catch (error) {
-        // deleteUser();
-        console.log("Error", error);
+        console.log(error);
     } finally {
         document.body.removeChild(overlay);
         document.head.removeChild(style);
@@ -163,7 +162,7 @@ export const apiCall = async (url, options = {}) => {
     if (!response.ok) {
         const error = await response.json();
         console.error(`API Error: ${response.status}`, error);
-        throw new Error(error.error || "API call failed");
+        throw new Error(error.error || error.detail || "API call failed");
     }
     return response;
 }
@@ -310,6 +309,7 @@ export const logout = async () => {
         });
 
         if (response.ok) {
+            GlobalCacheManager.clear();
             await setOnlineStatus(false);
             deleteUser();
             location.reload();
