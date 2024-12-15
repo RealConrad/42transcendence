@@ -47,8 +47,8 @@ class RegisterView(generics.CreateAPIView):
                     key='refresh_token',
                     value=refresh_token,
                     httponly=True,
-                    secure=False,
-                    samesite='Lax',
+                    secure=True,
+                    samesite='None',
                 )
                 return response
             else:
@@ -100,8 +100,8 @@ class LoginView(generics.GenericAPIView):
                     key='refresh_token',
                     value=refresh_token,
                     httponly=True,
-                    secure=False,
-                    samesite='Lax',
+                    secure=True,
+                    samesite='None',
                 )
                 return response
             else:

@@ -12,15 +12,15 @@ class SetCookieMiddleware:
                 key='access_token',
                 value=request.new_access_token,
                 httponly=True,
-                secure=False,
-                samesite='Lax',
+                secure=True,
+                samesite='None',
             )
         if hasattr(request, 'new_refresh_token'):
             response.set_cookie(
                 key='refresh_token',
                 value=request.new_refresh_token,
                 httponly=True,
-                secure=False,
-                samesite='Lax',
+                secure=True,
+                samesite='None',
             )
         return response

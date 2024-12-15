@@ -16,8 +16,8 @@ from corsheaders.defaults import default_headers
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-MEDIA_URL = '/media/'
 BASE_DIR = Path(__file__).resolve().parent.parent
+MEDIA_URL = '/media/auth/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Quick-start development settings - unsuitable for production
@@ -35,6 +35,7 @@ ALLOWED_HOSTS = ['authservice', 'localhost', '127.0.0.1', "friendsserivce"]
 CORS_ORIGIN_WHITELIST = [
     "http://localhost",
     "http://127.0.0.1",
+    "https://127.0.0.1",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -44,8 +45,6 @@ CORS_ALLOW_HEADERS = list(default_headers) + [
 ]
 
 AUTH_USER_MODEL = 'authentication.CustomUser'
-
-JWT_SERVICE_URL = 'http://127.0.0.1:8001'
 
 # Application definition
 INSTALLED_APPS = [
@@ -164,3 +163,16 @@ CLIENT_ID = os.getenv('CLIENT_ID')
 CLIENT_SECRET = os.getenv('CLIENT_SECRET')
 REDIRECT_URI = os.getenv('REDIRECT_URI')
 AUTHORIZE_42_URL = os.getenv('AUTHORIZE_42_URL')
+
+#SECURE_SSL_REDIRECT = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_REFERRER_POLICY = 'strict-origin'

@@ -35,6 +35,7 @@ ALLOWED_HOSTS = ['gameservice', 'localhost', '127.0.0.1']
 CORS_ORIGIN_WHITELIST = [
     "http://localhost",
     "http://127.0.0.1",
+    "https://127.0.0.1",
 ]
 
 CORS_ALLOW_CREDENTIALS = True
@@ -166,3 +167,16 @@ LOGGING = {
         },
     },
 }
+
+#SECURE_SSL_REDIRECT = True
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
+SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
+
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_REFERRER_POLICY = 'strict-origin'

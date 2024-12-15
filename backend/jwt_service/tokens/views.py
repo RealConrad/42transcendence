@@ -73,8 +73,8 @@ class RefreshTokenView(APIView):
                 key='refresh_token',
                 value=new_refresh,
                 httponly=True,
-                secure=False,
-                samesite='Lax'
+                secure=True,
+                samesite='None'
             )
             return response
         except TokenError:

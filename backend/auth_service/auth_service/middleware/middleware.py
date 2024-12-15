@@ -26,15 +26,15 @@ class RefreshTokensMiddleware:
                         key='access_token',
                         value=str(new_access),
                         httponly=True,
-                        secure=False,
-                        samesite='Lax'
+                        secure=True,
+                        samesite='None'
                     )
                     response.set_cookie(
                         key='refresh_token',
                         value=str(new_refresh),
                         httponly=True,
-                        secure=False,
-                        samesite='Lax'
+                        secure=True,
+                        samesite='None'
                     )
                     return response
             except Exception as e:
