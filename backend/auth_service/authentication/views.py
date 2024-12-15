@@ -174,6 +174,9 @@ class SaveProfilePicture(generics.GenericAPIView):
             else None
         )
 
+        user.profile_picture_url = profile_picture_url
+        user.save()
+
         self.update_friends_service(request, profile_picture_url)
 
         return Response({
