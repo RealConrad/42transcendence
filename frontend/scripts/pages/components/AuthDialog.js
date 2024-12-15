@@ -665,7 +665,6 @@ class AuthDialog extends HTMLElement {
 				await setDefaultPicture();
 			}
 			setAccessToken(data.access_token);
-			showToast('Successfully logged in!', 'success');
 			setLocalUsername(username);
 			await setOnlineStatus(true);
 
@@ -678,6 +677,7 @@ class AuthDialog extends HTMLElement {
 				this.shadowRoot.getElementById("sign-in-view").style.display = "none";
 				this.shadowRoot.getElementById("otp-view").style.display = "block";
 			} else {
+				showToast('Successfully logged in!', 'success');
 				this.close();
 				await GlobalCacheManager.initialize("matches", fetchMatchHistory);
 				await GlobalCacheManager.initialize("friends", fetchFriends);
