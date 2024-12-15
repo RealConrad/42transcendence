@@ -725,7 +725,7 @@ class AuthDialog extends HTMLElement {
 			await setDefaultPicture();
 			GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
 		} catch (err) {
-			showToast("username may contain only letters, numbers, and @/./+/-/_ characters / Password too weak", 'danger');
+			showToast(err, 'danger');
 			console.log(err);
 		}
 	}
@@ -890,6 +890,8 @@ export async function handleCallback() {
 					await setOnlineStatus(true);
 					Router.navigateTo("/");
 				} else {
+					const errorData = await response.json();
+    				showToast(JSON.stringify(errorData), "danger");
 					Router.navigateTo("/");
 					console.error("Error from backed 42 OAuth API");
 				}
