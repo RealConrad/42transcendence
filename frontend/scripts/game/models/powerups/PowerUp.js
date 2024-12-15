@@ -64,7 +64,6 @@ export default class PowerUp extends Renderable {
     collectPowerUp(game, player) {
         if (!this.isActive) return;
         this.isActive = false;
-        console.log(`Power-up ${this.type} (${this.symbol}) collected by ${player.username}`);
         player.addPowerUp({ type: this.type, symbol: this.symbol });
         game.createPowerUps(1);
     }

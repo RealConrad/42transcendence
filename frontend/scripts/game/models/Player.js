@@ -66,7 +66,6 @@ export default class Player {
         } else if (powerUp.type === "DEF") {
             this.defPowerUp = powerUp;
         }
-        console.log(`${this.username} collected ${powerUp.type}: ${powerUp.symbol}`);
     }
     
     removePowerUp(powerUpToRemove) {
@@ -79,11 +78,9 @@ export default class Player {
         }
         const powerUp = type === "ATK" ? this.atkPowerUp : this.defPowerUp;
         if (!powerUp) {
-            console.log(`No ${type} power-up to activate!`);
             return;
         }
     
-        console.log(`${this.username} activated ${type} power-up: ${powerUp.symbol}`);
         this.applyPowerUpEffect(powerUp, game);
     
         if (type === "ATK") this.atkPowerUp = null;
@@ -151,7 +148,6 @@ export default class Player {
         const powerUp = type === "ATK" ? this.atkPowerUp : this.defPowerUp;
         if (!powerUp) return;
     
-        console.log(`AI activated ${type} power-up: ${powerUp.symbol}`);
         this.applyPowerUpEffect(powerUp, game);
     
         if (type === "ATK") this.atkPowerUp = null;

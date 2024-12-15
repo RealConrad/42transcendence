@@ -76,7 +76,6 @@ export default class Tournament {
             this.currentMatchIndex = 0;
             if (this.currentRoundIndex >= this.bracket.length) {
                 const champion = this.bracket[this.bracket.length - 1][0].winner;
-                console.log(champion);
                 await apiCall(`${BASE_GAME_API_URL}/save-tournament/`, {
                     method: 'PUT',
                     headers: {
@@ -92,7 +91,6 @@ export default class Tournament {
                 } catch (error) {
                     console.error(error);
                 }
-                console.log(`${champion.username} won the Tournament!`);
                 GlobalEventEmitter.emit(EVENT_TYPES.GAME_OVER, { winner: champion.username, isTournament: true });
                 return;
             } else {
@@ -106,13 +104,11 @@ export default class Tournament {
 
         // If both players are null, this match is not ready yet
         if (!match.player1 || !match.player2) {
-            console.log(`Match ${this.currentMatchIndex + 1} in Round ${this.currentRoundIndex + 1} is not ready.`);
             this.currentMatchIndex++;
             this.startNextMatch();
             return;
         }
 
-        console.log(`Starting match: ${match.player1.username} vs ${match.player2.username}`);
         const winner = await this.playMatch(match);
         match.winner = winner;
 
