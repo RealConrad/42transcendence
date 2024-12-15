@@ -717,7 +717,7 @@ class AuthDialog extends HTMLElement {
 			await setDefaultPicture();
 			GlobalEventEmitter.emit(EVENT_TYPES.RELOAD_DASHBOARD, {});
 		} catch (err) {
-			showToast(err, 'danger');
+			showToast("username may contain only letters, numbers, and @/./+/-/_ characters / Password too weak", 'danger');
 			console.log(err);
 		}
 	}
