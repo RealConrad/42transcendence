@@ -21,7 +21,13 @@ import { atkPowers, defPowers } from "./models/powerups/PowerUp.js";
 import GlobalCacheManager from "../utils/CacheManager.js";
 
 export default class Game {
+    static activeGame = null;
     constructor(canvas, player1Details, player2Details, isTournamentMatch = false, powerUpCount = 0) {
+        if (Game.activeGame) {
+            Game.activeGame.cleanup();
+        }
+        Game.activeGame = this;
+        this.animationFrameId = null;
         this.isGameOver = false;
         this.isGamePaused = false;
         this.winner = null;
@@ -144,7 +150,7 @@ export default class Game {
             this.player2.drawInventory(this.ctx, this.canvas.width - 160, this.canvas.height - 60);
         }
         this.checkWinCondition();
-        requestAnimationFrame(this.gameLoop.bind(this));
+        this.animationFrameId = requestAnimationFrame(this.gameLoop.bind(this));
     }
 
     handlePowerUpActivation() {
@@ -194,10 +200,18 @@ export default class Game {
     }
 
     cleanup() {
-        // TODO: Clean up event listeners
+        if (this.animationFrameId) {
+            cancelAnimationFrame(this.animationFrameId);
+            this.animationFrameId = null;
+        }
+
+        this.renderManager.clearCanvas();
+        this.renderManager.removeAllRenderables();
+
         GlobalEventEmitter.off(EVENT_TYPES.PAUSE_GAME, this.pauseGame);
         GlobalEventEmitter.off(EVENT_TYPES.RESUME_GAME, this.resumeGame);
         GlobalEventEmitter.off(EVENT_TYPES.QUIT_GAME, this.quitGame);
+        Game.activeGame = null;
     }
 
     checkWinCondition() {
@@ -235,13 +249,19 @@ export default class Game {
     pauseGame() {
         if (this.isGameOver) return;
         this.isGamePaused = true;
+        cancelAnimationFrame(this.animationFrameId); // Stop the animation frame
+        this.animationFrameId = null;
         GlobalEventEmitter.emit(EVENT_TYPES.SHOW_GAME_MENU, { isTournament: this.isTournamentMatch });
     }
 
     resumeGame() {
         if (!this.isGameOver) {
             this.isGamePaused = false;
-            requestAnimationFrame(this.gameLoop.bind(this));
+            if (this.animationFrameId) {
+                cancelAnimationFrame(this.animationFrameId); // Stop the animation frame
+                this.animationFrameId = null;
+            }
+            this.animationFrameId = requestAnimationFrame(this.gameLoop.bind(this));
         }
     }
 
@@ -290,6 +310,7 @@ export default class Game {
             if (response.ok) {
                 await response.json();
                 showToast('Match saved successfully!', 'success');
+                this.cleanup();
                 try {
                     const updatedMatchHistory = await fetchMatchHistory();
                     GlobalCacheManager.set("matches", updatedMatchHistory);

@@ -21,6 +21,7 @@ export class DashboardView extends HTMLElement {
         this.isGameMenuOpen = false;
         this.menuComponents = {}; 
         setDefaultPicture();
+        this.eventListenersSetup = false;
     }
 
     connectedCallback() {
@@ -29,7 +30,7 @@ export class DashboardView extends HTMLElement {
         this.handleKeyDown = this.handleKeyDown.bind(this);
         window.addEventListener("keydown", this.handleKeyDown);
         GlobalEventEmitter.replaceOn(EVENT_TYPES.RELOAD_DASHBOARD, () => {
-            this.initializeDashboard();
+            location.reload();
         });
     }
 
@@ -49,7 +50,6 @@ export class DashboardView extends HTMLElement {
         }
         this.setupEventListeners();
         if (localStorage.getItem("authDialogState") === "otp") {
-            console.log("Opening model...");
             const authDialogPopup = this.shadowRoot.getElementById("auth-dialog");
             authDialogPopup.showView("otp-view");
             authDialogPopup.open();
@@ -161,6 +161,7 @@ export class DashboardView extends HTMLElement {
     }
 
     setupEventListeners() {
+        if (this.eventListenersSetup) return;
         const loginButton = this.shadowRoot.getElementById("login-button");
         const authDialogPopup = this.shadowRoot.getElementById("auth-dialog");
         const contributor = this.shadowRoot.querySelector(".team");
@@ -184,6 +185,14 @@ export class DashboardView extends HTMLElement {
         });
 
         // Listen for
+        GlobalEventEmitter.off(EVENT_TYPES.MATCH_VS_AI);
+        GlobalEventEmitter.off(EVENT_TYPES.MATCH_LOCAL);
+        GlobalEventEmitter.off(EVENT_TYPES.MATCH_TOURNAMENT);
+        GlobalEventEmitter.off(EVENT_TYPES.START_MATCH);
+        GlobalEventEmitter.off(EVENT_TYPES.START_TOURNAMENT);
+        GlobalEventEmitter.off(EVENT_TYPES.QUIT_MATCH);
+        GlobalEventEmitter.off(EVENT_TYPES.GAME_OVER);
+        GlobalEventEmitter.off(EVENT_TYPES.UPDATE_SCORE);
 
         GlobalEventEmitter.replaceOn(EVENT_TYPES.SET_TWOFACTOR, () => {
             authDialogPopup.openEnable2fa();
@@ -222,6 +231,8 @@ export class DashboardView extends HTMLElement {
         });
         GlobalEventEmitter.on(EVENT_TYPES.RESUME_GAME, () => this.onResumeGame());
         GlobalEventEmitter.on(EVENT_TYPES.QUIT_GAME, () => this.quitGame());
+
+        this.eventListenersSetup = true;
     }
 
     handleKeyDown(event) {
