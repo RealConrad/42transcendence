@@ -1,14 +1,16 @@
+from django.contrib.auth.validators import UnicodeUsernameValidator
 from rest_framework import serializers
 from .models import Friendship, FriendRequest, UserProfile
 from .utils import check_user_in_auth_database
 from django.contrib.auth.models import User
+from django.contrib.auth.validators import UnicodeUsernameValidator
 
 class FriendRequestSerializer(serializers.ModelSerializer):
     """
     Serializer for creating and handling friend requests
     """
 
-    receiver_username = serializers.CharField(write_only=True)
+    receiver_username = serializers.CharField(write_only=True, validators=[UnicodeUsernameValidator()])
     sender = serializers.StringRelatedField(read_only=True)
     receiver = serializers.StringRelatedField(read_only=True)
 

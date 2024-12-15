@@ -1,10 +1,11 @@
 import requests
+from django.core.serializers import serialize
 from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK
 from .models import CustomUser
-from .serializers import RegisterSerializer, LoginSerializer
+from .serializers import RegisterSerializer, LoginSerializer, UpdateDisplayNameSerializer
 from .authentication import JWTAuthentication
 
 JWT_SERVICE_URL = 'http://jwtservice:8002/api/token/generate-tokens/'
@@ -173,6 +174,9 @@ class SaveProfilePicture(generics.GenericAPIView):
             else None
         )
 
+        user.profile_picture_url = profile_picture_url
+        user.save()
+
         self.update_friends_service(request, profile_picture_url)
 
         return Response({
@@ -238,27 +242,28 @@ class UpdateDisplayName(generics.GenericAPIView):
 
     permission_classes = [AllowAny]
     authentication_classes = [JWTAuthentication]
+    serializer_class = UpdateDisplayNameSerializer
 
     def put(self, request, *args, **kwargs):
         user = request.user
 
-        new_display_name = request.data.get('displayname')
-        if not new_display_name:
+        serializer = self.get_serializer(data=request.data)
+        # new_display_name = request.data.get('displayname')
+        if serializer.is_valid():
+            new_display_name = serializer.validated_data['displayname']
+
+            user.displayname = new_display_name
+            user.save()
+            return Response({
+                "detail": "Display name updated successfully.",
+                "username": user.username,
+                "displayname": user.displayname
+            }, status=status.HTTP_200_OK)
+        else:
             return Response(
                 { "detail": "Missing 'displayname' in the request body."},
                 status=status.HTTP_400_BAD_REQUEST
             )
-
-        user.displayname = new_display_name
-        user.save()
-
-        response = Response({
-            "detail": "Display name updated successfully.",
-            "username": user.username,
-            "displayname": user.displayname
-        }, status=status.HTTP_200_OK)
-
-        return response
 
 class CheckUserExistence(generics.GenericAPIView):
     """
