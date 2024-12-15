@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 from .models import UserProfile
 from rest_framework import exceptions, authentication
 
-
 class JWTAuthentication(authentication.BaseAuthentication):
     """
     Custom JWT Authentication class to authenticate user via header Bearer token
@@ -19,12 +18,8 @@ class JWTAuthentication(authentication.BaseAuthentication):
         token_data = self.validate_token_with_service(access_token, self.JWT)
 
         username = token_data.get("username")
-        user_id = token_data.get("user_id")
 
-        user, created = User.objects.get_or_create(
-            id=user_id,
-            username=username
-        )
+        user, created = User.objects.get_or_create(username=username)
         UserProfile.objects.get_or_create(user=user)
         request.token_data = token_data
         return user, None
