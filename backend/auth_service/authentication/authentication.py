@@ -17,10 +17,10 @@ class JWTAuthentication(authentication.BaseAuthentication):
         access_token = self.get_authorization_token(request)
         token_data = self.validate_token_with_service(access_token, self.JWT)
 
-        user_id = token_data.get("user_id")
+        username = token_data.get("username")
 
         user_model = get_user_model()
-        user = user_model.objects.filter(id=user_id).first()
+        user = user_model.objects.get(username=username)
         if not user:
             raise exceptions.AuthenticationFailed("User not found")
         return user, None
