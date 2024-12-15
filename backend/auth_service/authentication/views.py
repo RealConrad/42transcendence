@@ -1,6 +1,6 @@
 import requests
-from django.core.serializers import serialize
 from rest_framework import generics, status
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK
@@ -246,22 +246,34 @@ class UpdateDisplayName(generics.GenericAPIView):
     def put(self, request, *args, **kwargs):
         user = request.user
 
-        serializer = self.get_serializer(data=request.data)
-        # new_display_name = request.data.get('displayname')
-        if serializer.is_valid():
-            new_display_name = serializer.validated_data['displayname']
+        try:
+            serializer = self.get_serializer(data=request.data)
+            if not request.data.get('displayname'):
+                return Response(
+                    {"detail": "Missing displayname"},  # Pass error details for clarity
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
-            user.displayname = new_display_name
-            user.save()
-            return Response({
-                "detail": "Display name updated successfully.",
-                "username": user.username,
-                "displayname": user.displayname
-            }, status=status.HTTP_200_OK)
-        else:
+            if serializer.is_valid(raise_exception=True):
+                new_display_name = serializer.validated_data['displayname']
+
+                user.displayname = new_display_name
+                user.save()
+                return Response({
+                    "detail": "Display name updated successfully.",
+                    "username": user.username,
+                    "displayname": user.displayname
+                }, status=status.HTTP_200_OK)
+
+        except ValidationError as e:
             return Response(
-                { "detail": "Missing 'displayname' in the request body."},
+                {"detail": "Display name can only contain alphabets, numbers and underscore"},
                 status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return Response(
+                {"detail": f"An unexpected error occurred: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
 class CheckUserExistence(generics.GenericAPIView):
